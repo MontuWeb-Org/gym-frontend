@@ -1,4 +1,8 @@
 {
+  "Metadata": {
+    "title": "Gym App — Fitness Made Simple",
+    "description": "Track workouts, manage memberships, and reach your fitness goals."
+  },
   "Home": {
     "title": "Welcome to Your Gym App",
     "description": "Track workouts, manage memberships, and reach your fitness goals."
