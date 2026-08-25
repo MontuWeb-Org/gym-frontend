@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import tailwindcss from "eslint-plugin-tailwindcss";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -14,7 +15,12 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
-    plugins: { tailwindcss: tailwind },
+    plugins: { tailwindcss },
+    settings: {
+      tailwindcss: {
+        cssConfigPath: "./src/app/globals.css",
+      },
+    },
     rules: {
       "tailwindcss/no-custom-classname": "off", // allow non-tailwind utility classes if needed
       "tailwindcss/enforces-shorthand": "warn",
