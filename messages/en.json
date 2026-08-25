@@ -1,0 +1,11 @@
+{
+  "Home": {
+    "title": "Welcome to Your Gym App",
+    "description": "Track workouts, manage memberships, and reach your fitness goals."
+  },
+  "Nav": {
+    "dashboard": "Dashboard",
+    "classes": "Classes",
+    "profile": "Profile"
+  }
+}
