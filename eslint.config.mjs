@@ -13,6 +13,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    plugins: { tailwindcss: tailwind },
+    rules: {
+      "tailwindcss/no-custom-classname": "off", // allow non-tailwind utility classes if needed
+      "tailwindcss/enforces-shorthand": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;
