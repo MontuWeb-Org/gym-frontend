@@ -49,9 +49,15 @@ export function generateStaticParams() {
 export default async function RootLayout({
   children,
   params,
-}: LayoutProps<"/[locale]">) {
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
   const { locale } = await params;
-  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) notFound();
+
+  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
+    notFound();
+  }
 
   const messages = await getMessages();
 
@@ -61,11 +67,11 @@ export default async function RootLayout({
       dir={locale === "ar" ? "rtl" : "ltr"}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <StoreProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             {children}
-            <ThemeToggle  />
+            <ThemeToggle />
           </NextIntlClientProvider>
         </StoreProvider>
       </body>
