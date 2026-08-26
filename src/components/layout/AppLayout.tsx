@@ -1,6 +1,6 @@
 "use client";
 
-import { Navbar } from "./Navbar";
+import  {Navbar}  from "./Navbar";
 import { Sidebar } from "./Sidebar";
 import { useAppSelector } from "@/store/hooks";
 

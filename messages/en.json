@@ -9,7 +9,17 @@
   },
   "Login": {
     "title": "Sign In",
-    "description": "Enter your credentials to access your account."
+    "description": "Enter your credentials to access your account.",
+    "nameLabel": "Name",
+    "emailLabel": "Email Address",
+    "roleLabel": "Select Role (for testing)",
+    "roles": {
+      "admin": "Admin",
+      "coach": "Coach",
+      "trainee": "Trainee"
+    },
+    "submitButton": "Sign In",
+    "backToHome": "Back to Welcome Page"
   },
   "Nav": {
     "brandName": "Gym App",
@@ -46,31 +56,16 @@
     "title": "Members",
     "description": "View and manage registered gym members."
   },
-  "Coach": {
-    "title": "Coach Panel",
-    "description": "Manage assigned trainees, schedules, and attendance."
+  "Settings": {
+    "title": "Settings",
+    "description": "Configure system preferences and configuration."
   },
   "Admin": {
     "title": "Admin Panel",
     "description": "Configure system settings, users, and platform roles."
   },
-  "Settings": {
-    "title": "Settings",
-    "description": "Configure system preferences and configuration."
-  },
-
-  "Login": {
-  "title": "Sign In",
-  "description": "Enter your credentials to access your account.",
-  "nameLabel": "Name",
-  "emailLabel": "Email Address",
-  "roleLabel": "Select Role (for testing)",
-  "roles": {
-    "admin": "Admin",
-    "coach": "Coach",
-    "trainee": "Trainee"
-  },
-  "submitButton": "Sign In",
-  "backToHome": "Back to Welcome Page"
-}
+  "Coach": {
+    "title": "Coach Panel",
+    "description": "Manage assigned trainees, schedules, and attendance."
+  }
 }

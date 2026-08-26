@@ -7,6 +7,7 @@ import { LAYOUT_CONFIG } from "@/data/layout-config";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
 import { Menu, X, LogOut } from "lucide-react";
+import LocaleSwitcher from "@/components/LocaleSwitcher"; 
 
 export function Navbar() {
   const t = useTranslations("Nav");
@@ -43,6 +44,8 @@ export function Navbar() {
 
         {/* Right Section / Controls (Desktop) */}
         <div className="hidden md:flex items-center gap-4">
+          <LocaleSwitcher /> {/* <-- Added to Desktop Navbar */}
+
           {user && (
             <>
               <span className="text-sm font-medium text-muted-foreground">
@@ -64,6 +67,11 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="border-b border-border bg-background px-4 py-4 md:hidden">
           <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between pb-2 border-b border-border">
+              <span className="text-sm font-medium text-muted-foreground">Language</span>
+              <LocaleSwitcher /> {/* <-- Added to Mobile Menu Drawer */}
+            </div>
+
             {user && (
               <>
                 <div className="flex flex-col gap-1 border-b border-border pb-3">

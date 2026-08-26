@@ -26,11 +26,11 @@ export function Sidebar({ currentUserRole = "trainee" }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Toggle on the bottom left */}
+      {/* Mobile Toggle on the bottom start (left in LTR, right in RTL) */}
       <button
         type="button"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed bottom-4 left-4 z-40 md:hidden p-3 rounded-full bg-primary text-primary-foreground shadow-lg rtl:left-auto rtl:right-4"
+        className="fixed bottom-4 start-4 z-40 md:hidden p-3 rounded-full bg-primary text-primary-foreground shadow-lg"
         aria-label={t(LAYOUT_CONFIG.ariaLabels.toggleSidebar)}
       >
         {isMobileOpen ? <X className="size-6" /> : <Menu className="size-6" />}
@@ -44,12 +44,14 @@ export function Sidebar({ currentUserRole = "trainee" }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar Drawer positioned below the navbar */}
+      {/* Sidebar Drawer positioned with logical start and border-end */}
       <aside
         className={cn(
-          "fixed md:static top-16 bottom-0 start-0 z-30 flex flex-col justify-between border-r border-border bg-background transition-all duration-300 h-[calc(100vh-4rem)] md:h-auto",
+          "fixed md:static top-16 bottom-0 start-0 z-30 flex flex-col justify-between border-e border-border bg-background transition-all duration-300 h-[calc(100vh-4rem)] md:h-auto",
           isCollapsed ? "w-20" : "w-64",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          isMobileOpen 
+            ? "translate-x-0 rtl:translate-x-0" 
+            : "-translate-x-full rtl:translate-x-full md:translate-x-0"
         )}
       >
         <div className="p-4 space-y-6 overflow-y-auto">
