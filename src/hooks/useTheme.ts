@@ -1,28 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
+const emptySubscribe = () => () => {};
+
+function getSnapshot(): Theme {
+  const stored = localStorage.getItem("theme") as Theme | null;
+  if (stored) return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>("light"); // consistent on server + first client render
-  const [mounted, setMounted] = useState(false);
+  // Hydration-safe mounted check without using state or effects
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
+  const [themeState, setThemeState] = useState<Theme | null>(null);
+
+  // Derive theme directly during render
+  const theme = themeState ?? (mounted ? getSnapshot() : "light");
+
+  // Effect only updates DOM (no setState inside effect)
   useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme | null;
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initial = stored ?? (prefersDark ? "dark" : "light");
-
-    setTheme(initial);
-    document.documentElement.classList.toggle("dark", initial === "dark");
-    setMounted(true);
-  }, []);
+    if (mounted) {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
+  }, [theme, mounted]);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
+    setThemeState(next);
     localStorage.setItem("theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
   };
 
   return { theme, toggleTheme, mounted };
