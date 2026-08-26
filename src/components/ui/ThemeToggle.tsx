@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, mounted } = useTheme();
 
   return (
     <button
@@ -20,7 +20,9 @@ export function ThemeToggle({ className }: { className?: string }) {
         className
       )}
     >
-      {theme === "dark" ? (
+      {!mounted ? (
+        <div className="size-5" /> // empty placeholder, matches server render exactly
+      ) : theme === "dark" ? (
         <Sun size={20} className="transition-transform rotate-0" />
       ) : (
         <Moon size={20} className="transition-transform rotate-0" />
