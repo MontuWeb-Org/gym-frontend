@@ -4,23 +4,19 @@ import { useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
-  const stored = localStorage.getItem("theme") as Theme | null;
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  return stored ?? (prefersDark ? "dark" : "light");
-}
-
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
+  const [theme, setTheme] = useState<Theme>("light"); // consistent on server + first client render
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+    const stored = localStorage.getItem("theme") as Theme | null;
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initial = stored ?? (prefersDark ? "dark" : "light");
+
+    setTheme(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -29,5 +25,5 @@ export function useTheme() {
     document.documentElement.classList.toggle("dark", next === "dark");
   };
 
-  return { theme, toggleTheme };
+  return { theme, toggleTheme, mounted };
 }
