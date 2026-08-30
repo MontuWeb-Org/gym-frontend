@@ -32,25 +32,25 @@ export const APP_ROUTES: RouteConfig[] = [
   // User/Trainee Dashboard Route
   {
     id: "dashboard",
-    path: "/dashboard",
+    path: "/trainee/dashboard",
     titleKey: "dashboard",
     showInSidebar: true,
     allowedRoles: [ "trainee"],
     iconName: "dashboard",
   },
-  // Coach Panel Route
+  // Coach Dashboard Route
   {
     id: "coach",
-    path: "/coach",
+    path: "/coach/dashboard",
     titleKey: "coach",
     showInSidebar: true,
     allowedRoles: ["coach"],
     iconName: "dashboard",
   },
-  // Admin Panel Route
+  // Admin Dashboard Route
   {
     id: "admin",
-    path: "/admin",
+    path: "/admin/dashboard",
     titleKey: "admin",
     showInSidebar: true,
     allowedRoles: ["admin"],

@@ -29,11 +29,11 @@ export default function LoginPage() {
     );
 
     if (role === "admin") {
-      router.push("/admin");
+      router.push("/admin/dashboard");
     } else if (role === "coach") {
-      router.push("/coach");
+      router.push("/coach/dashboard");
     } else {
-      router.push("/dashboard");
+      router.push("/trainee/dashboard");
     }
   };
 
