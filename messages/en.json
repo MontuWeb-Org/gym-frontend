@@ -1,15 +1,71 @@
 {
   "Metadata": {
-    "title": "Gym App — Fitness Made Simple",
-    "description": "Track workouts, manage memberships, and reach your fitness goals."
+    "title": "Gym Management System",
+    "description": "Comprehensive gym management platform"
   },
   "Home": {
-    "title": "Welcome to Your Gym App",
-    "description": "Track workouts, manage memberships, and reach your fitness goals."
+    "title": "Welcome to Gym Platform",
+    "description": "Manage your gym workouts, classes, and memberships easily."
+  },
+  "Login": {
+    "title": "Sign In",
+    "description": "Enter your credentials to access your account.",
+    "nameLabel": "Name",
+    "emailLabel": "Email Address",
+    "roleLabel": "Select Role (for testing)",
+    "roles": {
+      "admin": "Admin",
+      "coach": "Coach",
+      "trainee": "Trainee"
+    },
+    "submitButton": "Sign In",
+    "backToHome": "Back to Welcome Page"
   },
   "Nav": {
+    "brandName": "Gym App",
+    "home": "Home",
+    "login": "Sign In",
     "dashboard": "Dashboard",
+    "workouts": "Workouts",
     "classes": "Classes",
-    "profile": "Profile"
+    "members": "Members",
+    "coach": "Coach Panel",
+    "admin": "Admin Panel",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "toggleSidebar": "Toggle Sidebar"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "description": "Overview of your gym activity and metrics."
+  },
+  "Classes": {
+    "title": "Classes",
+    "description": "View and manage available fitness classes."
+  },
+  "Workouts": {
+    "title": "Workouts",
+    "description": "Explore workout programs and tracking."
+  },
+  "Profile": {
+    "title": "Profile",
+    "description": "Manage your account and personal profile."
+  },
+  "Members": {
+    "title": "Members",
+    "description": "View and manage registered gym members."
+  },
+  "Settings": {
+    "title": "Settings",
+    "description": "Configure system preferences and configuration."
+  },
+  "Admin": {
+    "title": "Admin Panel",
+    "description": "Configure system settings, users, and platform roles."
+  },
+  "Coach": {
+    "title": "Coach Panel",
+    "description": "Manage assigned trainees, schedules, and attendance."
   }
 }
