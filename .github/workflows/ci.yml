@@ -2,12 +2,13 @@ name: CI
 
 on:
   pull_request:
-    branches: [dev, uat, prod]
+    branches: [dev, UAT, prod, main]
   push:
-    branches: [dev, uat, prod]
+    branches: [dev, UAT, prod, main]
 
 jobs:
-  build:
+  lint:
+    name: Code Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,5 +18,27 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npm run lint
+
+  i18n-check:
+    name: Translation Keys Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - run: npm ci
       - run: npm run check:i18n
+
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - run: npm ci
       - run: npm run build
