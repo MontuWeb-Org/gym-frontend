@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, Menu, X, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { Button } from "@/components/ui/button";
 import type { SidebarItem } from "@/data/sidebar.types";
 
 export interface SidebarProps {
@@ -37,15 +38,16 @@ export function Sidebar({
   return (
     <>
       {/* ── Mobile Floating Hamburger Toggle Button (Matched to ThemeToggle) ── */}
-      <button
+      <Button
         suppressHydrationWarning
         type="button"
+        size="icon"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
         className="fixed bottom-16 start-6 z-40 md:hidden size-12 rounded-full shadow-lg bg-primary text-primary-foreground flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer"
         aria-label={isMobileOpen ? "Close Sidebar" : "Open Sidebar"}
       >
         {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      </Button>
 
       {/* ── Mobile Backdrop Overlay ── */}
       {isMobileOpen && (
@@ -75,10 +77,12 @@ export function Sidebar({
             {!isCollapsed && title && <div className="flex-1 truncate">{title}</div>}
             
             {/* Desktop collapse toggle */}
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden md:flex p-1.5 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground transition-colors ms-auto cursor-pointer"
+              className="hidden md:flex p-1.5 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground transition-colors ms-auto cursor-pointer size-8"
               aria-label="Toggle Sidebar Collapse"
             >
               {isCollapsed ? (
@@ -86,17 +90,19 @@ export function Sidebar({
               ) : (
                 <ChevronLeft className="size-4 rtl:rotate-180" />
               )}
-            </button>
+            </Button>
 
             {/* Mobile close button inside drawer header */}
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon"
               onClick={() => setIsMobileOpen(false)}
-              className="md:hidden p-1.5 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground transition-colors ms-auto cursor-pointer"
+              className="md:hidden p-1.5 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground transition-colors ms-auto cursor-pointer size-8"
               aria-label="Close Sidebar"
             >
               <X className="size-4" />
-            </button>
+            </Button>
           </div>
 
           {/* Navigation Items */}
@@ -109,17 +115,18 @@ export function Sidebar({
                   : false;
 
               return (
-                <button
+                <Button
                   key={item.id}
                   type="button"
+                  variant={isActive ? "default" : "ghost"}
                   onClick={() => {
                     setIsMobileOpen(false);
                     if (onItemClick) onItemClick(item);
                   }}
                   className={cn(
-                    "w-full flex items-center justify-between rounded-lg px-3.5 py-3 text-sm font-medium transition-colors text-start cursor-pointer",
+                    "w-full flex items-center justify-between rounded-lg px-3.5 py-3 h-auto text-sm font-medium transition-colors text-start cursor-pointer",
                     isActive
-                      ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+                      ? "bg-primary text-primary-foreground font-semibold shadow-sm hover:bg-primary/90"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
@@ -132,7 +139,7 @@ export function Sidebar({
                       {item.badge}
                     </span>
                   )}
-                </button>
+                </Button>
               );
             })}
           </nav>

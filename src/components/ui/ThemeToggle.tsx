@@ -3,12 +3,13 @@
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/cn";
 import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, toggleTheme, mounted } = useTheme();
 
   return (
-    <button
+    <Button
       suppressHydrationWarning
       onClick={toggleTheme}
       aria-label="Toggle theme"
@@ -28,6 +29,6 @@ export function ThemeToggle({ className }: { className?: string }) {
       ) : (
         <Moon size={20} className="transition-transform rotate-0" />
       )}
-    </button>
+    </Button>
   );
 }
