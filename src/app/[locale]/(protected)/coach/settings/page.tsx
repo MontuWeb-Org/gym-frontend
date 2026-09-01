@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-export default function CoachPage() {
-  const t = useTranslations("Coach");
+export default function CoachSettingsPage() {
+  const t = useTranslations("CoachSettings");
 
   return (
     <div className="space-y-4">

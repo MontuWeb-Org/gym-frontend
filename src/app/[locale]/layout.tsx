@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import StoreProvider from "@/store/StoreProvider";
+import { GlobalNavbar } from "@/components/layout/GlobalNavbar";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { buildMetadata } from "@/lib/metadata";
 import { siteConfig } from "@/config/site";
@@ -70,7 +71,8 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <StoreProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
+            <GlobalNavbar />
+            <div className="flex-1 flex flex-col">{children}</div>
             <ThemeToggle />
           </NextIntlClientProvider>
         </StoreProvider>

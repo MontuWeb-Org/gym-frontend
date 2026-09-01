@@ -9,19 +9,20 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   return (
     <button
+      suppressHydrationWarning
       onClick={toggleTheme}
       aria-label="Toggle theme"
       className={cn(
-        "fixed bottom-6 end-6 z-50",
+        "fixed bottom-16 end-6 z-50",
         "size-12 rounded-full shadow-lg",
         "bg-primary text-primary-foreground",
         "flex items-center justify-center",
-        "transition-transform hover:scale-105 active:scale-95",
+        "transition-transform hover:scale-105 active:scale-95 cursor-pointer",
         className
       )}
     >
       {!mounted ? (
-        <div className="size-5" /> // empty placeholder, matches server render exactly
+        <div className="size-5" />
       ) : theme === "dark" ? (
         <Sun size={20} className="transition-transform rotate-0" />
       ) : (

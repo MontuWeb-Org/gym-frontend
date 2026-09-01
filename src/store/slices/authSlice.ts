@@ -14,13 +14,8 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: {
-    id: "usr_1",
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    role: "admin", // Easily testable across all routes
-  },
-  isAuthenticated: true,
+  user: null,
+  isAuthenticated: false,
 };
 
 const authSlice = createSlice({
@@ -30,15 +25,36 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("gym_auth_user", JSON.stringify(action.payload));
+        } catch {
+          // Ignore localStorage errors in private mode
+        }
+      }
     },
     setRole: (state, action: PayloadAction<UserRole>) => {
       if (state.user) {
         state.user.role = action.payload;
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("gym_auth_user", JSON.stringify(state.user));
+          } catch {
+            // Ignore
+          }
+        }
       }
     },
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("gym_auth_user");
+        } catch {
+          // Ignore
+        }
+      }
     },
   },
 });

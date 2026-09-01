@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-export default function AdminPage() {
-  const t = useTranslations("Admin");
+export default function TraineePage() {
+  const t = useTranslations("Dashboard");
 
   return (
     <div className="space-y-4">

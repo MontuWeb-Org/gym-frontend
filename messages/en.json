@@ -22,19 +22,30 @@
     "backToHome": "Back to Welcome Page"
   },
   "Nav": {
-    "brandName": "Gym App",
+    "brandName": "Gym Platform",
     "home": "Home",
+    "offerings": "Our Offerings",
+    "partners": "Partners",
+    "subscription": "Subscription",
     "login": "Sign In",
     "dashboard": "Dashboard",
-    "workouts": "Workouts",
-    "classes": "Classes",
-    "members": "Members",
+    "trainees": "Trainees",
+    "programs": "Programs",
+    "templates": "Templates",
+    "billing": "Billing",
+    "workouts": "Workout Plans",
+    "classes": "Class Schedules",
+    "members": "Members Directory",
     "coach": "Coach Panel",
     "admin": "Admin Panel",
-    "profile": "Profile",
+    "profile": "My Profile",
     "settings": "Settings",
-    "logout": "Log Out",
-    "toggleSidebar": "Toggle Sidebar"
+    "logout": "Logout",
+    "language": "Language",
+    "menu": "Menu",
+    "adminManagement": "Admin Management",
+    "coachHub": "Coach Hub",
+    "traineePortal": "Trainee Portal"
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -67,5 +78,29 @@
   "Coach": {
     "title": "Coach Panel",
     "description": "Manage assigned trainees, schedules, and attendance."
+  },
+  "Trainee": {
+    "title": "Trainee Portal",
+    "description": "View your workout programs, classes, and progress."
+  },
+  "CoachTrainees": {
+    "title": "Trainees",
+    "description": "Manage your assigned trainees, track their progress and goals."
+  },
+  "CoachPrograms": {
+    "title": "Programs",
+    "description": "Create and manage structured training programs for your trainees."
+  },
+  "CoachTemplates": {
+    "title": "Templates",
+    "description": "Build reusable workout templates to quickly assign to trainees."
+  },
+  "CoachBilling": {
+    "title": "Billing",
+    "description": "View your subscription status, invoices, and payment history."
+  },
+  "CoachSettings": {
+    "title": "Settings",
+    "description": "Configure your coach profile and account preferences."
   }
 }

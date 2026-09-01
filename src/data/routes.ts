@@ -31,17 +31,17 @@ export const APP_ROUTES: RouteConfig[] = [
   },
   // User/Trainee Dashboard Route
   {
-    id: "dashboard",
-    path: "/trainee/dashboard",
+    id: "trainee-dashboard",
+    path: "/trainee",
     titleKey: "dashboard",
     showInSidebar: true,
-    allowedRoles: [ "trainee"],
+    allowedRoles: ["trainee"],
     iconName: "dashboard",
   },
   // Coach Dashboard Route
   {
-    id: "coach",
-    path: "/coach/dashboard",
+    id: "coach-dashboard",
+    path: "/coach",
     titleKey: "coach",
     showInSidebar: true,
     allowedRoles: ["coach"],
@@ -49,8 +49,8 @@ export const APP_ROUTES: RouteConfig[] = [
   },
   // Admin Dashboard Route
   {
-    id: "admin",
-    path: "/admin/dashboard",
+    id: "admin-dashboard",
+    path: "/admin",
     titleKey: "admin",
     showInSidebar: true,
     allowedRoles: ["admin"],
@@ -78,7 +78,7 @@ export const APP_ROUTES: RouteConfig[] = [
     path: "/members",
     titleKey: "members",
     showInSidebar: true,
-    allowedRoles: ["admin", "coach"], // Explicitly allows both admin and coach!
+    allowedRoles: ["admin", "coach"],
     iconName: "members",
   },
   {
