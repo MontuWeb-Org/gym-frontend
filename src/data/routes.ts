@@ -12,7 +12,7 @@ export interface RouteConfig {
 }
 
 export const APP_ROUTES: RouteConfig[] = [
-  // Public Routes
+// Public Routes
   {
     id: "home",
     path: "/",
@@ -29,27 +29,33 @@ export const APP_ROUTES: RouteConfig[] = [
     showInNavbar: true,
     iconName: "auth",
   },
+  {
+    id: "signup-coach",
+    path: "/auth/signup/coach",
+    titleKey: "signupCoach",
+    isPublic: true,
+  },
   // User/Trainee Dashboard Route
   {
-    id: "dashboard",
-    path: "/dashboard",
+    id: "trainee-dashboard",
+    path: "/trainee",
     titleKey: "dashboard",
     showInSidebar: true,
-    allowedRoles: [ "trainee"],
+    allowedRoles: ["trainee"],
     iconName: "dashboard",
   },
-  // Coach Panel Route
+  // Coach Dashboard Route
   {
-    id: "coach",
+    id: "coach-dashboard",
     path: "/coach",
     titleKey: "coach",
     showInSidebar: true,
     allowedRoles: ["coach"],
     iconName: "dashboard",
   },
-  // Admin Panel Route
+  // Admin Dashboard Route
   {
-    id: "admin",
+    id: "admin-dashboard",
     path: "/admin",
     titleKey: "admin",
     showInSidebar: true,
@@ -78,7 +84,7 @@ export const APP_ROUTES: RouteConfig[] = [
     path: "/members",
     titleKey: "members",
     showInSidebar: true,
-    allowedRoles: ["admin", "coach"], // Explicitly allows both admin and coach!
+    allowedRoles: ["admin", "coach"],
     iconName: "members",
   },
   {

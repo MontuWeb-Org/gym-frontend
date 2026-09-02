@@ -14,7 +14,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("alex@example.com");
   const [name, setName] = useState("Alex Johnson");
-  const [role, setRole] = useState<UserRole>("trainee");
+  const [role, setRole] = useState<UserRole>("admin");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +33,12 @@ export default function LoginPage() {
     } else if (role === "coach") {
       router.push("/coach");
     } else {
-      router.push("/dashboard");
+      router.push("/trainee");
     }
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+    <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-6 text-center">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm text-start">
         <h1 className="text-2xl font-bold text-foreground text-center">{t("title")}</h1>
         <p className="mt-2 text-sm text-muted-foreground text-center mb-6">{t("description")}</p>

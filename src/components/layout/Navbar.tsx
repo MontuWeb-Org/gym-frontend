@@ -1,97 +1,136 @@
+// src/components/layout/Navbar.tsx
 "use client";
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
-import { LAYOUT_CONFIG } from "@/data/layout-config";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useRouter } from "@/i18n/navigation";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
-import { Menu, X, LogOut } from "lucide-react";
-import LocaleSwitcher from "@/components/LocaleSwitcher"; 
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
 
-export function Navbar() {
+interface NavbarProps {
+  brand?: {
+    title: React.ReactNode;
+    href?: string;
+  };
+  publicLinks?: Array<{
+    href: string;
+    label: React.ReactNode;
+  }>;
+  languageSwitcher?: React.ReactNode;
+}
+
+export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
   const t = useTranslations("Nav");
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const user = useAppSelector((state) => state.auth.user);
+
+  const safeBrand = brand ?? { title: t("brandName"), href: "/" };
+  const safeLinks = publicLinks ?? [];
 
   const handleLogout = () => {
     dispatch(logout());
-    router.push("/login");
+    router.push("/");
+    router.refresh();
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center justify-between px-4 md:px-8">
-        
-        {/* Left Section: Mobile Menu Button & Brand Title */}
-        <div className="flex items-center gap-3">
-          {/* Mobile Hamburger Toggle Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close Menu" : "Open Menu"}
-            className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground md:hidden"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+    <header className="border-b border-border bg-background px-6 py-4">
+      <div className="flex items-center justify-between">
+        {/* Brand / Logo */}
+        <Link href={safeBrand.href ?? "/"} className="font-bold text-lg">
+          {safeBrand.title}
+        </Link>
 
-          <Link href="/" className="text-xl font-bold tracking-tight text-foreground">
-            {t(LAYOUT_CONFIG.brand.titleKey)}
-          </Link>
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-6">
+          {safeLinks.map((link, index) => (
+            <Link 
+              key={`${link.href}-${index}`} 
+              href={link.href} 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right Actions (Desktop) */}
+        <div className="hidden md:flex items-center gap-4">
+          {languageSwitcher}
+
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">{user.name}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+              >
+                {t("logout")}
+              </Button>
+            </div>
+          ) : (
+            <Link href="/login">
+              <Button size="sm">{t("login")}</Button>
+            </Link>
+          )}
         </div>
 
-        {/* Right Section / Controls (Desktop) */}
-        <div className="hidden md:flex items-center gap-4">
-          <LocaleSwitcher /> {/* <-- Added to Desktop Navbar */}
-
-          {user && (
-            <>
-              <span className="text-sm font-medium text-muted-foreground">
-                {user.name} ({user.role})
-              </span>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </button>
-            </>
-          )}
+        {/* Mobile Hamburger Button */}
+        <div className="flex md:hidden items-center gap-3">
+          {languageSwitcher}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 text-foreground focus:outline-none"
+            aria-label="Toggle Menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
 
-      {/* Mobile Dropdown Menu Drawer */}
+      {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="border-b border-border bg-background px-4 py-4 md:hidden">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between pb-2 border-b border-border">
-              <span className="text-sm font-medium text-muted-foreground">Language</span>
-              <LocaleSwitcher /> {/* <-- Added to Mobile Menu Drawer */}
-            </div>
-
-            {user && (
-              <>
-                <div className="flex flex-col gap-1 border-b border-border pb-3">
-                  <span className="text-sm font-medium text-foreground">{user.name}</span>
-                  <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
-                </div>
-                <button
+        <div className="md:hidden mt-4 pt-4 border-t border-border flex flex-col gap-4 pb-2">
+          {safeLinks.map((link, index) => (
+            <Link 
+              key={`mobile-${link.href}-${index}`} 
+              href={link.href} 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="pt-2 border-t border-border flex flex-col gap-2">
+            {isAuthenticated && user ? (
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">{user.name}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
                   onClick={() => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
                 >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </>
-            )}
-            {!user && (
-              <span className="text-sm text-muted-foreground">Not signed in</span>
+                  {t("logout")}
+                </Button>
+              </div>
+            ) : (
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="w-full">{t("login")}</Button>
+              </Link>
             )}
           </div>
         </div>

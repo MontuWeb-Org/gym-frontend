@@ -22,50 +22,65 @@
     "backToHome": "Back to Welcome Page"
   },
   "Nav": {
-    "brandName": "Gym App",
+    "brandName": "Gym Platform",
     "home": "Home",
+    "offerings": "Our Offerings",
+    "partners": "Partners",
+    "subscription": "Subscription",
     "login": "Sign In",
     "dashboard": "Dashboard",
-    "workouts": "Workouts",
-    "classes": "Classes",
-    "members": "Members",
+    "trainees": "Trainees",
+    "programs": "Programs",
+    "templates": "Templates",
+    "billing": "Billing",
     "coach": "Coach Panel",
     "admin": "Admin Panel",
-    "profile": "Profile",
+    "profile": "My Profile",
     "settings": "Settings",
-    "logout": "Log Out",
-    "toggleSidebar": "Toggle Sidebar"
-  },
-  "Dashboard": {
-    "title": "Dashboard",
-    "description": "Overview of your gym activity and metrics."
-  },
-  "Classes": {
-    "title": "Classes",
-    "description": "View and manage available fitness classes."
-  },
-  "Workouts": {
-    "title": "Workouts",
-    "description": "Explore workout programs and tracking."
-  },
-  "Profile": {
-    "title": "Profile",
-    "description": "Manage your account and personal profile."
-  },
-  "Members": {
-    "title": "Members",
-    "description": "View and manage registered gym members."
-  },
-  "Settings": {
-    "title": "Settings",
-    "description": "Configure system preferences and configuration."
-  },
-  "Admin": {
-    "title": "Admin Panel",
-    "description": "Configure system settings, users, and platform roles."
+    "logout": "Logout",
+    "language": "Language",
+    "menu": "Menu",
+    "coachHub": "Coach Hub",
+    "traineeHub": "Trainee Hub",
+    "workouts": "Workouts"
   },
   "Coach": {
-    "title": "Coach Panel",
-    "description": "Manage assigned trainees, schedules, and attendance."
+    "panelTitle": "Coach Panel",
+    "panelDescription": "Manage assigned trainees, schedules, and attendance.",
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Manage your coach dashboard seamlessly.",
+      "activeTrainees": "Active Trainees",
+      "activePrograms": "Active Programs",
+      "completionRate": "Completion Rate",
+      "monthlyRevenue": "Monthly Revenue",
+      "recentActivity": "Recent Trainee Activity"
+    },
+    "trainees": {
+      "title": "Trainees",
+      "description": "Manage your assigned trainees, track their progress and goals."
+    },
+    "programs": {
+      "title": "Programs",
+      "description": "Create and manage structured training programs for your trainees."
+    },
+    "templates": {
+      "title": "Templates",
+      "description": "Build reusable workout templates to quickly assign to trainees."
+    },
+    "billing": {
+      "title": "Billing",
+      "description": "View your subscription status, invoices, and payment history."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure your coach profile and account preferences."
+    }
+  },
+  
+  "Admin": {
+    "title": "Admin Dashboard",
+    "description": "Manage platform settings and users seamlessly."
   }
+
 }
