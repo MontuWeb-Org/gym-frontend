@@ -2,14 +2,13 @@ import type { ComponentType } from "react";
 import type { ReactNode } from "react";
 
 export interface SidebarItem {
-  id: string;
-  label: ReactNode;
+ id: string;
+  label: string;
   href: string;
   icon?: ReactNode;
-  badge?: ReactNode;
+  badge?: string;
   /**
    * The view component to render in the main content area when this item is selected.
-   * This makes AppLayout fully data-driven — no switch/case needed there.
    */
   component?: ComponentType;
 }

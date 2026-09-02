@@ -1,72 +1,55 @@
-import React from "react";
-import {
-  LayoutDashboard,
-  Users,
-  Dumbbell,
-  FileText,
-  CreditCard,
-  Settings,
-  Award,
-} from "lucide-react";
-import type { SidebarItem } from "../sidebar.types";
-
-// Coach-specific page components — each section has its own dedicated page
-import CoachPage from "@/app/[locale]/(protected)/coach/page";
-import CoachTraineesPage from "@/app/[locale]/(protected)/coach/trainees/page";
-import CoachProgramsPage from "@/app/[locale]/(protected)/coach/programs/page";
-import CoachTemplatesPage from "@/app/[locale]/(protected)/coach/templates/page";
-import CoachBillingPage from "@/app/[locale]/(protected)/coach/billing/page";
-import CoachSettingsPage from "@/app/[locale]/(protected)/coach/settings/page";
-
-export const COACH_SIDEBAR_TITLE: React.ReactNode = (
-  <div className="flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-primary border-b border-border mb-2">
-    <Award className="size-4 text-primary" />
-    <span>Coach Hub</span>
-  </div>
-);
+// src/data/sidebars/coachSidebar.data.ts
+import { LayoutDashboard, Users, Dumbbell, FileText, CreditCard, Settings } from "lucide-react";
+import type { SidebarItem } from "@/data/sidebar.types";
+import CoachDashboardView from "@/components/views/coach/CoachDashboardView";
+import TraineesView from "@/components/views/coach/TraineesView";
+import ProgramsView from "@/components/views/coach/ProgramsView";
+import TemplatesView from "@/components/views/coach/TemplatesView";
+import BillingView from "@/components/views/coach/BillingView";
+import CoachSettingsView from "@/components/views/coach/CoachSettingsView";
 
 export const COACH_SIDEBAR_DATA: SidebarItem[] = [
   {
-    id: "coach-dashboard",
+    id: "dashboard",
     label: "Dashboard",
     href: "/coach",
     icon: <LayoutDashboard className="size-5" />,
     badge: "Coach",
-    component: CoachPage,
+    component: CoachDashboardView,
   },
   {
-    id: "coach-trainees",
+    id: "trainees",
     label: "Trainees",
     href: "/coach/trainees",
     icon: <Users className="size-5" />,
-    component: CoachTraineesPage,
+    component: TraineesView,
   },
   {
-    id: "coach-programs",
+    id: "programs",
     label: "Programs",
     href: "/coach/programs",
     icon: <Dumbbell className="size-5" />,
-    component: CoachProgramsPage,
+    component: ProgramsView,
   },
   {
-    id: "coach-templates",
+    id: "templates",
     label: "Templates",
     href: "/coach/templates",
     icon: <FileText className="size-5" />,
-    component: CoachTemplatesPage,
+    component: TemplatesView,
   },
   {
-    id: "coach-billing",
+    id: "billing",
     label: "Billing",
     href: "/coach/billing",
     icon: <CreditCard className="size-5" />,
-    component: CoachBillingPage,
+    component: BillingView,
   },
   {
-    id: "coach-settings",
+    id: "settings",
     label: "Settings",
     href: "/coach/settings",
     icon: <Settings className="size-5" />,
-    component: CoachSettingsPage,
+    component: CoachSettingsView,
   },
 ];

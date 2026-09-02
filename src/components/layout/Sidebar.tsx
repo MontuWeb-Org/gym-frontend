@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Menu, X, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ export function Sidebar({
   activePath = "",
   onItemClick,
 }: SidebarProps) {
+  const t = useTranslations("Nav");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -114,6 +116,9 @@ export function Sidebar({
                   ? activePath === item.href || activePath.startsWith(`${item.href}/`)
                   : false;
 
+              // Translate the item label if a translation key exists in Nav, otherwise fallback to item.label
+              const translatedLabel = typeof item.label === "string" ? (t(item.id) || item.label) : item.label;
+
               return (
                 <Button
                   key={item.id}
@@ -132,7 +137,7 @@ export function Sidebar({
                 >
                   <div className="flex items-center gap-3 truncate">
                     {item.icon ? item.icon : <LayoutDashboard className="size-5 shrink-0" />}
-                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    {!isCollapsed && <span className="truncate">{translatedLabel}</span>}
                   </div>
                   {!isCollapsed && item.badge && (
                     <span className="rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground font-normal">

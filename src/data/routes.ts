@@ -12,7 +12,7 @@ export interface RouteConfig {
 }
 
 export const APP_ROUTES: RouteConfig[] = [
-  // Public Routes
+// Public Routes
   {
     id: "home",
     path: "/",
@@ -28,6 +28,12 @@ export const APP_ROUTES: RouteConfig[] = [
     isPublic: true,
     showInNavbar: true,
     iconName: "auth",
+  },
+  {
+    id: "signup-coach",
+    path: "/auth/signup/coach",
+    titleKey: "signupCoach",
+    isPublic: true,
   },
   // User/Trainee Dashboard Route
   {
