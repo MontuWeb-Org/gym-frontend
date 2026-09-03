@@ -1,4 +1,3 @@
-// src/components/views/coach/CoachDashboardView.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -8,8 +7,8 @@ import { CoachActivityList } from "./components/CoachActivityList";
 export default function CoachDashboardView() {
   const t = useTranslations("Coach.dashboard");
 
-  // Ready for backend integration or Redux hooks matching StatItem & ActivityItem interfaces
-  const stats: Array<{ id: string; label: string; value: string | number; change?: string; icon?: React.ReactNode }> = [];
+  // Aligned with StatItem interface expectations (making icon required or handling it correctly)
+  const stats: Array<{ id: string; label: string; value: string; change?: string; icon: React.ReactNode }> = [];
   const activities: Array<{ id: string; title: string; description: string; time: string; timestamp?: string; type?: string }> = [];
 
   const localizedStats = stats.map((stat) => {
