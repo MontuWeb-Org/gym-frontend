@@ -6,6 +6,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { type UserRole } from "@/data/routes";
+import AuthForm from "@/components/auth/AuthForm";
 
 export default function LoginPage() {
   const t = useTranslations("Login");
@@ -18,7 +19,6 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     dispatch(
       setUser({
         id: "usr_" + Date.now(),
@@ -28,74 +28,61 @@ export default function LoginPage() {
       })
     );
 
-    if (role === "admin") {
-      router.push("/admin");
-    } else if (role === "coach") {
-      router.push("/coach");
-    } else {
-      router.push("/trainee");
-    }
+    router.push(`/${role}`);
   };
 
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-6 text-center">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm text-start">
-        <h1 className="text-2xl font-bold text-foreground text-center">{t("title")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground text-center mb-6">{t("description")}</p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1">{t("nameLabel")}</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1">{t("emailLabel")}</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1">{t("roleLabel")}</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
-              className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+    <main>
+      <AuthForm
+        title={t("title")}
+        subtitle={t("description")}
+        submitLabel={t("submitButton")}
+        onSubmit={handleSubmit}
+        fields={[
+          {
+            name: "name",
+            label: t("nameLabel"),
+            type: "text",
+            value: name,
+            onChange: (e) => setName(e.target.value),
+          },
+          {
+            name: "email",
+            label: t("emailLabel"),
+            type: "email",
+            value: email,
+            onChange: (e) => setEmail(e.target.value),
+          },
+          {
+            name: "role",
+            label: t("roleLabel"),
+            type: "select",
+            value: role,
+            onChange: (e) => setRole(e.target.value as UserRole),
+            options: [
+              { label: t("roles.admin"), value: "admin" },
+              { label: t("roles.coach"), value: "coach" },
+              { label: t("roles.trainee"), value: "trainee" },
+            ],
+          },
+        ]}
+        footer={
+          <div className="flex flex-col gap-2 text-center">
+            <Link
+              href="/forgot-password"
+              className="text-xs text-muted-foreground hover:text-foreground hover:underline"
             >
-              <option value="admin">{t("roles.admin")}</option>
-              <option value="coach">{t("roles.coach")}</option>
-              <option value="trainee">{t("roles.trainee")}</option>
-            </select>
+              Forgot password?
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline"
+            >
+              &larr; {t("backToHome")}
+            </Link>
           </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-primary text-primary-foreground font-medium text-sm rounded-md hover:bg-primary/90 transition-colors mt-2"
-          >
-            {t("submitButton")}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline"
-          >
-            &larr; {t("backToHome")}
-          </Link>
-        </div>
-      </div>
+        }
+      />
     </main>
   );
 }
