@@ -17,11 +17,14 @@ export default function TraineeLayout({
     TRAINEE_SIDEBAR_DATA[0]?.id ?? "dashboard"
   );
 
-  const localizedSidebarItems = TRAINEE_SIDEBAR_DATA.map((item) => ({
-    ...item,
-    label: t.has(item.id as any) ? t(item.id as any) : item.label,
-    href: item.href === "" ? `/${locale}/trainee` : `/${locale}/trainee/${item.href}`,
-  }));
+  const localizedSidebarItems = TRAINEE_SIDEBAR_DATA.map((item) => {
+    const translationKey = item.id as Parameters<typeof t>[0];
+    return {
+      ...item,
+      label: t.has(translationKey) ? t(translationKey) : item.label,
+      href: item.href === "" ? `/${locale}/trainee` : `/${locale}/trainee/${item.href}`,
+    };
+  });
 
   const handleItemClick = (item: SidebarItem) => {
     setActiveTab(item.id);
@@ -30,12 +33,17 @@ export default function TraineeLayout({
   const activeItem = TRAINEE_SIDEBAR_DATA.find((item) => item.id === activeTab);
   const ActiveView = activeItem?.component;
 
-  const activeLabel = activeItem ? (t.has(activeItem.id as any) ? t(activeItem.id as any) : activeItem.label) : "Dashboard";
+  const activeTranslationKey = (activeItem?.id ?? "") as Parameters<typeof t>[0];
+  const traineeHubKey = "traineeHub" as Parameters<typeof t>[0];
+
+  const activeLabel = activeItem 
+    ? (t.has(activeTranslationKey) ? t(activeTranslationKey) : activeItem.label) 
+    : "Dashboard";
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <Sidebar
-        title={t.has("traineeHub" as any) ? t("traineeHub" as any) : "Trainee Hub"}
+        title={t.has(traineeHubKey) ? t(traineeHubKey) : "Trainee Hub"}
         items={localizedSidebarItems}
         activeTab={activeTab}
         onItemClick={handleItemClick}

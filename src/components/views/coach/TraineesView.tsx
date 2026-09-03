@@ -1,4 +1,4 @@
-
+// src/components/views/coach/TraineesView.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,8 @@ import { UserPlus, Search } from "lucide-react";
 import { TraineesTable } from "./components/TraineesTable";
 
 export default function TraineesView() {
-  
-  const trainees: Array<{ id: string; name: string; email: string; status?: string }> = [];
+  // Ready for backend integration or Redux selectors matching TraineeRecord
+  const trainees: Array<{ id: string; name: string; email: string; program: string; progress: number; status?: string }> = [];
 
   return (
     <div className="space-y-6">

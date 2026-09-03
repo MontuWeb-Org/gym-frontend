@@ -1,4 +1,3 @@
-// src/app/[locale]/(protected)/admin/layout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -21,9 +20,11 @@ export default function AdminLayout({
 
   const localizedSidebarItems = ADMIN_SIDEBAR_DATA.map((item) => {
     const cleanPath = item.href.replace(/^\/admin/, "").replace(/^\//, "");
+    const translationKey = item.id as Parameters<typeof t>[0];
+    
     return {
       ...item,
-      label: t.has(item.id as any) ? t(item.id as any) : item.label,
+      label: t.has(translationKey) ? t(translationKey) : item.label,
       href: cleanPath === "" 
         ? `/${locale}/admin` 
         : `/${locale}/admin/${cleanPath}`,
@@ -37,12 +38,17 @@ export default function AdminLayout({
   const activeItem = ADMIN_SIDEBAR_DATA.find((item) => item.id === activeTab);
   const ActiveView = activeItem?.component;
 
-  const activeLabel = activeItem ? (t.has(activeItem.id as any) ? t(activeItem.id as any) : activeItem.label) : "Dashboard";
+  const activeTranslationKey = (activeItem?.id ?? "") as Parameters<typeof t>[0];
+  const adminHubKey = "adminHub" as Parameters<typeof t>[0];
+
+  const activeLabel = activeItem 
+    ? (t.has(activeTranslationKey) ? t(activeTranslationKey) : activeItem.label) 
+    : "Dashboard";
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <Sidebar
-        title={t.has("adminHub" as any) ? t("adminHub" as any) : "Admin Hub"}
+        title={t.has(adminHubKey) ? t(adminHubKey) : "Admin Hub"}
         items={localizedSidebarItems}
         activeTab={activeTab}
         onItemClick={handleItemClick}
