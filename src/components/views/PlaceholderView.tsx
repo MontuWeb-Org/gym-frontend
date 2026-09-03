@@ -1,4 +1,3 @@
-// src/components/views/PlaceholderView.tsx
 "use client";
 
 import { useLocale } from "next-intl";

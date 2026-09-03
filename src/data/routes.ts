@@ -12,7 +12,7 @@ export interface RouteConfig {
 }
 
 export const APP_ROUTES: RouteConfig[] = [
-  // Public Routes
+// Public Routes
   {
     id: "home",
     path: "",

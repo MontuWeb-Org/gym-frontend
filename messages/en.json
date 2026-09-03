@@ -80,6 +80,7 @@
       "description": "Configure your coach profile and account preferences."
     }
   },
+  
   "Admin": {
     "title": "Admin Dashboard",
     "description": "Manage platform settings and users seamlessly."
