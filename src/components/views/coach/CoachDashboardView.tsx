@@ -1,15 +1,17 @@
-// src/components/views/coach/CoachDashboardView.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
-import { COACH_STATS, COACH_ACTIVITIES } from "@/data/mock/coachDashboard.data";
 import { CoachStatsGrid } from "./components/CoachStatsGrid";
 import { CoachActivityList } from "./components/CoachActivityList";
 
 export default function CoachDashboardView() {
   const t = useTranslations("Coach.dashboard");
 
-  const localizedStats = COACH_STATS.map((stat) => {
+  
+  const stats: Array<{ id: string; label: string; value: string | number; change?: string }> = [];
+  const activities: Array<{ id: string; title: string; timestamp: string; type?: string }> = [];
+
+  const localizedStats = stats.map((stat) => {
     const labelMap: Record<string, string> = {
       trainees: t("activeTrainees"),
       programs: t("activePrograms"),
@@ -25,13 +27,8 @@ export default function CoachDashboardView() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("description")}</p>
-      </div>
-
       <CoachStatsGrid stats={localizedStats} />
-      <CoachActivityList activities={COACH_ACTIVITIES} title={t("recentActivity")} />
+      <CoachActivityList activities={activities} title={t("recentActivity")} />
     </div>
   );
 }

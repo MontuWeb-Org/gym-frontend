@@ -1,11 +1,13 @@
+
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { UserPlus, Search } from "lucide-react";
-import { MOCK_TRAINEES } from "@/data/mock/trainees.data";
 import { TraineesTable } from "./components/TraineesTable";
 
 export default function TraineesView() {
-  // Ready to be replaced with Redux selectors or API hooks later (e.g., const { data } = useGetTraineesQuery())
-  const trainees = MOCK_TRAINEES;
+  
+  const trainees: Array<{ id: string; name: string; email: string; status?: string }> = [];
 
   return (
     <div className="space-y-6">

@@ -1,4 +1,3 @@
-// src/app/[locale]/(protected)/coach/layout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -18,6 +17,12 @@ export default function CoachLayout({
     COACH_SIDEBAR_DATA[0]?.id ?? "dashboard"
   );
 
+  const localizedSidebarItems = COACH_SIDEBAR_DATA.map((item) => ({
+    ...item,
+    label: t.has(item.id as any) ? t(item.id as any) : item.label,
+    href: item.href === "" ? `/${locale}/coach` : `/${locale}/coach/${item.href}`,
+  }));
+
   const handleItemClick = (item: SidebarItem) => {
     setActiveTab(item.id);
   };
@@ -25,13 +30,13 @@ export default function CoachLayout({
   const activeItem = COACH_SIDEBAR_DATA.find((item) => item.id === activeTab);
   const ActiveView = activeItem?.component;
 
-  const activeLabel = activeItem ? (t.has(activeItem.id) ? t(activeItem.id) : activeItem.label) : "Dashboard";
+  const activeLabel = activeItem ? (t.has(activeItem.id as any) ? t(activeItem.id as any) : activeItem.label) : "Dashboard";
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <Sidebar
-        title={t("coachHub")}
-        items={COACH_SIDEBAR_DATA}
+        title={t.has("coachHub" as any) ? t("coachHub" as any) : "Coach Hub"}
+        items={localizedSidebarItems}
         activeTab={activeTab}
         onItemClick={handleItemClick}
       />
