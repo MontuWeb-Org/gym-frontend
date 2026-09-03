@@ -42,7 +42,10 @@
     "menu": "Menu",
     "coachHub": "Coach Hub",
     "traineeHub": "Trainee Hub",
-    "workouts": "Workouts"
+    "adminHub": "Admin Hub",
+    "workouts": "Workouts",
+    "members": "Members",
+    "classes": "Classes"
   },
   "Coach": {
     "panelTitle": "Coach Panel",
@@ -81,6 +84,9 @@
   "Admin": {
     "title": "Admin Dashboard",
     "description": "Manage platform settings and users seamlessly."
-  }
-
+  },
+  "Common": {
+  "title": "Coming Soon",
+  "description": "This section is currently under development and will be available soon."
+}
 }
