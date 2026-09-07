@@ -90,7 +90,7 @@ export const authHandlers = [
     );
   }),
 
-  // 4. Login
+// 4. Login
   http.post('/api/auth/login', async ({ request }) => {
     const body = await parseRequestBody(request);
     const { identifier, password } = body;
@@ -105,14 +105,29 @@ export const authHandlers = [
     if (password === 'wrong_password') {
       return HttpResponse.json(
         { message: 'Invalid credentials' },
-        { status: 404 }
+        { status: 401 }
       );
     }
+
+    const role = identifier.includes('trainee') ? 'trainee' : 'trainer';
+    
+    // Capitalize all segments of the email prefix (e.g., alex.johnson -> Alex Johnson)
+    const baseName = identifier.split('@')[0] || 'Alex Johnson';
+    const fullName = baseName
+      .split(/[._-]/)
+      .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
 
     return HttpResponse.json(
       {
         data: {
           accessToken: `mock_jwt_access_token_${Date.now()}`,
+          user: {
+            id: 'usr_' + Date.now(),
+            name: fullName,
+            email: identifier,
+            role: role,
+          },
         },
       },
       {
@@ -123,7 +138,6 @@ export const authHandlers = [
       }
     );
   }),
-
   // 5. Logout
   http.post('/api/auth/logout', async () => {
     return HttpResponse.json(

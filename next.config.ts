@@ -11,14 +11,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
-  async rewrites() {
+  /**async rewrites() {
     return [
       {
         source: "/api/:path*",
         destination: `${process.env.BACKEND_SERVER_URL || "http://localhost:5000"}/api/:path*`,
       },
     ];
-  },
+  },**/
 };
 
 export default withNextIntl(nextConfig);

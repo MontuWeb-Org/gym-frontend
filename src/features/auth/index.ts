@@ -1,5 +1,8 @@
 export { default as authReducer } from "./store/auth.slice";
 export * from "./store/auth.slice";
 export { default as SignupView } from "./views/TrainerSignupView";
+export { default as TraineeSignupView } from "./views/TraineeSignupView";
+export { default as LoginView } from "./views/LoginView";
+export { default as ForgotPasswordView } from "./views/ForgotPasswordView";
 export { authService } from "./services/auth.service";
 export * from "./types/auth.types";

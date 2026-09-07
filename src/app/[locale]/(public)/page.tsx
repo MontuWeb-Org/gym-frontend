@@ -50,7 +50,7 @@ export default function WelcomePage() {
                 Sign Up as Trainer
               </Link>
               <Link
-                href="/signup/trainee?token=valid_token"
+                href="/signup/trainee?token=mock_invite_123"
                 className="inline-block w-full rounded-md border border-dashed border-input bg-background py-2 px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 Test Trainee Signup (Mock Token)
