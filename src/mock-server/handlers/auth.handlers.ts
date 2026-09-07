@@ -12,7 +12,7 @@ async function parseRequestBody(request: Request) {
 
 export const authHandlers = [
   // 1. Register Init
-  http.post('/api/auth/register/init', async ({ request }) => {
+  http.post('*/api/auth/register/init', async ({ request }) => {
     const body = await parseRequestBody(request);
     const { email, password, name, phoneNumber } = body;
 
@@ -38,7 +38,7 @@ export const authHandlers = [
   }),
 
   // 2. Register Complete
-  http.post('/api/auth/register/complete', async ({ request }) => {
+  http.post('*/api/auth/register/complete', async ({ request }) => {
     const body = await parseRequestBody(request);
     const { otp, creationToken } = body;
 
@@ -65,7 +65,7 @@ export const authHandlers = [
   }),
 
   // 3. Refresh Token
-  http.post('/api/auth/refresh', async ({ request }) => {
+  http.post('*/api/auth/refresh', async ({ request }) => {
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader && !request.headers.get('cookie')?.includes('refreshToken')) {
@@ -90,8 +90,8 @@ export const authHandlers = [
     );
   }),
 
-// 4. Login
-  http.post('/api/auth/login', async ({ request }) => {
+  // 4. Login
+  http.post('*/api/auth/login', async ({ request }) => {
     const body = await parseRequestBody(request);
     const { identifier, password } = body;
 
@@ -138,8 +138,9 @@ export const authHandlers = [
       }
     );
   }),
+
   // 5. Logout
-  http.post('/api/auth/logout', async () => {
+  http.post('*/api/auth/logout', async () => {
     return HttpResponse.json(
       {
         message: 'Logout successfully.',

@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.tsx
 "use client";
 
 import { useState } from "react";
@@ -37,6 +36,12 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
     router.refresh();
   };
 
+  // Helper to normalize role text to Title Case (e.g., "TRAINER" or "trainer" -> "Trainer")
+  const formatRole = (role?: string) => {
+    if (!role) return "";
+    return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+  };
+
   return (
     <header className="border-b border-border bg-background px-6 py-4">
       <div className="flex items-center justify-between">
@@ -64,7 +69,10 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
 
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium">{user.name}</span>
+              <div className="flex flex-col text-right">
+                <span className="text-sm font-medium">{user.name}</span>
+                <span className="text-xs text-muted-foreground">{formatRole(user.role)}</span>
+              </div>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -116,6 +124,7 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
             {isAuthenticated && user ? (
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium">{user.name}</span>
+                <span className="text-xs text-muted-foreground">{formatRole(user.role)}</span>
                 <Button 
                   variant="outline" 
                   size="sm" 
