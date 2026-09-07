@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import AuthForm from "@/components/auth/AuthForm";
+import AuthForm from "@/features/auth/components/AuthForm";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();

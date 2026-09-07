@@ -6,7 +6,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { type UserRole } from "@/data/routes";
-import AuthForm from "@/components/auth/AuthForm";
+import AuthForm from "@/features/auth/components/AuthForm";
 
 export default function LoginPage() {
   const t = useTranslations("Login");
@@ -61,7 +61,7 @@ export default function LoginPage() {
             onChange: (e) => setRole(e.target.value as UserRole),
             options: [
               { label: t("roles.admin"), value: "admin" },
-              { label: t("roles.coach"), value: "coach" },
+              { label: t("roles.trainer"), value: "trainer" },
               { label: t("roles.trainee"), value: "trainee" },
             ],
           },

@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { CoachStatsGrid } from "./components/CoachStatsGrid";
-import { CoachActivityList } from "./components/CoachActivityList";
+import { TrainerStatsGrid } from "./components/TrainerStatsGrid";
+import { TrainerActivityList } from "./components/TrainerActivityList";
 
-export default function CoachDashboardView() {
-  const t = useTranslations("Coach.dashboard");
+export default function TrainerDashboardView() {
+  const t = useTranslations("Trainer.dashboard");
 
   // Aligned with StatItem interface expectations (making icon required or handling it correctly)
   const stats: Array<{ id: string; label: string; value: string; change?: string; icon: React.ReactNode }> = [];
@@ -27,8 +27,8 @@ export default function CoachDashboardView() {
 
   return (
     <div className="space-y-6">
-      <CoachStatsGrid stats={localizedStats} />
-      <CoachActivityList activities={activities} title={t("recentActivity")} />
+      <TrainerStatsGrid stats={localizedStats} />
+      <TrainerActivityList activities={activities} title={t("recentActivity")} />
     </div>
   );
 }
