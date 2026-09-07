@@ -15,7 +15,7 @@
     "roleLabel": "Select Role (for testing)",
     "roles": {
       "admin": "Admin",
-      "coach": "Coach",
+      "trainer": "Trainer",
       "trainee": "Trainee"
     },
     "submitButton": "Sign In",
@@ -33,26 +33,26 @@
     "programs": "Programs",
     "templates": "Templates",
     "billing": "Billing",
-    "coach": "Coach Panel",
+    "trainer": "Trainer Panel",
     "admin": "Admin Panel",
     "profile": "My Profile",
     "settings": "Settings",
     "logout": "Logout",
     "language": "Language",
     "menu": "Menu",
-    "coachHub": "Coach Hub",
+    "trainerHub": "Trainer Hub",
     "traineeHub": "Trainee Hub",
     "adminHub": "Admin Hub",
     "workouts": "Workouts",
     "members": "Members",
     "classes": "Classes"
   },
-  "Coach": {
-    "panelTitle": "Coach Panel",
+  "Trainer": {
+    "panelTitle": "Trainer Panel",
     "panelDescription": "Manage assigned trainees, schedules, and attendance.",
     "dashboard": {
       "title": "Dashboard",
-      "description": "Manage your coach dashboard seamlessly.",
+      "description": "Manage your trainer dashboard seamlessly.",
       "activeTrainees": "Active Trainees",
       "activePrograms": "Active Programs",
       "completionRate": "Completion Rate",
@@ -77,16 +77,40 @@
     },
     "settings": {
       "title": "Settings",
-      "description": "Configure your coach profile and account preferences."
+      "description": "Configure your trainer profile and account preferences."
     }
   },
-  
+
   "Admin": {
     "title": "Admin Dashboard",
     "description": "Manage platform settings and users seamlessly."
   },
   "Common": {
-  "title": "Coming Soon",
-  "description": "This section is currently under development and will be available soon."
-}
+    "title": "Coming Soon",
+    "description": "This section is currently under development and will be available soon."
+  },
+  "Auth": {
+    "trainerSignupTitle": "Trainer Sign Up",
+    "trainerSignupSubtitle": "Enter your details to register your trainer account.",
+    "verifyOtpTitle": "Verify OTP",
+    "verifyOtpSubtitle": "Enter the verification code sent to {email}",
+    "fullNameLabel": "Full Name",
+    "fullNamePlaceholder": "Karim Ahmed",
+    "phoneNumberLabel": "Phone Number",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "otpLabel": "Verification Code",
+    "continueButton": "Continue",
+    "completeSignupButton": "Complete Sign Up",
+    "alreadyHaveAccount": "Already have an account? Login",
+    "backToDetails": "Back to details",
+    "fieldRequired": "{field} is required.",
+    "invalidFormat": "Invalid format.",
+    "phonePatternError": "Please enter a valid international phone number.",
+    "emailPatternError": "Please enter a valid email address.",
+    "strongPasswordError": "Password must be at least 8 characters, with 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
+    "passwordMismatch": "Passwords do not match.",
+    "otpPatternError": "OTP must be a 6-digit code."
+  }
 }
