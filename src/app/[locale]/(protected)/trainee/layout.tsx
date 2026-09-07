@@ -1,4 +1,3 @@
-// src/app/[locale]/(protected)/trainee/layout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -18,6 +17,15 @@ export default function TraineeLayout({
     TRAINEE_SIDEBAR_DATA[0]?.id ?? "dashboard"
   );
 
+  const localizedSidebarItems = TRAINEE_SIDEBAR_DATA.map((item) => {
+    const translationKey = item.id as Parameters<typeof t>[0];
+    return {
+      ...item,
+      label: t.has(translationKey) ? t(translationKey) : item.label,
+      href: item.href === "" ? `/${locale}/trainee` : `/${locale}/trainee/${item.href}`,
+    };
+  });
+
   const handleItemClick = (item: SidebarItem) => {
     setActiveTab(item.id);
   };
@@ -25,13 +33,18 @@ export default function TraineeLayout({
   const activeItem = TRAINEE_SIDEBAR_DATA.find((item) => item.id === activeTab);
   const ActiveView = activeItem?.component;
 
-  const activeLabel = activeItem ? (t.has(activeItem.id) ? t(activeItem.id) : activeItem.label) : "Dashboard";
+  const activeTranslationKey = (activeItem?.id ?? "") as Parameters<typeof t>[0];
+  const traineeHubKey = "traineeHub" as Parameters<typeof t>[0];
+
+  const activeLabel = activeItem 
+    ? (t.has(activeTranslationKey) ? t(activeTranslationKey) : activeItem.label) 
+    : "Dashboard";
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <Sidebar
-        title={t("traineeHub")}
-        items={TRAINEE_SIDEBAR_DATA}
+        title={t.has(traineeHubKey) ? t(traineeHubKey) : "Trainee Hub"}
+        items={localizedSidebarItems}
         activeTab={activeTab}
         onItemClick={handleItemClick}
       />

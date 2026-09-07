@@ -1,4 +1,4 @@
-// src/data/sidebars/coachSidebar.data.ts
+
 import { LayoutDashboard, Users, Dumbbell, FileText, CreditCard, Settings } from "lucide-react";
 import type { SidebarItem } from "@/data/sidebar.types";
 import CoachDashboardView from "@/components/views/coach/CoachDashboardView";
@@ -12,7 +12,7 @@ export const COACH_SIDEBAR_DATA: SidebarItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    href: "/coach",
+    href: "", 
     icon: <LayoutDashboard className="size-5" />,
     badge: "Coach",
     component: CoachDashboardView,
@@ -20,35 +20,35 @@ export const COACH_SIDEBAR_DATA: SidebarItem[] = [
   {
     id: "trainees",
     label: "Trainees",
-    href: "/coach/trainees",
+    href: "trainees",
     icon: <Users className="size-5" />,
     component: TraineesView,
   },
   {
     id: "programs",
     label: "Programs",
-    href: "/coach/programs",
+    href: "programs",
     icon: <Dumbbell className="size-5" />,
     component: ProgramsView,
   },
   {
     id: "templates",
     label: "Templates",
-    href: "/coach/templates",
+    href: "templates",
     icon: <FileText className="size-5" />,
     component: TemplatesView,
   },
   {
     id: "billing",
     label: "Billing",
-    href: "/coach/billing",
+    href: "billing",
     icon: <CreditCard className="size-5" />,
     component: BillingView,
   },
   {
     id: "settings",
     label: "Settings",
-    href: "/coach/settings",
+    href: "settings",
     icon: <Settings className="size-5" />,
     component: CoachSettingsView,
   },

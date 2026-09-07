@@ -15,7 +15,7 @@ export const APP_ROUTES: RouteConfig[] = [
 // Public Routes
   {
     id: "home",
-    path: "/",
+    path: "",
     titleKey: "home",
     isPublic: true,
     showInNavbar: true,
@@ -23,7 +23,7 @@ export const APP_ROUTES: RouteConfig[] = [
   },
   {
     id: "login",
-    path: "/login",
+    path: "login",
     titleKey: "login",
     isPublic: true,
     showInNavbar: true,
@@ -31,14 +31,14 @@ export const APP_ROUTES: RouteConfig[] = [
   },
   {
     id: "signup-coach",
-    path: "/auth/signup/coach",
+    path: "auth/signup/coach",
     titleKey: "signupCoach",
     isPublic: true,
   },
   // User/Trainee Dashboard Route
   {
     id: "trainee-dashboard",
-    path: "/trainee",
+    path: "trainee",
     titleKey: "dashboard",
     showInSidebar: true,
     allowedRoles: ["trainee"],
@@ -47,7 +47,7 @@ export const APP_ROUTES: RouteConfig[] = [
   // Coach Dashboard Route
   {
     id: "coach-dashboard",
-    path: "/coach",
+    path: "coach",
     titleKey: "coach",
     showInSidebar: true,
     allowedRoles: ["coach"],
@@ -56,51 +56,10 @@ export const APP_ROUTES: RouteConfig[] = [
   // Admin Dashboard Route
   {
     id: "admin-dashboard",
-    path: "/admin",
+    path: "admin",
     titleKey: "admin",
     showInSidebar: true,
     allowedRoles: ["admin"],
     iconName: "dashboard",
-  },
-  {
-    id: "classes",
-    path: "/classes",
-    titleKey: "classes",
-    showInSidebar: true,
-    allowedRoles: ["admin", "coach", "trainee"],
-    iconName: "classes",
-  },
-  {
-    id: "workouts",
-    path: "/workouts",
-    titleKey: "workouts",
-    showInSidebar: true,
-    allowedRoles: ["admin", "coach", "trainee"],
-    iconName: "workouts",
-  },
-  // Coach & Admin Shared Route for Members
-  {
-    id: "members",
-    path: "/members",
-    titleKey: "members",
-    showInSidebar: true,
-    allowedRoles: ["admin", "coach"],
-    iconName: "members",
-  },
-  {
-    id: "profile",
-    path: "/profile",
-    titleKey: "profile",
-    showInSidebar: true,
-    allowedRoles: ["admin", "coach", "trainee"],
-    iconName: "profile",
-  },
-  {
-    id: "settings",
-    path: "/settings",
-    titleKey: "settings",
-    showInSidebar: true,
-    allowedRoles: ["admin"],
-    iconName: "settings",
   },
 ];

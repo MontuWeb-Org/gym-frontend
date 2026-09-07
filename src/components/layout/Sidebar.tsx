@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Menu, X, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
@@ -20,11 +20,6 @@ export interface SidebarProps {
   onItemClick?: (item: SidebarItem) => void;
 }
 
-/**
- * Responsive Dumb Sidebar Component with full RTL and LTR support.
- * - Desktop: Permanent static full-height sidebar docked beside content.
- * - Mobile: Floating hamburger button toggle + sliding drawer.
- */
 export function Sidebar({
   title,
   items = [],
@@ -33,13 +28,11 @@ export function Sidebar({
   activePath = "",
   onItemClick,
 }: SidebarProps) {
-  const t = useTranslations("Nav");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
     <>
-      {/* ── Mobile Floating Hamburger Toggle Button (Matched to ThemeToggle) ── */}
       <Button
         suppressHydrationWarning
         type="button"
@@ -51,7 +44,6 @@ export function Sidebar({
         {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
       </Button>
 
-      {/* ── Mobile Backdrop Overlay ── */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden"
@@ -59,26 +51,21 @@ export function Sidebar({
         />
       )}
 
-      {/* ── Sidebar Shell (RTL and LTR safe) ── */}
       <aside
         className={cn(
           "flex flex-col justify-between border-e border-border bg-background transition-all duration-300 shrink-0 h-[calc(100vh-4rem)]",
           isCollapsed ? "w-20" : "w-64",
-          // Mobile: fixed overlay sliding drawer (properly hides off-screen in both LTR and RTL)
           "fixed top-16 bottom-0 start-0 z-50",
           isMobileOpen 
             ? "translate-x-0 rtl:translate-x-0 shadow-2xl" 
             : "-translate-x-full rtl:translate-x-full",
-          // Desktop: static flex container in normal layout flow
           "md:static md:translate-x-0 md:rtl:translate-x-0 md:top-auto md:bottom-auto md:z-auto md:shadow-none"
         )}
       >
         <div className="p-4 space-y-4 overflow-y-auto flex-1">
-          {/* Header & Collapse Toggle */}
           <div className="flex items-center justify-between">
             {!isCollapsed && title && <div className="flex-1 truncate">{title}</div>}
             
-            {/* Desktop collapse toggle */}
             <Button
               type="button"
               variant="outline"
@@ -94,7 +81,6 @@ export function Sidebar({
               )}
             </Button>
 
-            {/* Mobile close button inside drawer header */}
             <Button
               type="button"
               variant="outline"
@@ -107,7 +93,6 @@ export function Sidebar({
             </Button>
           </div>
 
-          {/* Navigation Items */}
           <nav className="space-y-1.5">
             {items.map((item) => {
               const isActive = activeTab
@@ -116,15 +101,12 @@ export function Sidebar({
                   ? activePath === item.href || activePath.startsWith(`${item.href}/`)
                   : false;
 
-              // Translate the item label if a translation key exists in Nav, otherwise fallback to item.label
-              const translatedLabel = typeof item.label === "string" ? (t(item.id) || item.label) : item.label;
-
               return (
-                <Button
+                <Link
                   key={item.id}
-                  type="button"
-                  variant={isActive ? "default" : "ghost"}
-                  onClick={() => {
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
                     setIsMobileOpen(false);
                     if (onItemClick) onItemClick(item);
                   }}
@@ -137,20 +119,19 @@ export function Sidebar({
                 >
                   <div className="flex items-center gap-3 truncate">
                     {item.icon ? item.icon : <LayoutDashboard className="size-5 shrink-0" />}
-                    {!isCollapsed && <span className="truncate">{translatedLabel}</span>}
+                    {!isCollapsed && <span className="truncate">{item.label}</span>}
                   </div>
                   {!isCollapsed && item.badge && (
                     <span className="rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground font-normal">
                       {item.badge}
                     </span>
                   )}
-                </Button>
+                </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* User Card in Sidebar Footer */}
         {user && !isCollapsed && (
           <div className="p-4 border-t border-border bg-muted/40 mt-auto">
             <div className="flex flex-col">

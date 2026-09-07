@@ -1,30 +1,19 @@
-import { Button } from "@/components/ui/button";
-import { UserPlus, Search } from "lucide-react";
-import { MOCK_TRAINEES } from "@/data/mock/trainees.data";
-import { TraineesTable } from "./components/TraineesTable";
+"use client";
 
-export default function TraineesView() {
-  // Ready to be replaced with Redux selectors or API hooks later (e.g., const { data } = useGetTraineesQuery())
-  const trainees = MOCK_TRAINEES;
+import { useTranslations } from "next-intl";
+
+export default function TraineeDashboardView() {
+  const t = useTranslations("Common");
+
+ 
+  const stats: Array<{ id: string; label: string; value: string; change?: string; icon: React.ReactNode }> = [];
+  const activities: Array<{ id: string; title: string; description: string; time: string; timestamp?: string; type?: string }> = [];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search trainees..."
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </div>
-        <Button className="inline-flex items-center gap-2">
-          <UserPlus className="size-4" />
-          <span>Add Trainee</span>
-        </Button>
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        
       </div>
-
-      <TraineesTable data={trainees} />
     </div>
   );
 }
