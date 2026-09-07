@@ -35,6 +35,8 @@ yarn-error.log*
 # but keep the example env file
 !.env.example
 
+src/mock-server/data
+
 # vercel
 .vercel
 

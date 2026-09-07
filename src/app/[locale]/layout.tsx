@@ -12,6 +12,7 @@ import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { buildMetadata } from "@/lib/metadata";
 import { siteConfig } from "@/config/site";
+import { MSWProvider } from "@/mock-server/MSWProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,18 +80,20 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <StoreProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            {/* Navbar is back globally across the entire app */}
-            <Navbar
-              brand={{ title: t("brandName"), href: "/" }}
-              publicLinks={localizedPublicLinks}
-              languageSwitcher={<LocaleSwitcher />}
-            />
-            <div className="flex-1 flex flex-col">{children}</div>
-            <ThemeToggle />
-          </NextIntlClientProvider>
-        </StoreProvider>
+        <MSWProvider>
+          <StoreProvider>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              {/* Navbar is back globally across the entire app */}
+              <Navbar
+                brand={{ title: t("brandName"), href: "/" }}
+                publicLinks={localizedPublicLinks}
+                languageSwitcher={<LocaleSwitcher />}
+              />
+              <div className="flex-1 flex flex-col">{children}</div>
+              <ThemeToggle />
+            </NextIntlClientProvider>
+          </StoreProvider>
+        </MSWProvider>
       </body>
     </html>
   );
