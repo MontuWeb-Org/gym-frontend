@@ -6,13 +6,14 @@ import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
-import StoreProvider from "@/store/StoreProvider";
+import StoreProvider from "@/providers/StoreProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { buildMetadata } from "@/lib/metadata";
 import { siteConfig } from "@/config/site";
 import { MSWProvider } from "@/mock-server/MSWProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -81,18 +82,20 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <MSWProvider>
-          <StoreProvider>
-            <NextIntlClientProvider locale={locale} messages={messages}>
-              {/* Navbar is back globally across the entire app */}
-              <Navbar
-                brand={{ title: t("brandName"), href: "/" }}
-                publicLinks={localizedPublicLinks}
-                languageSwitcher={<LocaleSwitcher />}
-              />
-              <div className="flex-1 flex flex-col">{children}</div>
-              <ThemeToggle />
-            </NextIntlClientProvider>
-          </StoreProvider>
+          <QueryProvider>
+            <StoreProvider>
+              <NextIntlClientProvider locale={locale} messages={messages}>
+                {/* Navbar is back globally across the entire app */}
+                <Navbar
+                  brand={{ title: t("brandName"), href: "/" }}
+                  publicLinks={localizedPublicLinks}
+                  languageSwitcher={<LocaleSwitcher />}
+                />
+                <div className="flex-1 flex flex-col">{children}</div>
+                <ThemeToggle />
+              </NextIntlClientProvider>
+            </StoreProvider>
+          </QueryProvider>
         </MSWProvider>
       </body>
     </html>

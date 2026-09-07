@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAppSelector } from "@/store/hooks";
+import { UserRole } from "@/features/auth/types/auth.types";
 
 export default function WelcomePage() {
   const t = useTranslations("Home");
@@ -11,8 +12,8 @@ export default function WelcomePage() {
 
   const getDashboardHref = () => {
     if (!user) return "/login";
-    if (user.role === "admin") return "/admin";
-    if (user.role === "coach") return "/coach";
+    if (user.role === UserRole.ADMIN) return "/admin";
+    if (user.role === UserRole.TRAINER) return "/trainer";
     return "/trainee";
   };
 
@@ -35,12 +36,26 @@ export default function WelcomePage() {
               Go to Dashboard ({user.name})
             </Link>
           ) : (
-            <Link
-              href="/login"
-              className="inline-block w-full rounded-md bg-primary py-2.5 px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-            >
-              {loginT("submitButton")}
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/login"
+                className="inline-block w-full rounded-md bg-primary py-2.5 px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+              >
+                {loginT("submitButton")}
+              </Link>
+              <Link
+                href="/signup/trainer"
+                className="inline-block w-full rounded-md border border-input bg-background py-2.5 px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                Sign Up as Trainer
+              </Link>
+              <Link
+                href="/signup/trainee?token=valid_token"
+                className="inline-block w-full rounded-md border border-dashed border-input bg-background py-2 px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                Test Trainee Signup (Mock Token)
+              </Link>
+            </div>
           )}
         </div>
       </div>
