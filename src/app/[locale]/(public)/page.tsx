@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAppSelector } from "@/store/hooks";
-import { UserRole } from "@/features/auth/types/auth.types";
+import { UserRole } from "@/types/user.types";
 
 export default function WelcomePage() {
   const t = useTranslations("Home");

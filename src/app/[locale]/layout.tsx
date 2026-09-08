@@ -1,4 +1,3 @@
-// src/app/[locale]/layout.tsx
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -14,6 +13,7 @@ import { buildMetadata } from "@/lib/metadata";
 import { siteConfig } from "@/config/site";
 import { MSWProvider } from "@/mock-server/MSWProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,14 +85,15 @@ export default async function RootLayout({
           <QueryProvider>
             <StoreProvider>
               <NextIntlClientProvider locale={locale} messages={messages}>
-                {/* Navbar is back globally across the entire app */}
-                <Navbar
-                  brand={{ title: t("brandName"), href: "/" }}
-                  publicLinks={localizedPublicLinks}
-                  languageSwitcher={<LocaleSwitcher />}
-                />
-                <div className="flex-1 flex flex-col">{children}</div>
-                <ThemeToggle />
+                <AuthProvider>
+                  <Navbar
+                    brand={{ title: t("brandName"), href: "/" }}
+                    publicLinks={localizedPublicLinks}
+                    languageSwitcher={<LocaleSwitcher key="locale-switcher" />}
+                  />
+                  <div className="flex-1 flex flex-col">{children}</div>
+                  <ThemeToggle />
+                </AuthProvider>
               </NextIntlClientProvider>
             </StoreProvider>
           </QueryProvider>
