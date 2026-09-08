@@ -3,13 +3,17 @@ import { faker } from '@faker-js/faker';
 export function generateUsersAndProfiles(trainerCount = 4, traineeCount = 15) {
   let currentId = 1;
 
+  const trainerHashedPassword = "3b60774b88b9ea67c9bac5eee365652a1cc33585c9e924b0aa36959b3c38d007"; //Trainer123!
+  const traineeHashedPassword = "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e"; //Trainee123!
+  const adminHashedPassword = "3eb3fe66b31e3b4d10fa70b5cad49c7112294af6ae4e476a1c405155d45aa121"; //Admin123!
+  
   type User = {
     id: number;
     phoneNumber: string;
     email: string;
     name: string;
     role: 'TRAINER' | 'TRAINEE' | 'ADMIN';
-    passwordHash: string;
+    password: string;
     activationStatus: 'ACTIVATED' | 'PENDING';
     createdAt: string;
     updatedAt: string;
@@ -44,7 +48,7 @@ export function generateUsersAndProfiles(trainerCount = 4, traineeCount = 15) {
     email: 'admin@gym.com',
     name: 'Admin Trainer',
     role: 'ADMIN' as const,
-    passwordHash: 'hashed_admin_pass',
+    password: adminHashedPassword,
     activationStatus: 'ACTIVATED' as const,
     createdAt: faker.date.past().toISOString(),
     updatedAt: faker.date.recent().toISOString(),
@@ -70,7 +74,7 @@ export function generateUsersAndProfiles(trainerCount = 4, traineeCount = 15) {
       email: faker.internet.email(),
       name: faker.person.fullName(),
       role: 'TRAINER' as const,
-      passwordHash: 'hashed_pass',
+      password: trainerHashedPassword,
       activationStatus: 'ACTIVATED' as const,
       createdAt: faker.date.past().toISOString(),
       updatedAt: faker.date.recent().toISOString(),
@@ -95,7 +99,7 @@ export function generateUsersAndProfiles(trainerCount = 4, traineeCount = 15) {
       email: faker.internet.email(),
       name: faker.person.fullName(),
       role: 'TRAINEE' as const,
-      passwordHash: 'hashed_pass',
+      password: traineeHashedPassword,
       activationStatus: faker.helpers.arrayElement(['ACTIVATED', 'PENDING']) as 'ACTIVATED' | 'PENDING',
       createdAt: faker.date.past().toISOString(),
       updatedAt: faker.date.recent().toISOString(),

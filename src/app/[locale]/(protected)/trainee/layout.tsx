@@ -17,12 +17,12 @@ export default function TraineeLayout({
     TRAINEE_SIDEBAR_DATA[0]?.id ?? "dashboard"
   );
 
-  const localizedSidebarItems = TRAINEE_SIDEBAR_DATA.map((item) => {
+ const localizedSidebarItems = TRAINEE_SIDEBAR_DATA.map((item) => {
     const translationKey = item.id as Parameters<typeof t>[0];
     return {
       ...item,
       label: t.has(translationKey) ? t(translationKey) : item.label,
-      href: item.href === "" ? `/${locale}/trainee` : `/${locale}/trainee/${item.href}`,
+      href: item.href === "" ? "/trainee" : `/trainee/${item.href}`,
     };
   });
 

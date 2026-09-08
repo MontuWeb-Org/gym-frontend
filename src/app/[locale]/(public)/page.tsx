@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAppSelector } from "@/store/hooks";
-import { UserRole } from "@/features/auth/types/auth.types";
+import { UserRole } from "@/types/user.types";
 
 export default function WelcomePage() {
   const t = useTranslations("Home");
@@ -50,7 +50,7 @@ export default function WelcomePage() {
                 Sign Up as Trainer
               </Link>
               <Link
-                href="/signup/trainee?token=valid_token"
+                href="/signup/trainee?token=mock_invite_123"
                 className="inline-block w-full rounded-md border border-dashed border-input bg-background py-2 px-4 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 Test Trainee Signup (Mock Token)

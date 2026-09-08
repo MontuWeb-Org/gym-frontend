@@ -1,15 +1,4 @@
-export enum UserRole {
-  ADMIN = "ADMIN",
-  TRAINER = "TRAINER",
-  TRAINEE = "TRAINEE",
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-}
+import { User } from "@/types/user.types";
 
 export interface RegisterInitPayload {
   name: string;
@@ -36,12 +25,38 @@ export interface RegisterCompleteResponse {
 }
 
 export interface LoginPayload {
-  identifier: string;
+  email: string;
   password: string;
+}
+
+export interface ForgotPasswordInitPayload {
+  email: string;
+}
+
+export interface ForgotPasswordInitResponse {
+  data: {
+    verificationToken: string;
+  };
+}
+
+export interface ForgotPasswordCompletePayload {
+  otp: string;
+  verificationToken: string;
+  newPassword: string;
 }
 
 export interface AuthResponse {
   data: {
     accessToken: string;
   };
+}
+
+export interface RefreshTokenResponse {
+  data: {
+    accessToken: string;
+  };
+
+}
+export interface GetCurrentUserResponse {
+  data: User;
 }

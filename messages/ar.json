@@ -80,14 +80,14 @@
       "description": "ضبط الملف الشخصي للمدرب وتفضيلات الحساب."
     }
   },
-  
+
   "Admin": {
     "title": "لوحة تحكم المسؤول",
     "description": "إدارة إعدادات المنصة والمستخدمين بسلاسة."
   },
   "Common": {
-  "title": "قريباً",
-  "description": "هذا القسم قيد التطوير حالياً وسيكون متاحاً قريباً."
+    "title": "قريباً",
+    "description": "هذا القسم قيد التطوير حالياً وسيكون متاحاً قريباً."
   },
   "Auth": {
     "trainerSignupTitle": "إنشاء حساب مدرب",
@@ -99,6 +99,7 @@
     "phoneNumberLabel": "رقم الهاتف",
     "emailLabel": "البريد الإلكتروني",
     "passwordLabel": "كلمة المرور",
+    "newPasswordLabel": "كلمة المرور الجديدة",
     "confirmPasswordLabel": "تأكيد كلمة المرور",
     "otpLabel": "رمز التحقق",
     "continueButton": "متابعة",
@@ -111,6 +112,13 @@
     "emailPatternError": "يرجى إدخال بريد إلكتروني صحيح.",
     "strongPasswordError": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل، وحرف كبير، وحرف صغير، ورقم، ورمز خاص.",
     "passwordMismatch": "كلمتا المرور غير متطابقتين.",
-    "otpPatternError": "يجب أن يتكون رمز التحقق من 6 أرقام."
+    "otpPatternError": "يجب أن يتكون رمز التحقق من 6 أرقام.",
+    "forgotPasswordTitle": "نسيت كلمة المرور",
+    "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني لتلقي رمز التحقق.",
+    "sendResetCodeButton": "إرسال رمز إعادة التعيين",
+    "resetPasswordTitle": "إعادة تعيين كلمة المرور",
+    "resetPasswordSubtitle": "أدخل الرمز المرسل إلى {email} واختر كلمة مرور جديدة.",
+    "resetPasswordButton": "إعادة تعيين كلمة المرور",
+    "backToLogin": "العودة لتسجيل الدخول"
   }
 }

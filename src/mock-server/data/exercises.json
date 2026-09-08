@@ -1,0 +1,100 @@
+[
+  {
+    "id": 1,
+    "name": "Bench Press",
+    "instructions": "Arcesso cuppedia ait vulnus desipio pariatur aegre tandem bellum velociter. Aufero adfectus demens maiores. Terga defessus error.",
+    "difficulty": "Intermediate",
+    "equipment": [
+      "Dumbbell"
+    ],
+    "illustrations": [
+      "https://picsum.photos/seed/RWngDp/2239/621"
+    ],
+    "createdAt": "2025-09-18T02:20:06.170Z",
+    "updatedAt": "2026-09-07T23:41:53.512Z"
+  },
+  {
+    "id": 2,
+    "name": "Squat",
+    "instructions": "Soluta acsi brevis callide spectaculum accusantium amicitia thesaurus. Solitudo capio alveus carcer. Umbra triduana crux sordeo bardus clarus vel abundans.",
+    "difficulty": "Beginner",
+    "equipment": [
+      "Barbell"
+    ],
+    "illustrations": [
+      "https://picsum.photos/seed/qTOlgnAg/107/726"
+    ],
+    "createdAt": "2026-04-24T15:29:41.418Z",
+    "updatedAt": "2026-09-08T05:46:34.841Z"
+  },
+  {
+    "id": 3,
+    "name": "Deadlift",
+    "instructions": "Debeo claustrum vinum tenax apud ustilo depono. Thesaurus currus acerbitas censura id recusandae causa apud truculenter vorax. Astrum certe accusamus vergo angulus nemo certus.",
+    "difficulty": "Intermediate",
+    "equipment": [
+      "Machine"
+    ],
+    "illustrations": [
+      "https://picsum.photos/seed/8TSBB/3319/826"
+    ],
+    "createdAt": "2026-05-09T13:40:17.988Z",
+    "updatedAt": "2026-09-08T00:09:33.987Z"
+  },
+  {
+    "id": 4,
+    "name": "Overhead Press",
+    "instructions": "Curatio crebro earum adipiscor aspernatur taceo agnitio pax cariosus creta. Constans super clibanus maxime demonstro. Video synagoga bestia addo celebrer pariatur admoneo derelinquo.",
+    "difficulty": "Intermediate",
+    "equipment": [
+      "Dumbbell"
+    ],
+    "illustrations": [
+      "https://picsum.photos/seed/JuGqf/3083/427"
+    ],
+    "createdAt": "2026-07-04T19:17:11.955Z",
+    "updatedAt": "2026-09-08T15:08:10.817Z"
+  },
+  {
+    "id": 5,
+    "name": "Pull-up",
+    "instructions": "Cernuus officia contra aliqua vero approbo virga decumbo. Id uterque synagoga timidus. Stultus ulciscor carus deporto bos votum vinco adflicto.",
+    "difficulty": "Advanced",
+    "equipment": [
+      "Bodyweight"
+    ],
+    "illustrations": [
+      "https://picsum.photos/seed/2HiVYWtRQj/723/2272"
+    ],
+    "createdAt": "2026-07-08T09:14:59.648Z",
+    "updatedAt": "2026-09-07T20:50:19.506Z"
+  },
+  {
+    "id": 6,
+    "name": "Barbell Row",
+    "instructions": "Calculus animi aestus subito conforto surgo aedificium. Fugit texo comis quidem valde. Candidus acidus usus acer utilis eveniet vigor.",
+    "difficulty": "Advanced",
+    "equipment": [
+      "Bodyweight"
+    ],
+    "illustrations": [
+      "https://picsum.photos/seed/tCSZLpq/1403/3068"
+    ],
+    "createdAt": "2026-06-05T01:10:16.810Z",
+    "updatedAt": "2026-09-08T01:40:52.190Z"
+  },
+  {
+    "id": 7,
+    "name": "Dumbbell Curl",
+    "instructions": "Conspergo cito clibanus. Adicio accommodo votum cursus. Spoliatio blanditiis virga terror alii cura.",
+    "difficulty": "Advanced",
+    "equipment": [
+      "Bodyweight"
+    ],
+    "illustrations": [
+      "https://picsum.photos/seed/ZeWEBv/1870/2454"
+    ],
+    "createdAt": "2025-12-02T00:37:05.035Z",
+    "updatedAt": "2026-09-08T00:11:13.929Z"
+  }
+]

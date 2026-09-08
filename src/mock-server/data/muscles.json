@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "commonName": "Pectoralis Major",
+    "bodyRegion": "Chest",
+    "diagramUrl": "https://picsum.photos/seed/CxTM9jfK2/1340/557",
+    "description": "Tempus utor congregatio trado amor tyrannus antiquus."
+  },
+  {
+    "id": 2,
+    "commonName": "Latissimus Dorsi",
+    "bodyRegion": "Back",
+    "diagramUrl": "https://picsum.photos/seed/eIIDH/1589/3189",
+    "description": "Caste coniuratio attonbitus ver nostrum cui deinde."
+  },
+  {
+    "id": 3,
+    "commonName": "Quadriceps",
+    "bodyRegion": "Legs",
+    "diagramUrl": "https://picsum.photos/seed/vB1SVzHV/3789/614",
+    "description": "Argumentum nemo pectus curriculum tabgo victus vespillo defendo."
+  },
+  {
+    "id": 4,
+    "commonName": "Biceps Brachii",
+    "bodyRegion": "Arms",
+    "diagramUrl": "https://picsum.photos/seed/7VRwAo3kN0/453/3939",
+    "description": "Cubicularis fuga verto coniuratio conor."
+  },
+  {
+    "id": 5,
+    "commonName": "Deltoids",
+    "bodyRegion": "Shoulders",
+    "diagramUrl": "https://picsum.photos/seed/s8aupU/2950/1809",
+    "description": "Nobis ratione abutor somnus atrocitas."
+  }
+]

@@ -22,7 +22,7 @@ export default function TrainerLayout({
     return {
       ...item,
       label: t.has(translationKey) ? t(translationKey) : item.label,
-      href: item.href === "" ? `/${locale}/trainer` : `/${locale}/trainer/${item.href}`,
+      href: item.href === "" ? "/trainer" : `/trainer/${item.href}`,
     };
   });
 

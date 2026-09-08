@@ -1,5 +1,4 @@
-export type UserRole = "admin" | "trainer" | "trainee";
-
+import { UserRole } from "@/types/user.types";
 export interface RouteConfig {
   id: string;
   path: string;
@@ -35,13 +34,19 @@ export const APP_ROUTES: RouteConfig[] = [
     titleKey: "signupTrainer",
     isPublic: true,
   },
+  {
+    id: "forgot-password",
+    path: "forgot-password", 
+    titleKey: "forgotPassword",
+    isPublic: true,
+  },
   // User/Trainee Dashboard Route
   {
     id: "trainee-dashboard",
     path: "trainee",
     titleKey: "dashboard",
     showInSidebar: true,
-    allowedRoles: ["trainee"],
+    allowedRoles: [UserRole.TRAINEE],
     iconName: "dashboard",
   },
   // Trainer Dashboard Route
@@ -50,7 +55,7 @@ export const APP_ROUTES: RouteConfig[] = [
     path: "trainer",
     titleKey: "trainer",
     showInSidebar: true,
-    allowedRoles: ["trainer"],
+    allowedRoles: [UserRole.TRAINER],
     iconName: "dashboard",
   },
   // Admin Dashboard Route
@@ -59,7 +64,7 @@ export const APP_ROUTES: RouteConfig[] = [
     path: "admin",
     titleKey: "admin",
     showInSidebar: true,
-    allowedRoles: ["admin"],
+    allowedRoles: [UserRole.ADMIN],
     iconName: "dashboard",
   },
 ];

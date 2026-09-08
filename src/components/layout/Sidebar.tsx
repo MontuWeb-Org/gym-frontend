@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight, Menu, X, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import type { SidebarItem } from "@/data/sidebar.types";
 export interface SidebarProps {
   title?: React.ReactNode;
   items: SidebarItem[];
+  baseUrl?: string; 
   user?: {
     name: string;
     role: string;
@@ -23,6 +24,7 @@ export interface SidebarProps {
 export function Sidebar({
   title,
   items = [],
+  baseUrl = "",
   user,
   activeTab,
   activePath = "",
@@ -95,10 +97,12 @@ export function Sidebar({
 
           <nav className="space-y-1.5">
             {items.map((item) => {
+              const fullHref = item.href ? `${baseUrl}/${item.href}`.replace(/\/+/g, '/') : baseUrl;
+              
               const isActive = activeTab
                 ? activeTab === item.id
                 : activePath
-                  ? activePath === item.href || activePath.startsWith(`${item.href}/`)
+                  ? activePath === fullHref || activePath.startsWith(`${fullHref}/`)
                   : false;
 
               return (

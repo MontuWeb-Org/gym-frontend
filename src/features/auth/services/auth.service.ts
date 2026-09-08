@@ -6,7 +6,12 @@ import {
   RegisterCompleteResponse,
   LoginPayload,
   AuthResponse,
+  RefreshTokenResponse,
+  ForgotPasswordInitPayload,
+  ForgotPasswordInitResponse,
+  ForgotPasswordCompletePayload,
 } from "../types/auth.types";
+import { User } from "@/types/user.types";
 
 export const authService = {
   async registerInit(payload: RegisterInitPayload): Promise<RegisterInitResponse> {
@@ -24,7 +29,29 @@ export const authService = {
     return response.data;
   },
 
+  async refreshToken(): Promise<RefreshTokenResponse> {
+    const response = await apiClient.post("/auth/refresh");
+    return response.data;
+  },
+
+  async forgotPasswordInit(payload: ForgotPasswordInitPayload): Promise<ForgotPasswordInitResponse> {
+    const response = await apiClient.post("/auth/forgot/init", payload);
+    return response.data;
+  },
+
+  async forgotPasswordComplete(payload: ForgotPasswordCompletePayload): Promise<AuthResponse> {
+    const response = await apiClient.post("/auth/forgot/complete", payload);
+    return response.data;
+  },
+
   async logout(): Promise<void> {
     await apiClient.post("/auth/logout");
+  },
+
+  async getCurrentUser(token?: string): Promise<{ data: User }> {
+    const response = await apiClient.get<{ data: User }>("/users/me", {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    return response.data;
   },
 };
