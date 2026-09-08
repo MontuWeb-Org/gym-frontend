@@ -109,4 +109,6 @@
 //   );
 // }
 
-export default function TraineeSignupView() { }
+export default function TraineeSignupView() { 
+    return null;
+}
