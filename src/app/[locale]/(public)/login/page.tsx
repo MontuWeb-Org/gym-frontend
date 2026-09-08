@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAppDispatch } from "@/store/hooks";
-import { setUser } from "@/store/slices/authSlice";
-import { type UserRole } from "@/data/routes";
+import { setUser } from "@/features/auth/store/auth.slice";
 import AuthForm from "@/features/auth/components/AuthForm";
+import { UserRole } from "@/features/auth";
 
 export default function LoginPage() {
   const t = useTranslations("Login");
@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("alex@example.com");
   const [name, setName] = useState("Alex Johnson");
-  const [role, setRole] = useState<UserRole>("admin");
+  const [role, setRole] = useState<UserRole>(UserRole.TRAINEE);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +24,7 @@ export default function LoginPage() {
         id: "usr_" + Date.now(),
         name: name || "User",
         email: email || "user@example.com",
-        role,
+        role: role || UserRole.TRAINEE,
       })
     );
 
@@ -43,22 +43,16 @@ export default function LoginPage() {
             name: "name",
             label: t("nameLabel"),
             type: "text",
-            value: name,
-            onChange: (e) => setName(e.target.value),
           },
           {
             name: "email",
             label: t("emailLabel"),
             type: "email",
-            value: email,
-            onChange: (e) => setEmail(e.target.value),
           },
           {
             name: "role",
             label: t("roleLabel"),
             type: "select",
-            value: role,
-            onChange: (e) => setRole(e.target.value as UserRole),
             options: [
               { label: t("roles.admin"), value: "admin" },
               { label: t("roles.trainer"), value: "trainer" },
