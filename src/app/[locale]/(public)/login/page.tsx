@@ -38,6 +38,16 @@ export default function LoginPage() {
         subtitle={t("description")}
         submitLabel={t("submitButton")}
         onSubmit={handleSubmit}
+        onChange={(e) => {
+          if (e.target.name === "name") {
+            setName(e.target.value);
+          } else if (e.target.name === "email") {
+            setEmail(e.target.value);
+          } else if (e.target.name === "role") {
+            setRole(e.target.value as UserRole);
+          }
+        }}
+        values={{ name, email, role }}
         fields={[
           {
             name: "name",
