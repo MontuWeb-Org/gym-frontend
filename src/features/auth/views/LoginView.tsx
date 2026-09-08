@@ -7,6 +7,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { setUser, loginThunk } from "@/features/auth/store/auth.slice";
 import { UserRole } from "@/features/auth/types/auth.types";
 import AuthForm from "@/features/auth/components/AuthForm";
+import { hashPassword } from "@/lib/crypto";
 
 export default function LoginView() {
   const t = useTranslations("Login");
@@ -24,7 +25,13 @@ export default function LoginView() {
     setIsLoading(true);
 
     try {
-      const resultAction = await dispatch(loginThunk({ identifier, password }));
+      // 1. Hash the password using Web Crypto SHA-256 before sending over the wire
+      const hashedPassword = await hashPassword(password);
+
+      // 2. Dispatch loginThunk with the hashed string
+      const resultAction = await dispatch(
+        loginThunk({ email: identifier, password: hashedPassword })
+      );
       
       if (loginThunk.fulfilled.match(resultAction)) {
         const responseData = resultAction.payload as any;
@@ -44,10 +51,16 @@ export default function LoginView() {
         
         dispatch(setUser(user));
 
-        const roleRoute = user.role.toLowerCase() === "coach" ? "trainer" : user.role.toLowerCase();
+        const roleRoute =
+          user.role.toLowerCase() === "coach"
+            ? "trainer"
+            : user.role.toLowerCase();
         router.push(`/${roleRoute}`);
       } else {
-        setError((resultAction.payload as string) || "Invalid credentials. Please try again.");
+        setError(
+          (resultAction.payload as string) ||
+            "Invalid credentials. Please try again."
+        );
       }
     } catch (err: any) {
       setError(err?.message || "An unexpected error occurred.");
