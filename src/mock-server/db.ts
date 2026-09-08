@@ -1,13 +1,19 @@
-import { generateUsersAndProfiles } from "./generators/users.generator";
+import usersData from "./data/users.json";
+import trainersData from "./data/trainers.json";
+import traineesData from "./data/trainees.json";
 
-const initialData = generateUsersAndProfiles(4, 15);
+export enum MockUserRole {
+  ADMIN = "ADMIN",
+  TRAINER = "TRAINER",
+  TRAINEE = "TRAINEE",
+}
 
 export interface MockUser {
   id: number;
   phoneNumber: string;
   email: string;
   name: string;
-  role: "TRAINER" | "TRAINEE" | "ADMIN";
+  role: MockUserRole;
   password: string;
   activationStatus: "ACTIVATED" | "PENDING";
   createdAt: string;
@@ -15,10 +21,9 @@ export interface MockUser {
 }
 
 export const mockDb = {
-  users: initialData.users as MockUser[],
-  trainers: initialData.trainers,
-  trainees: initialData.trainees,
-  // Stores pending registration data linked to creationToken
+  users: usersData as MockUser[],
+  trainers: trainersData,
+  trainees: traineesData,
   pendingRegistrations: new Map<
     string,
     {
@@ -28,4 +33,5 @@ export const mockDb = {
       password: string;
     }
   >(),
+  pendingPasswordResets: new Map<string, { email: string }>(),
 };
