@@ -99,6 +99,7 @@
     "phoneNumberLabel": "Phone Number",
     "emailLabel": "Email",
     "passwordLabel": "Password",
+    "newPasswordLabel": "New Password",
     "confirmPasswordLabel": "Confirm Password",
     "otpLabel": "Verification Code",
     "continueButton": "Continue",
@@ -111,6 +112,13 @@
     "emailPatternError": "Please enter a valid email address.",
     "strongPasswordError": "Password must be at least 8 characters, with 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
     "passwordMismatch": "Passwords do not match.",
-    "otpPatternError": "OTP must be a 6-digit code."
+    "otpPatternError": "OTP must be a 6-digit code.",
+    "forgotPasswordTitle": "Forgot Password",
+    "forgotPasswordSubtitle": "Enter your email address to receive a verification code.",
+    "sendResetCodeButton": "Send Reset Code",
+    "resetPasswordTitle": "Reset Password",
+    "resetPasswordSubtitle": "Enter the code sent to {email} and choose a new password.",
+    "resetPasswordButton": "Reset Password",
+    "backToLogin": "Back to Login"
   }
 }
