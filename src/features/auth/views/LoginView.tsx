@@ -9,6 +9,20 @@ import { UserRole } from "@/features/auth/types/auth.types";
 import AuthForm from "@/features/auth/components/AuthForm";
 import { hashPassword } from "@/lib/crypto";
 
+type LoginUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+};
+
+type LoginResponse = {
+  user?: LoginUser;
+  data?: {
+    user?: LoginUser;
+  };
+};
+
 export default function LoginView() {
   const t = useTranslations("Login");
   const dispatch = useAppDispatch();
@@ -32,10 +46,10 @@ export default function LoginView() {
       const resultAction = await dispatch(
         loginThunk({ email: identifier, password: hashedPassword })
       );
-      
+
       if (loginThunk.fulfilled.match(resultAction)) {
-        const responseData = resultAction.payload as any;
-        
+        const responseData = resultAction.payload as LoginResponse;
+
         const rawName = identifier.split("@")[0] || "User";
         const formattedName = rawName
           .split(/[._-]/)
@@ -48,7 +62,7 @@ export default function LoginView() {
           email: identifier,
           role: identifier.includes("trainee") ? UserRole.TRAINEE : UserRole.TRAINER,
         };
-        
+
         dispatch(setUser(user));
 
         const roleRoute =
@@ -62,8 +76,8 @@ export default function LoginView() {
             "Invalid credentials. Please try again."
         );
       }
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }

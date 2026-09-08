@@ -1,19 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/features/auth/store/auth.slice";
 import AuthForm from "@/features/auth/components/AuthForm";
 import { UserRole } from "@/features/auth/types/auth.types";
-import { hashPassword } from "@/lib/crypto";
 
 export default function TraineeSignupView() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token") || "mock_token";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,7 +48,6 @@ export default function TraineeSignupView() {
     setIsLoading(true);
 
     try {
-      const hashedPassword = await hashPassword(password);
       await new Promise((resolve) => setTimeout(resolve, 800));
 
       const traineeUser = {
@@ -64,7 +59,7 @@ export default function TraineeSignupView() {
 
       dispatch(setUser(traineeUser));
       router.push("/trainee");
-    } catch (err: any) {
+    } catch {
       setError("Account activation failed. Link may be expired.");
     } finally {
       setIsLoading(false);

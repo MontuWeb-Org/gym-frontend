@@ -58,7 +58,7 @@ export const registerCompleteThunk = createAsyncThunk(
         tokenStorage.setAccessToken(res.data.accessToken);
       }
       return res.data;
-    } catch (err: unknown) {
+    } catch {
       return rejectWithValue("OTP verification failed");
     }
   }
@@ -74,6 +74,7 @@ export const loginThunk = createAsyncThunk(
       }
       return res.data;
     } catch (err: unknown) {
+      void err;
       return rejectWithValue("Login failed");
     }
   }

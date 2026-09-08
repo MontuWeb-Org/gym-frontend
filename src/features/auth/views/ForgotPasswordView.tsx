@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import AuthForm from "@/features/auth/components/AuthForm";
 
 export default function ForgotPasswordView() {
-  const t = useTranslations("Login"); // or your preferred namespace
   const [identifier, setIdentifier] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -21,7 +19,7 @@ export default function ForgotPasswordView() {
       // Simulate API call with a "blind" success state to prevent email enumeration
       await new Promise((resolve) => setTimeout(resolve, 800));
       setIsSubmitted(true);
-    } catch (err: any) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
