@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { logout } from "@/store/slices/authSlice";
+import { logout } from "@/features/auth/store/auth.slice";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 

@@ -15,7 +15,7 @@
     "roleLabel": "اختر الدور (للاختبار)",
     "roles": {
       "admin": "مدير",
-      "coach": "مدرب",
+      "trainer": "مدرب",
       "trainee": "متدرب"
     },
     "submitButton": "تسجيل الدخول",
@@ -33,21 +33,21 @@
     "programs": "البرامج",
     "templates": "النماذج",
     "billing": "الفواتير",
-    "coach": "لوحة المدرب",
+    "trainer": "لوحة المدرب",
     "admin": "لوحة الإدارة",
     "profile": "الملف الشخصي",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج",
     "language": "اللغة",
     "menu": "القائمة",
-    "coachHub": "بوابة المدرب",
+    "trainerHub": "بوابة المدرب",
     "traineeHub": "بوابة المتدرب",
     "adminHub": "بوابة الإدارة",
     "workouts": "التمارين",
     "members": "الأعضاء",
     "classes": "الصفوف"
   },
-  "Coach": {
+  "Trainer": {
     "panelTitle": "لوحة المدرب",
     "panelDescription": "إدارة المتدربين والتمارين.",
     "dashboard": {
@@ -88,6 +88,29 @@
   "Common": {
   "title": "قريباً",
   "description": "هذا القسم قيد التطوير حالياً وسيكون متاحاً قريباً."
-}
-
+  },
+  "Auth": {
+    "trainerSignupTitle": "إنشاء حساب مدرب",
+    "trainerSignupSubtitle": "أدخل بياناتك لإنشاء حساب المدرب الخاص بك.",
+    "verifyOtpTitle": "التحقق من رمز OTP",
+    "verifyOtpSubtitle": "أدخل رمز التحقق المرسل إلى {email}",
+    "fullNameLabel": "الاسم الكامل",
+    "fullNamePlaceholder": "كريم أحمد",
+    "phoneNumberLabel": "رقم الهاتف",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "otpLabel": "رمز التحقق",
+    "continueButton": "متابعة",
+    "completeSignupButton": "إتمام التسجيل",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟ تسجيل الدخول",
+    "backToDetails": "العودة للبيانات",
+    "fieldRequired": "حقل {field} مطلوب.",
+    "invalidFormat": "صيغة غير صحيحة.",
+    "phonePatternError": "يرجى إدخال رقم هاتف دولي صحيح.",
+    "emailPatternError": "يرجى إدخال بريد إلكتروني صحيح.",
+    "strongPasswordError": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل، وحرف كبير، وحرف صغير، ورقم، ورمز خاص.",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+    "otpPatternError": "يجب أن يتكون رمز التحقق من 6 أرقام."
+  }
 }

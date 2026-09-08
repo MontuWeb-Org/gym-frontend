@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "coach" | "trainee";
+export type UserRole = "admin" | "trainer" | "trainee";
 
 export interface RouteConfig {
   id: string;
@@ -30,9 +30,9 @@ export const APP_ROUTES: RouteConfig[] = [
     iconName: "auth",
   },
   {
-    id: "signup-coach",
-    path: "auth/signup/coach",
-    titleKey: "signupCoach",
+    id: "signup-trainer",
+    path: "auth/signup/trainer",
+    titleKey: "signupTrainer",
     isPublic: true,
   },
   // User/Trainee Dashboard Route
@@ -44,13 +44,13 @@ export const APP_ROUTES: RouteConfig[] = [
     allowedRoles: ["trainee"],
     iconName: "dashboard",
   },
-  // Coach Dashboard Route
+  // Trainer Dashboard Route
   {
-    id: "coach-dashboard",
-    path: "coach",
-    titleKey: "coach",
+    id: "trainer-dashboard",
+    path: "trainer",
+    titleKey: "trainer",
     showInSidebar: true,
-    allowedRoles: ["coach"],
+    allowedRoles: ["trainer"],
     iconName: "dashboard",
   },
   // Admin Dashboard Route

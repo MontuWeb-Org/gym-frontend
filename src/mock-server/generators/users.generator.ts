@@ -8,7 +8,7 @@ export function generateUsersAndProfiles(trainerCount = 4, traineeCount = 15) {
     phoneNumber: string;
     email: string;
     name: string;
-    role: 'TRAINER' | 'TRAINEE';
+    role: 'TRAINER' | 'TRAINEE' | 'ADMIN';
     passwordHash: string;
     activationStatus: 'ACTIVATED' | 'PENDING';
     createdAt: string;
@@ -43,7 +43,7 @@ export function generateUsersAndProfiles(trainerCount = 4, traineeCount = 15) {
     phoneNumber: '+10000000000',
     email: 'admin@gym.com',
     name: 'Admin Trainer',
-    role: 'TRAINER' as const,
+    role: 'ADMIN' as const,
     passwordHash: 'hashed_admin_pass',
     activationStatus: 'ACTIVATED' as const,
     createdAt: faker.date.past().toISOString(),
@@ -53,7 +53,7 @@ export function generateUsersAndProfiles(trainerCount = 4, traineeCount = 15) {
   const adminTrainer = {
     userId: adminUser.id,
     experience: '10+ Years (Admin)',
-    bio: 'Head Coach and System Administrator',
+    bio: 'Head Trainer and System Administrator',
     createdAt: adminUser.createdAt,
     updatedAt: adminUser.updatedAt,
   };

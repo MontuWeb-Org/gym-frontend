@@ -14,7 +14,7 @@ export interface ActivityItem {
   time: string;
 }
 
-export const COACH_STATS: StatItem[] = [
+export const TRAINER_STATS: StatItem[] = [
   {
     id: "trainees",
     label: "Active Trainees",
@@ -41,7 +41,7 @@ export const COACH_STATS: StatItem[] = [
   },
 ];
 
-export const COACH_ACTIVITIES: ActivityItem[] = [
+export const TRAINER_ACTIVITIES: ActivityItem[] = [
   {
     id: "1",
     description: "John Doe completed Upper Body Workout A",

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import AuthForm from "@/components/auth/AuthForm";
+import AuthForm from "@/features/auth/components/AuthForm";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -25,6 +25,8 @@ export default function ForgotPasswordPage() {
             e.preventDefault();
             router.push("/login");
           }}
+          onChange={(e) => setEmail(e.target.value)}
+          values={{ email }}
           fields={[]}
           footer={
             <Link href="/login" className="text-xs text-muted-foreground hover:text-foreground underline">
@@ -43,13 +45,13 @@ export default function ForgotPasswordPage() {
         subtitle="Enter the email on your account and we'll send a reset link."
         submitLabel="Send Reset Link"
         onSubmit={handleSubmit}
+        onChange={(e) => setEmail(e.target.value)}
+        values={{ email }}
         fields={[
           {
             name: "email",
             label: "Email",
             type: "email",
-            value: email,
-            onChange: (e) => setEmail(e.target.value),
             placeholder: "alex@example.com",
           },
         ]}

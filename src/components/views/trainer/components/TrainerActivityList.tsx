@@ -1,12 +1,15 @@
-// src/components/views/coach/components/CoachActivityList.tsx
-import type { ActivityItem } from "@/data/mock/coachDashboard.data";
+interface ActivityItem {
+  id: string | number;
+  description: string;
+  time: string;
+}
 
-interface CoachActivityListProps {
+interface TrainerActivityListProps {
   activities?: ActivityItem[];
   title?: string;
 }
 
-export function CoachActivityList({ activities = [], title = "Recent Trainee Activity" }: CoachActivityListProps) {
+export function TrainerActivityList({ activities = [], title = "Recent Trainee Activity" }: TrainerActivityListProps) {
   return (
     <div className="p-6 rounded-xl border border-border bg-card shadow-sm space-y-4">
       <h3 className="text-lg font-semibold">{title}</h3>

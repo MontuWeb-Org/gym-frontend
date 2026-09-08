@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { COACH_SIDEBAR_DATA } from "@/data/sidebars/coachSidebar.data";
+import { TRAINER_SIDEBAR_DATA } from "@/data/sidebars/trainerSidebar.data";
 import type { SidebarItem } from "@/data/sidebar.types";
 
-export default function CoachLayout({
+export default function TrainerLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -14,15 +14,15 @@ export default function CoachLayout({
   const t = useTranslations("Nav");
   const locale = useLocale();
   const [activeTab, setActiveTab] = useState<string>(
-    COACH_SIDEBAR_DATA[0]?.id ?? "dashboard"
+    TRAINER_SIDEBAR_DATA[0]?.id ?? "dashboard"
   );
 
-  const localizedSidebarItems = COACH_SIDEBAR_DATA.map((item) => {
+  const localizedSidebarItems = TRAINER_SIDEBAR_DATA.map((item) => {
     const translationKey = item.id as Parameters<typeof t>[0];
     return {
       ...item,
       label: t.has(translationKey) ? t(translationKey) : item.label,
-      href: item.href === "" ? `/${locale}/coach` : `/${locale}/coach/${item.href}`,
+      href: item.href === "" ? `/${locale}/trainer` : `/${locale}/trainer/${item.href}`,
     };
   });
 
@@ -30,11 +30,11 @@ export default function CoachLayout({
     setActiveTab(item.id);
   };
 
-  const activeItem = COACH_SIDEBAR_DATA.find((item) => item.id === activeTab);
+  const activeItem = TRAINER_SIDEBAR_DATA.find((item) => item.id === activeTab);
   const ActiveView = activeItem?.component;
 
   const activeTranslationKey = (activeItem?.id ?? "") as Parameters<typeof t>[0];
-  const coachHubKey = "coachHub" as Parameters<typeof t>[0];
+  const trainerHubKey = "trainerHub" as Parameters<typeof t>[0];
 
   const activeLabel = activeItem 
     ? (t.has(activeTranslationKey) ? t(activeTranslationKey) : activeItem.label) 
@@ -43,7 +43,7 @@ export default function CoachLayout({
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <Sidebar
-        title={t.has(coachHubKey) ? t(coachHubKey) : "Coach Hub"}
+        title={t.has(trainerHubKey) ? t(trainerHubKey) : "Trainer Hub"}
         items={localizedSidebarItems}
         activeTab={activeTab}
         onItemClick={handleItemClick}
@@ -57,7 +57,7 @@ export default function CoachLayout({
           <p className="text-sm text-muted-foreground">
             {locale === "ar"
               ? `إدارة لوحة ${activeLabel} الخاصة بك بسلاسة.`
-              : `Manage your coach ${String(activeLabel).toLowerCase()} seamlessly.`}
+              : `Manage your trainer ${String(activeLabel).toLowerCase()} seamlessly.`}
           </p>
         </header>
 
