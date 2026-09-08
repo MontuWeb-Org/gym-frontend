@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { authService } from "../services/auth.service";
 import { User, RegisterInitPayload, RegisterCompletePayload, LoginPayload } from "../types/auth.types";
+import { tokenStorage } from "@/lib/storage";
 
 interface AuthState {
   user: User | null;
@@ -53,12 +54,12 @@ export const registerCompleteThunk = createAsyncThunk(
   async (payload: RegisterCompletePayload, { rejectWithValue }) => {
     try {
       const res = await authService.registerComplete(payload);
-      if (typeof window !== "undefined" && res.data.accessToken) {
-        localStorage.setItem("accessToken", res.data.accessToken);
+      if (res.data.accessToken) {
+        tokenStorage.setAccessToken(res.data.accessToken);
       }
       return res.data;
     } catch (err: unknown) {
-      return rejectWithValue(getErrorMessage(err) || "OTP verification failed");
+      return rejectWithValue("OTP verification failed");
     }
   }
 );
@@ -68,12 +69,12 @@ export const loginThunk = createAsyncThunk(
   async (payload: LoginPayload, { rejectWithValue }) => {
     try {
       const res = await authService.login(payload);
-      if (typeof window !== "undefined" && res.data.accessToken) {
-        localStorage.setItem("accessToken", res.data.accessToken);
+      if (res.data.accessToken) {
+        tokenStorage.setAccessToken(res.data.accessToken);
       }
       return res.data;
     } catch (err: unknown) {
-      return rejectWithValue(getErrorMessage(err) || "Login failed");
+      return rejectWithValue("Login failed");
     }
   }
 );
@@ -82,10 +83,7 @@ export const logoutThunk = createAsyncThunk("auth/logout", async () => {
   try {
     await authService.logout();
   } finally {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("gym_auth_user");
-    }
+    tokenStorage.clearTokens();
   }
 });
 

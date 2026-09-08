@@ -6,6 +6,7 @@ import {
   RegisterCompleteResponse,
   LoginPayload,
   AuthResponse,
+  RefreshTokenResponse,
 } from "../types/auth.types";
 
 export const authService = {
@@ -21,6 +22,11 @@ export const authService = {
 
   async login(payload: LoginPayload): Promise<AuthResponse> {
     const response = await apiClient.post("/auth/login", payload);
+    return response.data;
+  },
+
+  async refreshToken(): Promise<RefreshTokenResponse> {
+    const response = await apiClient.post("/auth/refresh");
     return response.data;
   },
 

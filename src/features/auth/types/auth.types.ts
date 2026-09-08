@@ -36,11 +36,17 @@ export interface RegisterCompleteResponse {
 }
 
 export interface LoginPayload {
-  identifier: string;
+  email: string;
   password: string;
 }
 
 export interface AuthResponse {
+  data: {
+    accessToken: string;
+  };
+}
+
+export interface RefreshTokenResponse {
   data: {
     accessToken: string;
   };
