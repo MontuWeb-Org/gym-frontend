@@ -4,24 +4,9 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAppDispatch } from "@/store/hooks";
-import { setUser, loginThunk } from "@/features/auth/store/auth.slice";
-import { UserRole } from "@/features/auth/types/auth.types";
+import { loginThunk } from "@/features/auth/store/auth.slice";
 import AuthForm from "@/features/auth/components/AuthForm";
 import { hashPassword } from "@/lib/crypto";
-
-type LoginUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-};
-
-type LoginResponse = {
-  user?: LoginUser;
-  data?: {
-    user?: LoginUser;
-  };
-};
 
 export default function LoginView() {
   const t = useTranslations("Login");
@@ -39,36 +24,19 @@ export default function LoginView() {
     setIsLoading(true);
 
     try {
-      // 1. Hash the password using Web Crypto SHA-256 before sending over the wire
+      // 1. Hash password via Web Crypto SHA-256
       const hashedPassword = await hashPassword(password);
 
-      // 2. Dispatch loginThunk with the hashed string
+      // 2. Dispatch loginThunk (fetches token + user profile automatically)
       const resultAction = await dispatch(
         loginThunk({ email: identifier, password: hashedPassword })
       );
 
       if (loginThunk.fulfilled.match(resultAction)) {
-        const responseData = resultAction.payload as LoginResponse;
+        const { user } = resultAction.payload;
 
-        const rawName = identifier.split("@")[0] || "User";
-        const formattedName = rawName
-          .split(/[._-]/)
-          .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join(" ");
+      const roleRoute = String(user.role).toLowerCase();
 
-        const user = responseData?.user || responseData?.data?.user || {
-          id: "usr_" + Date.now(),
-          name: formattedName,
-          email: identifier,
-          role: identifier.includes("trainee") ? UserRole.TRAINEE : UserRole.TRAINER,
-        };
-
-        dispatch(setUser(user));
-
-        const roleRoute =
-          user.role.toLowerCase() === "coach"
-            ? "trainer"
-            : user.role.toLowerCase();
         router.push(`/${roleRoute}`);
       } else {
         setError(

@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import TrainerSignupForm, { TrainerSignupFormValues } from "../components/TrainerSignupForm";
-import { registerInitThunk, registerCompleteThunk, setUser } from "../store/auth.slice";
-import { UserRole } from "../types/auth.types";
+import { registerInitThunk, registerCompleteThunk } from "../store/auth.slice";
 import { hashPassword } from "@/lib/crypto";
 
 export default function TrainerSignupView() {
@@ -55,15 +54,9 @@ export default function TrainerSignupView() {
     );
 
     if (registerCompleteThunk.fulfilled.match(result)) {
-      dispatch(
-        setUser({
-          id: "1",
-          name: formData.name,
-          email: formData.email,
-          role: UserRole.TRAINER,
-        })
-      );
-      router.push("/trainer");
+      const { user } = result.payload;
+      const roleRoute = String(user.role).toLowerCase();
+      router.push(`/${roleRoute}`);
     }
   };
 

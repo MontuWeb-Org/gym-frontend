@@ -1,83 +1,88 @@
 "use client";
 
 import { useState } from "react";
-import { Link } from "@/i18n/navigation";
-import AuthForm from "@/features/auth/components/AuthForm";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import ForgotPasswordForm, { ForgotPasswordFormValues } from "../components/ForgotPasswordForm";
+import {
+  forgotPasswordInitThunk,
+  forgotPasswordCompleteThunk,
+} from "../store/auth.slice";
+import { hashPassword } from "@/lib/crypto";
 
 export default function ForgotPasswordView() {
-  const [identifier, setIdentifier] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
+  const { isLoading, error: globalError, verificationToken: reduxToken } = useAppSelector(
+    (state) => state.auth
+  );
 
-    try {
-      // Simulate API call with a "blind" success state to prevent email enumeration
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      setIsSubmitted(true);
-    } catch {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
+  const tokenFromUrl = searchParams.get("token") || "";
+  const emailFromUrl = searchParams.get("email") || "";
+
+  // Derive initial step directly during state initialization
+  const [step, setStep] = useState<1 | 2>(tokenFromUrl ? 2 : 1);
+
+  const [formData, setFormData] = useState<ForgotPasswordFormValues>({
+    email: emailFromUrl,
+    otp: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleInit = async () => {
+    const result = await dispatch(
+      forgotPasswordInitThunk({ email: formData.email })
+    );
+
+    if (forgotPasswordInitThunk.fulfilled.match(result)) {
+      setStep(2);
     }
   };
 
-  if (isSubmitted) {
-    return (
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-6">
-        <div className="w-full max-w-md rounded-2xl border bg-card p-6 text-center shadow-sm">
-          <h2 className="text-xl font-bold mb-2">Check your email</h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            If an account exists for {identifier}, we have sent password reset instructions.
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center text-sm font-medium text-primary hover:underline"
-          >
-            &larr; Back to Sign In
-          </Link>
-        </div>
-      </main>
+  const handleComplete = async () => {
+    const activeToken = tokenFromUrl || reduxToken;
+    if (!activeToken) return;
+
+    const hashedPassword = await hashPassword(formData.newPassword);
+
+    const result = await dispatch(
+      forgotPasswordCompleteThunk({
+        otp: formData.otp,
+        verificationToken: activeToken,
+        newPassword: hashedPassword,
+      })
     );
-  }
+
+    if (forgotPasswordCompleteThunk.fulfilled.match(result)) {
+      const { user } = result.payload;
+      const roleRoute = String(user.role).toLowerCase();
+      router.push(`/${roleRoute}`);
+    }
+  };
+
+  const handleBackToStep1 = () => {
+    router.push("/forgot-password");
+    setStep(1);
+  };
 
   return (
-    <main>
-      <AuthForm
-        title="Forgot Password"
-        subtitle="Enter your email to receive reset instructions."
-        submitLabel="Send Reset Instructions"
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-        error={error}
-        values={{ identifier }}
-        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-          setIdentifier(e.target.value);
-        }}
-        fields={[
-          {
-            name: "identifier",
-            label: "Email Address",
-            type: "text",
-            placeholder: "alex@example.com",
-            required: true,
-          },
-        ]}
-        footer={
-          <div className="text-center">
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline"
-            >
-              &larr; Back to Sign In
-            </Link>
-          </div>
-        }
-      />
-    </main>
+    <ForgotPasswordForm
+      step={step}
+      values={formData}
+      isLoading={isLoading}
+      globalError={globalError}
+      onChange={handleChange}
+      onSubmitInit={handleInit}
+      onSubmitComplete={handleComplete}
+      onBackToStep1={handleBackToStep1}
+    />
   );
 }

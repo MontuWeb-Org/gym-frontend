@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logout } from "@/features/auth/store/auth.slice";
-import { Link } from "@/i18n/navigation";
+import { authService } from "@/features/auth/services/auth.service";
 import { Button } from "@/components/ui/button";
+import { tokenStorage } from "@/lib/storage";
 
 interface NavbarProps {
   brand?: {
@@ -25,18 +26,28 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const safeBrand = brand ?? { title: t("brandName"), href: "/" };
   const safeLinks = publicLinks ?? [];
 
-  const handleLogout = () => {
-    dispatch(logout());
-    router.push("/");
-    router.refresh();
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout request failed, cleaning local state anyway:", error);
+    } finally {
+      tokenStorage.clearTokens();
+      dispatch(logout());
+      setMobileMenuOpen(false);
+      setIsLoggingOut(false);
+      router.push("/login");
+    }
   };
 
-  // Helper to normalize role text to Title Case (e.g., "TRAINER" or "trainer" -> "Trainer")
   const formatRole = (role?: string) => {
     if (!role) return "";
     return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
@@ -52,9 +63,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-6">
-          {safeLinks.map((link, index) => (
+          {safeLinks.map((link) => (
             <Link 
-              key={`${link.href}-${index}`} 
+              key={`desktop-${link.href}`} 
               href={link.href} 
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -77,8 +88,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
                 variant="outline" 
                 size="sm" 
                 onClick={handleLogout}
+                disabled={isLoggingOut}
               >
-                {t("logout")}
+                {isLoggingOut ? "..." : t("logout")}
               </Button>
             </div>
           ) : (
@@ -110,9 +122,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden mt-4 pt-4 border-t border-border flex flex-col gap-4 pb-2">
-          {safeLinks.map((link, index) => (
+          {safeLinks.map((link) => (
             <Link 
-              key={`mobile-${link.href}-${index}`} 
+              key={`mobile-${link.href}`} 
               href={link.href} 
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm text-muted-foreground hover:text-foreground"
@@ -128,12 +140,10 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => {
-                    handleLogout();
-                    setMobileMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
                 >
-                  {t("logout")}
+                  {isLoggingOut ? "..." : t("logout")}
                 </Button>
               </div>
             ) : (
