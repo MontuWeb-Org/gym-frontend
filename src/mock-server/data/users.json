@@ -1,0 +1,222 @@
+[
+  {
+    "id": 1,
+    "phoneNumber": "+10000000000",
+    "email": "admin@gym.com",
+    "name": "Admin Trainer",
+    "role": "ADMIN",
+    "password": "3eb3fe66b31e3b4d10fa70b5cad49c7112294af6ae4e476a1c405155d45aa121",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2026-01-23T12:55:18.890Z",
+    "updatedAt": "2026-09-08T18:46:02.843Z"
+  },
+  {
+    "id": 2,
+    "phoneNumber": "(611) 286-7098 x21135",
+    "email": "Breana_Klocko@hotmail.com",
+    "name": "Koby Bergnaum DVM",
+    "role": "TRAINER",
+    "password": "3b60774b88b9ea67c9bac5eee365652a1cc33585c9e924b0aa36959b3c38d007",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2026-06-30T21:30:40.041Z",
+    "updatedAt": "2026-09-08T03:15:40.404Z"
+  },
+  {
+    "id": 3,
+    "phoneNumber": "735.619.7985",
+    "email": "Ally_Goldner35@yahoo.com",
+    "name": "Mr. Rashawn Yost",
+    "role": "TRAINER",
+    "password": "3b60774b88b9ea67c9bac5eee365652a1cc33585c9e924b0aa36959b3c38d007",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2025-09-10T20:19:27.560Z",
+    "updatedAt": "2026-09-08T15:31:17.132Z"
+  },
+  {
+    "id": 4,
+    "phoneNumber": "(403) 476-8417 x757",
+    "email": "Alejandro50@hotmail.com",
+    "name": "Myrtle Blick",
+    "role": "TRAINER",
+    "password": "3b60774b88b9ea67c9bac5eee365652a1cc33585c9e924b0aa36959b3c38d007",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2025-11-06T16:14:56.433Z",
+    "updatedAt": "2026-09-08T18:15:47.028Z"
+  },
+  {
+    "id": 5,
+    "phoneNumber": "1-931-348-8054",
+    "email": "Tressie97@gmail.com",
+    "name": "Elvie Bashirian",
+    "role": "TRAINER",
+    "password": "3b60774b88b9ea67c9bac5eee365652a1cc33585c9e924b0aa36959b3c38d007",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2026-03-11T07:25:07.254Z",
+    "updatedAt": "2026-09-07T21:11:09.792Z"
+  },
+  {
+    "id": 6,
+    "phoneNumber": "1-373-765-0831",
+    "email": "Ahmad.OConnell@gmail.com",
+    "name": "Evans Walsh I",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "PENDING",
+    "createdAt": "2026-07-04T02:49:00.569Z",
+    "updatedAt": "2026-09-08T09:16:30.875Z"
+  },
+  {
+    "id": 7,
+    "phoneNumber": "478.976.0186 x016",
+    "email": "Maritza32@gmail.com",
+    "name": "Lukas Botsford",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2025-12-06T21:17:59.230Z",
+    "updatedAt": "2026-09-08T19:18:09.220Z"
+  },
+  {
+    "id": 8,
+    "phoneNumber": "372.261.9993 x09499",
+    "email": "Rozella_Lynch@yahoo.com",
+    "name": "Yvette Leannon DDS",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "PENDING",
+    "createdAt": "2026-05-23T05:42:39.451Z",
+    "updatedAt": "2026-09-08T04:34:41.757Z"
+  },
+  {
+    "id": 9,
+    "phoneNumber": "(867) 883-3050",
+    "email": "Kendrick.Senger@hotmail.com",
+    "name": "Landen Bechtelar",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "PENDING",
+    "createdAt": "2026-04-29T11:50:10.817Z",
+    "updatedAt": "2026-09-08T13:22:35.646Z"
+  },
+  {
+    "id": 10,
+    "phoneNumber": "298-741-1257 x629",
+    "email": "Griffin.Rosenbaum11@yahoo.com",
+    "name": "Matilda Boyle",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2025-11-11T01:11:56.077Z",
+    "updatedAt": "2026-09-08T06:21:46.430Z"
+  },
+  {
+    "id": 11,
+    "phoneNumber": "(861) 260-5953",
+    "email": "Tracy.Ullrich-Dietrich10@hotmail.com",
+    "name": "Angelica Sporer",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "PENDING",
+    "createdAt": "2025-12-20T16:59:53.976Z",
+    "updatedAt": "2026-09-07T22:47:11.404Z"
+  },
+  {
+    "id": 12,
+    "phoneNumber": "889-537-3984 x7719",
+    "email": "Sylvan31@hotmail.com",
+    "name": "Leon Greenholt",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "PENDING",
+    "createdAt": "2026-06-10T10:45:04.489Z",
+    "updatedAt": "2026-09-08T14:56:53.719Z"
+  },
+  {
+    "id": 13,
+    "phoneNumber": "1-411-861-0708 x7009",
+    "email": "Twila.Hirthe@hotmail.com",
+    "name": "Avery Anderson",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2025-10-22T04:47:43.770Z",
+    "updatedAt": "2026-09-07T22:46:16.232Z"
+  },
+  {
+    "id": 14,
+    "phoneNumber": "1-390-908-5905 x956",
+    "email": "Leonie_Goyette@yahoo.com",
+    "name": "Constantin Hermann",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2026-08-30T11:38:55.763Z",
+    "updatedAt": "2026-09-08T19:37:09.705Z"
+  },
+  {
+    "id": 15,
+    "phoneNumber": "1-897-649-8003 x8915",
+    "email": "Ronaldo86@hotmail.com",
+    "name": "Mr. Larue Welch",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2025-10-25T23:23:13.269Z",
+    "updatedAt": "2026-09-08T18:50:51.137Z"
+  },
+  {
+    "id": 16,
+    "phoneNumber": "(675) 855-8410 x7672",
+    "email": "Leta51@gmail.com",
+    "name": "Salma Corkery IV",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2026-02-23T09:58:46.832Z",
+    "updatedAt": "2026-09-08T19:28:15.917Z"
+  },
+  {
+    "id": 17,
+    "phoneNumber": "316-338-4611 x0121",
+    "email": "Claudia.Pollich@gmail.com",
+    "name": "Miss Tanya Gorczany",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2026-01-22T01:17:09.945Z",
+    "updatedAt": "2026-09-08T07:34:44.383Z"
+  },
+  {
+    "id": 18,
+    "phoneNumber": "(955) 245-2230 x32318",
+    "email": "Jarod_McGlynn43@hotmail.com",
+    "name": "Miss Madalyn Hermiston Sr.",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2025-12-07T14:32:24.758Z",
+    "updatedAt": "2026-09-07T23:48:24.792Z"
+  },
+  {
+    "id": 19,
+    "phoneNumber": "913.988.2169 x5527",
+    "email": "Karlie.Monahan58@gmail.com",
+    "name": "Alysha Collier",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "PENDING",
+    "createdAt": "2026-01-04T11:46:12.616Z",
+    "updatedAt": "2026-09-08T15:23:14.426Z"
+  },
+  {
+    "id": 20,
+    "phoneNumber": "989.279.1075 x817",
+    "email": "Rae39@gmail.com",
+    "name": "Jessyca Rogahn",
+    "role": "TRAINEE",
+    "password": "5f4887915e7ad8648549336ebae831405f90559dd3289ce110dff013d0fbdc7e",
+    "activationStatus": "ACTIVATED",
+    "createdAt": "2026-08-03T04:13:24.927Z",
+    "updatedAt": "2026-09-08T05:09:49.901Z"
+  }
+]

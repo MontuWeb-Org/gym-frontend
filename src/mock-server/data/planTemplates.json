@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "Master Hypertrophy Plan",
+    "description": "Cena aperio valeo vis unus tolero sollers ipsa aiunt cunabula.",
+    "status": "ACTIVE",
+    "trainerId": 1,
+    "durationWeekTemplates": 4,
+    "isFav": true,
+    "createdAt": "2025-12-12T15:23:37.150Z",
+    "updatedAt": "2026-09-08T13:18:44.860Z"
+  },
+  {
+    "id": 2,
+    "name": "Custom Hypertrophy Plan",
+    "description": "Ullus deputo denique.",
+    "status": "ACTIVE",
+    "trainerId": 2,
+    "durationWeekTemplates": 4,
+    "isFav": false,
+    "createdAt": "2026-07-06T20:09:20.202Z",
+    "updatedAt": "2026-09-08T04:17:52.453Z"
+  },
+  {
+    "id": 3,
+    "name": "Custom Hypertrophy Plan",
+    "description": "Solus ullam usque suggero tui subiungo sponte quae tantum.",
+    "status": "ACTIVE",
+    "trainerId": 3,
+    "durationWeekTemplates": 4,
+    "isFav": true,
+    "createdAt": "2026-07-27T08:22:41.467Z",
+    "updatedAt": "2026-09-08T16:52:28.494Z"
+  },
+  {
+    "id": 4,
+    "name": "Custom Hypertrophy Plan",
+    "description": "Arto toties tristis dignissimos absconditus cito provident vomica.",
+    "status": "ACTIVE",
+    "trainerId": 4,
+    "durationWeekTemplates": 4,
+    "isFav": false,
+    "createdAt": "2025-12-12T15:49:47.557Z",
+    "updatedAt": "2026-09-08T11:09:59.544Z"
+  },
+  {
+    "id": 5,
+    "name": "Custom Hypertrophy Plan",
+    "description": "Vix congregatio ratione vicissitudo ambulo viduo sto.",
+    "status": "ACTIVE",
+    "trainerId": 5,
+    "durationWeekTemplates": 4,
+    "isFav": true,
+    "createdAt": "2025-12-27T16:23:28.831Z",
+    "updatedAt": "2026-09-08T12:56:47.445Z"
+  }
+]

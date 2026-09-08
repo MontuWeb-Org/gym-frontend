@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "sequenceNumber": 1,
+    "planTemplateId": 1,
+    "createdAt": "2025-12-12T15:23:37.150Z",
+    "updatedAt": "2026-09-08T13:18:44.860Z"
+  },
+  {
+    "id": 2,
+    "sequenceNumber": 1,
+    "planTemplateId": 2,
+    "createdAt": "2026-07-06T20:09:20.202Z",
+    "updatedAt": "2026-09-08T04:17:52.453Z"
+  },
+  {
+    "id": 3,
+    "sequenceNumber": 1,
+    "planTemplateId": 3,
+    "createdAt": "2026-07-27T08:22:41.467Z",
+    "updatedAt": "2026-09-08T16:52:28.494Z"
+  },
+  {
+    "id": 4,
+    "sequenceNumber": 1,
+    "planTemplateId": 4,
+    "createdAt": "2025-12-12T15:49:47.557Z",
+    "updatedAt": "2026-09-08T11:09:59.544Z"
+  },
+  {
+    "id": 5,
+    "sequenceNumber": 1,
+    "planTemplateId": 5,
+    "createdAt": "2025-12-27T16:23:28.831Z",
+    "updatedAt": "2026-09-08T12:56:47.445Z"
+  }
+]

@@ -1,0 +1,197 @@
+[
+  {
+    "userId": 6,
+    "gender": "FEMALE",
+    "birthDate": "1976-02-03T02:54:57.830Z",
+    "bodyMetrics": {
+      "weightKg": 60,
+      "heightCm": 191,
+      "targetWeightKg": 86
+    },
+    "trainerId": 4,
+    "createdAt": "2026-07-04T02:49:00.569Z",
+    "updatedAt": "2026-09-08T09:16:30.875Z"
+  },
+  {
+    "userId": 7,
+    "gender": "MALE",
+    "birthDate": "2004-01-18T10:08:17.360Z",
+    "bodyMetrics": {
+      "weightKg": 90,
+      "heightCm": 187,
+      "targetWeightKg": 70
+    },
+    "trainerId": 3,
+    "createdAt": "2025-12-06T21:17:59.230Z",
+    "updatedAt": "2026-09-08T19:18:09.220Z"
+  },
+  {
+    "userId": 8,
+    "gender": "MALE",
+    "birthDate": "2000-06-28T20:21:26.284Z",
+    "bodyMetrics": {
+      "weightKg": 100,
+      "heightCm": 190,
+      "targetWeightKg": 87
+    },
+    "trainerId": 3,
+    "createdAt": "2026-05-23T05:42:39.451Z",
+    "updatedAt": "2026-09-08T04:34:41.757Z"
+  },
+  {
+    "userId": 9,
+    "gender": "FEMALE",
+    "birthDate": "1987-11-22T07:52:40.295Z",
+    "bodyMetrics": {
+      "weightKg": 73,
+      "heightCm": 187,
+      "targetWeightKg": 61
+    },
+    "trainerId": 3,
+    "createdAt": "2026-04-29T11:50:10.817Z",
+    "updatedAt": "2026-09-08T13:22:35.646Z"
+  },
+  {
+    "userId": 10,
+    "gender": "MALE",
+    "birthDate": "1992-03-03T18:10:10.329Z",
+    "bodyMetrics": {
+      "weightKg": 90,
+      "heightCm": 156,
+      "targetWeightKg": 65
+    },
+    "trainerId": 4,
+    "createdAt": "2025-11-11T01:11:56.077Z",
+    "updatedAt": "2026-09-08T06:21:46.430Z"
+  },
+  {
+    "userId": 11,
+    "gender": "FEMALE",
+    "birthDate": "1992-09-25T09:05:18.191Z",
+    "bodyMetrics": {
+      "weightKg": 104,
+      "heightCm": 185,
+      "targetWeightKg": 82
+    },
+    "trainerId": 2,
+    "createdAt": "2025-12-20T16:59:53.976Z",
+    "updatedAt": "2026-09-07T22:47:11.404Z"
+  },
+  {
+    "userId": 12,
+    "gender": "FEMALE",
+    "birthDate": "1969-08-12T05:21:17.781Z",
+    "bodyMetrics": {
+      "weightKg": 82,
+      "heightCm": 157,
+      "targetWeightKg": 72
+    },
+    "trainerId": 3,
+    "createdAt": "2026-06-10T10:45:04.489Z",
+    "updatedAt": "2026-09-08T14:56:53.719Z"
+  },
+  {
+    "userId": 13,
+    "gender": "FEMALE",
+    "birthDate": "1997-10-08T11:11:11.296Z",
+    "bodyMetrics": {
+      "weightKg": 87,
+      "heightCm": 194,
+      "targetWeightKg": 65
+    },
+    "trainerId": 2,
+    "createdAt": "2025-10-22T04:47:43.770Z",
+    "updatedAt": "2026-09-07T22:46:16.232Z"
+  },
+  {
+    "userId": 14,
+    "gender": "FEMALE",
+    "birthDate": "1988-09-28T05:23:34.731Z",
+    "bodyMetrics": {
+      "weightKg": 72,
+      "heightCm": 188,
+      "targetWeightKg": 78
+    },
+    "trainerId": 1,
+    "createdAt": "2026-08-30T11:38:55.763Z",
+    "updatedAt": "2026-09-08T19:37:09.705Z"
+  },
+  {
+    "userId": 15,
+    "gender": "FEMALE",
+    "birthDate": "1975-07-10T15:59:48.583Z",
+    "bodyMetrics": {
+      "weightKg": 92,
+      "heightCm": 180,
+      "targetWeightKg": 64
+    },
+    "trainerId": 1,
+    "createdAt": "2025-10-25T23:23:13.269Z",
+    "updatedAt": "2026-09-08T18:50:51.137Z"
+  },
+  {
+    "userId": 16,
+    "gender": "MALE",
+    "birthDate": "1979-10-29T21:00:27.100Z",
+    "bodyMetrics": {
+      "weightKg": 90,
+      "heightCm": 164,
+      "targetWeightKg": 53
+    },
+    "trainerId": 1,
+    "createdAt": "2026-02-23T09:58:46.832Z",
+    "updatedAt": "2026-09-08T19:28:15.917Z"
+  },
+  {
+    "userId": 17,
+    "gender": "FEMALE",
+    "birthDate": "1981-07-21T14:52:46.578Z",
+    "bodyMetrics": {
+      "weightKg": 80,
+      "heightCm": 185,
+      "targetWeightKg": 51
+    },
+    "trainerId": 2,
+    "createdAt": "2026-01-22T01:17:09.945Z",
+    "updatedAt": "2026-09-08T07:34:44.383Z"
+  },
+  {
+    "userId": 18,
+    "gender": "MALE",
+    "birthDate": "1977-12-13T06:01:17.624Z",
+    "bodyMetrics": {
+      "weightKg": 64,
+      "heightCm": 191,
+      "targetWeightKg": 53
+    },
+    "trainerId": 3,
+    "createdAt": "2025-12-07T14:32:24.758Z",
+    "updatedAt": "2026-09-07T23:48:24.792Z"
+  },
+  {
+    "userId": 19,
+    "gender": "MALE",
+    "birthDate": "1994-12-29T19:57:23.901Z",
+    "bodyMetrics": {
+      "weightKg": 97,
+      "heightCm": 179,
+      "targetWeightKg": 69
+    },
+    "trainerId": 3,
+    "createdAt": "2026-01-04T11:46:12.616Z",
+    "updatedAt": "2026-09-08T15:23:14.426Z"
+  },
+  {
+    "userId": 20,
+    "gender": "FEMALE",
+    "birthDate": "2004-08-31T23:25:07.117Z",
+    "bodyMetrics": {
+      "weightKg": 89,
+      "heightCm": 159,
+      "targetWeightKg": 88
+    },
+    "trainerId": 4,
+    "createdAt": "2026-08-03T04:13:24.927Z",
+    "updatedAt": "2026-09-08T05:09:49.901Z"
+  }
+]
