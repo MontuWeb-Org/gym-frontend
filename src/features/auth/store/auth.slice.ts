@@ -1,42 +1,60 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../services/auth.service";
-import { User, RegisterInitPayload, RegisterCompletePayload, LoginPayload } from "../types/auth.types";
+import {
+  RegisterInitPayload,
+  RegisterCompletePayload,
+  LoginPayload,
+  ForgotPasswordInitPayload,
+  ForgotPasswordCompletePayload,
+} from "../types/auth.types";
+import { User } from "@/types/user.types";
 import { tokenStorage } from "@/lib/storage";
 
 interface AuthState {
   user: User | null;
+  accessToken: string | null;
   creationToken: string | null;
+  verificationToken: string | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   isLoading: boolean;
   error: string | null;
 }
 
-const getPersistedUser = (): User | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    const stored = localStorage.getItem("gym_auth_user");
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-};
-
-const initialUser = getPersistedUser();
-
 const initialState: AuthState = {
-  user: initialUser,
+  user: null,
+  accessToken: null,
   creationToken: null,
-  isAuthenticated: !!initialUser,
+  verificationToken: null,
+  isAuthenticated: false,
+  isInitialized: false,
   isLoading: false,
   error: null,
 };
 
-const getErrorMessage = (err: unknown): string | undefined => {
-  if (!err) return undefined;
+const getErrorMessage = (err: unknown): string => {
+  if (!err) return "An unexpected error occurred.";
   const e = err as { response?: { data?: { message?: string } }; message?: string };
-  return e.response?.data?.message ?? e.message;
+  return e.response?.data?.message || e.message || "An unexpected error occurred.";
 };
 
+// --- Thunks ---
+
+// 1. Refresh Token + Profile Fetch
+export const refreshTokenThunk = createAsyncThunk(
+  "auth/refreshToken",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await authService.refreshToken();
+      const userRes = await authService.getCurrentUser(res.data.accessToken);
+      return { accessToken: res.data.accessToken, user: userRes.data };
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err));
+    }
+  }
+);
+
+// 2. Register Init
 export const registerInitThunk = createAsyncThunk(
   "auth/registerInit",
   async (payload: RegisterInitPayload, { rejectWithValue }) => {
@@ -44,42 +62,80 @@ export const registerInitThunk = createAsyncThunk(
       const res = await authService.registerInit(payload);
       return res.data.creationToken;
     } catch (err: unknown) {
-      return rejectWithValue(getErrorMessage(err) || "Registration initialization failed");
+      return rejectWithValue(getErrorMessage(err) || "Registration initialization failed.");
     }
   }
 );
 
+// 3. Register Complete + Profile Fetch
 export const registerCompleteThunk = createAsyncThunk(
   "auth/registerComplete",
   async (payload: RegisterCompletePayload, { rejectWithValue }) => {
     try {
       const res = await authService.registerComplete(payload);
-      if (res.data.accessToken) {
-        tokenStorage.setAccessToken(res.data.accessToken);
-      }
-      return res.data;
-    } catch {
-      return rejectWithValue("OTP verification failed");
+      const userRes = await authService.getCurrentUser(res.data.accessToken);
+      return { accessToken: res.data.accessToken, user: userRes.data };
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "OTP verification failed.");
     }
   }
 );
 
+// 4. Login + Profile Fetch
 export const loginThunk = createAsyncThunk(
   "auth/login",
   async (payload: LoginPayload, { rejectWithValue }) => {
     try {
       const res = await authService.login(payload);
-      if (res.data.accessToken) {
-        tokenStorage.setAccessToken(res.data.accessToken);
-      }
-      return res.data;
+      const userRes = await authService.getCurrentUser(res.data.accessToken);
+      return { accessToken: res.data.accessToken, user: userRes.data };
     } catch (err: unknown) {
-      void err;
-      return rejectWithValue("Login failed");
+      return rejectWithValue(getErrorMessage(err) || "Login failed.");
     }
   }
 );
 
+// 5. Forgot Password Init
+export const forgotPasswordInitThunk = createAsyncThunk(
+  "auth/forgotPasswordInit",
+  async (payload: ForgotPasswordInitPayload, { rejectWithValue }) => {
+    try {
+      const res = await authService.forgotPasswordInit(payload);
+      return res.data.verificationToken;
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "Forgot password initialization failed.");
+    }
+  }
+);
+
+// 6. Forgot Password Complete + Profile Fetch
+export const forgotPasswordCompleteThunk = createAsyncThunk(
+  "auth/forgotPasswordComplete",
+  async (payload: ForgotPasswordCompletePayload, { rejectWithValue }) => {
+    try {
+      const res = await authService.forgotPasswordComplete(payload);
+      const userRes = await authService.getCurrentUser(res.data.accessToken);
+      return { accessToken: res.data.accessToken, user: userRes.data };
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "Password reset failed.");
+    }
+  }
+);
+
+// 7. Get Current User Direct Call
+export const getCurrentUserThunk = createAsyncThunk(
+  "auth/getCurrentUser",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const res = await authService.getCurrentUser(token);
+      return res.data;
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "Failed to fetch user profile.");
+    }
+  }
+);
+
+// 8. Logout
 export const logoutThunk = createAsyncThunk("auth/logout", async () => {
   try {
     await authService.logout();
@@ -88,31 +144,45 @@ export const logoutThunk = createAsyncThunk("auth/logout", async () => {
   }
 });
 
+// --- Slice ---
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
-      state.isAuthenticated = true;
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("gym_auth_user", JSON.stringify(action.payload));
-        } catch {}
-      }
-    },
     clearError: (state) => {
       state.error = null;
+    },
+    resetFlowTokens: (state) => {
       state.creationToken = null;
+      state.verificationToken = null;
     },
     logout: (state) => {
       state.user = null;
-      state.isAuthenticated = false;
+      state.accessToken = null;
       state.creationToken = null;
+      state.verificationToken = null;
+      state.isAuthenticated = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Refresh Token
+      .addCase(refreshTokenThunk.fulfilled, (state, action) => {
+        state.accessToken = action.payload.accessToken;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.isInitialized = true;
+      })
+      .addCase(refreshTokenThunk.rejected, (state) => {
+        state.user = null;
+        state.accessToken = null;
+        state.isAuthenticated = false;
+        state.isInitialized = true;
+      })
+
+      // Register Init
       .addCase(registerInitThunk.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -125,25 +195,92 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // Register Complete
       .addCase(registerCompleteThunk.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(registerCompleteThunk.fulfilled, (state) => {
+      .addCase(registerCompleteThunk.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.accessToken = action.payload.accessToken;
+        state.user = action.payload.user;
         state.isAuthenticated = true;
+        state.creationToken = null;
       })
       .addCase(registerCompleteThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // Login
+      .addCase(loginThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.accessToken = action.payload.accessToken;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+      })
+      .addCase(loginThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Forgot Password Init
+      .addCase(forgotPasswordInitThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(forgotPasswordInitThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.verificationToken = action.payload;
+      })
+      .addCase(forgotPasswordInitThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Forgot Password Complete
+      .addCase(forgotPasswordCompleteThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.accessToken = action.payload.accessToken;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.verificationToken = null;
+      })
+      .addCase(forgotPasswordCompleteThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Get Current User
+      .addCase(getCurrentUserThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getCurrentUserThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(getCurrentUserThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.user = null;
+        state.error = action.payload as string;
+      })
+
+      // Logout
       .addCase(logoutThunk.fulfilled, (state) => {
         state.user = null;
-        state.isAuthenticated = false;
+        state.accessToken = null;
         state.creationToken = null;
+        state.verificationToken = null;
+        state.isAuthenticated = false;
+        state.error = null;
       });
   },
 });
 
-export const { setUser, clearError, logout } = authSlice.actions;
+export const { clearError, resetFlowTokens, logout } = authSlice.actions;
 export default authSlice.reducer;
