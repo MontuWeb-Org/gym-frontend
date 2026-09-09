@@ -260,7 +260,7 @@ export const authHandlers = [
     );
   }),
 
-  // 7. Logout
+ // 7. Logout
   http.post("*/api/auth/logout", async () => {
     return HttpResponse.json(
       { message: "Logout successfully." },

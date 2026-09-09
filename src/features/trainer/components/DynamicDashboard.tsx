@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import { DashboardWidgetConfig, TrainerDashboardResponse } from "../types/dashboard.types";
 import ScoreCardWidget from "./ScoreCardWidget";
 import ChartWidget from "./ChartWidget";
 import TableWidget from "./TableWidget";
 import WidgetErrorBoundary from "./WidgetErrorBoundary";
 import DashboardSkeleton from "./DashboardSkeleton";
+import { useTranslations } from "next-intl";
 
 export default function DynamicDashboard() {
+  const t = useTranslations ("Trainer.dashboard");
   const [widgets, setWidgets] = useState<DashboardWidgetConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +19,12 @@ export default function DynamicDashboard() {
   useEffect(() => {
     async function fetchDashboard() {
       try {
-        const res = await fetch("/api/users/trainer/dashboard");
+        const token = Cookies.get("accessToken");
+        const res = await fetch("/api/users/trainer/dashboard", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const json = await res.json();
         
         if (!res.ok) throw new Error(json?.message || "Failed to load dashboard layout");
@@ -43,7 +51,7 @@ export default function DynamicDashboard() {
     );
   }
 
- return (
+  return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       {widgets.map((widget) => (
         <div key={widget.id} className={widget.colSpan || "col-span-1"}>

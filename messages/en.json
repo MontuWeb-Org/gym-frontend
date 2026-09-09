@@ -53,11 +53,14 @@
     "dashboard": {
       "title": "Dashboard",
       "description": "Manage your trainer dashboard seamlessly.",
-      "activeTrainees": "Active Trainees",
+      "totalTrainees": "Total Trainees",
+      "avgAdherence": "Avg Adherence",
       "activePrograms": "Active Programs",
-      "completionRate": "Completion Rate",
-      "monthlyRevenue": "Monthly Revenue",
-      "recentActivity": "Recent Trainee Activity"
+      "pendingInvites": "Pending Invites",
+      "fallingBehindTitle": "Falling behind — needs attention",
+      "weeklyActivityTitle": "This week's activity",
+      "workoutsLogged": "Workouts Logged",
+      "errorTitle": "Dashboard Error"
     },
     "trainees": {
       "title": "Trainees",

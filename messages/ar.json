@@ -53,11 +53,14 @@
     "dashboard": {
       "title": "لوحة التحكم",
       "description": "إدارة لوحة تحكم المدرب الخاص بك بسلاسة.",
-      "activeTrainees": "المتدربون النشطون",
+      "totalTrainees": "إجمالي المتدربين",
+      "avgAdherence": "متوسط الالتزام",
       "activePrograms": "البرامج النشطة",
-      "completionRate": "نسبة الإكمال",
-      "monthlyRevenue": "الإيرادات الشهرية",
-      "recentActivity": "نشاط المتدربين الأخير"
+      "pendingInvites": "الدعوات المعلقة",
+      "fallingBehindTitle": "متأخرون — يحتاجون إلى اهتمام",
+      "weeklyActivityTitle": "نشاط هذا الأسبوع",
+      "workoutsLogged": "التمارين المسجلة",
+      "errorTitle": "خطأ في لوحة التحكم"
     },
     "trainees": {
       "title": "المتدربون",
