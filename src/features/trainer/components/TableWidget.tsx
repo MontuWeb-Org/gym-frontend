@@ -22,16 +22,16 @@ export default function TableWidget({ data }: TableWidgetProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
 
-  const title = data.titleKey ? tDashboard(data.titleKey as any) : (data.title || tDashboard("fallingBehindTitle"));
+  const title = data.titleKey 
+    ? tDashboard(data.titleKey as Parameters<typeof tDashboard>[0]) 
+    : (data.title || tDashboard("fallingBehindTitle"));
   
-  // Standard columns order: [Name, Adherence, Last Active]
   const baseColumns = data.columns || [
     tTable("columns.name"),
     tTable("columns.adherence"),
     tTable("columns.lastActive"),
   ];
 
-  // Flip column order for RTL so Last Active is on the left and Name is on the right
   const columns = isRtl ? [...baseColumns] : baseColumns;
 
   return (
@@ -49,7 +49,6 @@ export default function TableWidget({ data }: TableWidgetProps) {
           <tbody className="divide-y">
             {data.rows && data.rows.length > 0 ? (
               data.rows.map((row) => {
-                // Keep raw ISO timestamp format to match the trainees table view
                 const cells = isRtl ? [
                   <div key="name" className="font-medium flex items-center gap-2 justify-start">
                     {row.name}
