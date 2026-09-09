@@ -54,6 +54,6 @@ export const authService = {
   },
 
   async inviteTrainee(email: string): Promise<void> {
-    await authApi.post("/invite/init", { email });
+    await authApi.post("auth/invite/init", { email });
   }
 };
