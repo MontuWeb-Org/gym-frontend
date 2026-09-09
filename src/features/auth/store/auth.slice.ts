@@ -46,8 +46,9 @@ export const refreshTokenThunk = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await authService.refreshToken();
-      const userRes = await authService.getCurrentUser(res.data.accessToken);
-      return { accessToken: res.data.accessToken, user: userRes.data };
+      tokenStorage.setAccessToken(res.data.accessToken);
+      const userRes = await authService.getCurrentUser();
+      return { user: userRes.data };
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err));
     }
@@ -73,8 +74,9 @@ export const registerCompleteThunk = createAsyncThunk(
   async (payload: RegisterCompletePayload, { rejectWithValue }) => {
     try {
       const res = await authService.registerComplete(payload);
-      const userRes = await authService.getCurrentUser(res.data.accessToken);
-      return { accessToken: res.data.accessToken, user: userRes.data };
+      tokenStorage.setAccessToken(res.data.accessToken);
+      const userRes = await authService.getCurrentUser();
+      return { user: userRes.data };
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err) || "OTP verification failed.");
     }
@@ -87,8 +89,9 @@ export const loginThunk = createAsyncThunk(
   async (payload: LoginPayload, { rejectWithValue }) => {
     try {
       const res = await authService.login(payload);
-      const userRes = await authService.getCurrentUser(res.data.accessToken);
-      return { accessToken: res.data.accessToken, user: userRes.data };
+      tokenStorage.setAccessToken(res.data.accessToken);
+      const userRes = await authService.getCurrentUser();
+      return { user: userRes.data };
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err) || "Login failed.");
     }
@@ -114,8 +117,9 @@ export const forgotPasswordCompleteThunk = createAsyncThunk(
   async (payload: ForgotPasswordCompletePayload, { rejectWithValue }) => {
     try {
       const res = await authService.forgotPasswordComplete(payload);
-      const userRes = await authService.getCurrentUser(res.data.accessToken);
-      return { accessToken: res.data.accessToken, user: userRes.data };
+      tokenStorage.setAccessToken(res.data.accessToken);
+      const userRes = await authService.getCurrentUser();
+      return { user: userRes.data };
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err) || "Password reset failed.");
     }
@@ -125,9 +129,9 @@ export const forgotPasswordCompleteThunk = createAsyncThunk(
 // 7. Get Current User Direct Call
 export const getCurrentUserThunk = createAsyncThunk(
   "auth/getCurrentUser",
-  async (token: string, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await authService.getCurrentUser(token);
+      const res = await authService.getCurrentUser();
       return res.data;
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err) || "Failed to fetch user profile.");
@@ -143,6 +147,17 @@ export const logoutThunk = createAsyncThunk("auth/logout", async () => {
     tokenStorage.clearTokens();
   }
 });
+
+export const inviteTraineeThunk = createAsyncThunk(
+  "auth/inviteTrainee",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      await authService.inviteTrainee(email);
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "Failed to send invite.");
+    }
+  }
+);
 
 // --- Slice ---
 
@@ -170,7 +185,6 @@ const authSlice = createSlice({
     builder
       // Refresh Token
       .addCase(refreshTokenThunk.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken;
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.isInitialized = true;
@@ -203,7 +217,6 @@ const authSlice = createSlice({
       })
       .addCase(registerCompleteThunk.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.accessToken = action.payload.accessToken;
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.creationToken = null;
@@ -220,7 +233,6 @@ const authSlice = createSlice({
       })
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.accessToken = action.payload.accessToken;
         state.user = action.payload.user;
         state.isAuthenticated = true;
       })
@@ -246,7 +258,6 @@ const authSlice = createSlice({
       // Forgot Password Complete
       .addCase(forgotPasswordCompleteThunk.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.accessToken = action.payload.accessToken;
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.verificationToken = null;
@@ -279,6 +290,20 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.error = null;
       });
+
+      // Invite Trainee
+      builder
+        .addCase(inviteTraineeThunk.pending, (state) => {
+          state.isLoading = true;
+          state.error = null;
+        })
+        .addCase(inviteTraineeThunk.fulfilled, (state) => {
+          state.isLoading = false;
+        })
+        .addCase(inviteTraineeThunk.rejected, (state, action) => {
+          state.isLoading = false;
+          state.error = action.payload as string;
+        });
   },
 });
 

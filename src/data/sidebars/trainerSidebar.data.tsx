@@ -2,7 +2,7 @@
 import { LayoutDashboard, Users, Dumbbell, FileText, CreditCard, Settings } from "lucide-react";
 import type { SidebarItem } from "@/data/sidebar.types";
 import TrainerDashboardView from "@/components/views/trainer/TrainerDashboardView";
-import TraineesView from "@/components/views/trainer/TraineesView";
+import TraineesView from "@/features/trainer/views/TaineeManagement";
 import ProgramsView from "@/components/views/trainer/ProgramsView";
 import TemplatesView from "@/components/views/trainer/TemplatesView";
 import BillingView from "@/components/views/trainer/BillingView";

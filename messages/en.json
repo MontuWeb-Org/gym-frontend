@@ -120,5 +120,48 @@
     "resetPasswordSubtitle": "Enter the code sent to {email} and choose a new password.",
     "resetPasswordButton": "Reset Password",
     "backToLogin": "Back to Login"
+  },
+  "TraineesTable": {
+    "title": "Trainees",
+    "inviteTrainee": "Invite Trainee",
+    "searchPlaceholder": "Search...",
+    "tabs": {
+      "all": "All",
+      "active": "Active",
+      "fallingBehind": "Falling behind",
+      "pendingInvite": "Pending invite"
+    },
+    "columns": {
+      "name": "Name",
+      "program": "Program",
+      "adherence": "Adherence",
+      "lastActive": "Last Active",
+      "status": "Status",
+      "action": "Action"
+    },
+    "status": {
+      "onTrack": "On track",
+      "atRisk": "At risk",
+      "invitePending": "Invite pending",
+      "fallingBehind": "Falling behind"
+    },
+    "actions": {
+      "resend": "Resend",
+      "open": "Open"
+    },
+    "states": {
+      "loading": "Loading trainees...",
+      "empty": "No trainees found."
+    }
+  },
+  "InvitationModal": {
+    "title": "Invite New Trainee",
+    "description": "Send an email invitation to register a trainee under your training program.",
+    "emailLabel": "Trainee Email",
+    "emailPlaceholder": "trainee@example.com",
+    "invalidEmail": "Please enter a valid email address.",
+    "genericError": "Failed to send invitation. Please try again.",
+    "cancel": "Cancel",
+    "sendInvite": "Send Invite"
   }
 }

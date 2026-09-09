@@ -17,7 +17,6 @@ function getUserIdFromToken(request: Request): string | null {
 
   const token = authHeader.replace("Bearer ", "");
   const parts = token.split("_");
-  // Expected token format: mock_jwt_{userId}_{timestamp} -> parts[2] is userId
   return parts.length >= 3 ? parts[2] : null;
 }
 
@@ -305,5 +304,26 @@ export const authHandlers = [
         role: mockUser.role,
       },
     });
+  }),
+
+  // 9. Invite Trainee Init
+  http.post("*/api/auth/invite/init", async ({ request }) => {
+    const body = await parseRequestBody(request);
+    const { email } = body;
+
+    if (!email) {
+      return HttpResponse.json(
+        {
+          message: "Validation Error",
+          errors: { email: ["Email is required"] },
+        },
+        { status: 422 }
+      );
+    }
+
+    return HttpResponse.json(
+      { message: "Trainee registration initialized successfully." },
+      { status: 201 }
+    );
   }),
 ];

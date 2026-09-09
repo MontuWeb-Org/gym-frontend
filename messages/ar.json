@@ -120,5 +120,48 @@
     "resetPasswordSubtitle": "أدخل الرمز المرسل إلى {email} واختر كلمة مرور جديدة.",
     "resetPasswordButton": "إعادة تعيين كلمة المرور",
     "backToLogin": "العودة لتسجيل الدخول"
+  },
+  "TraineesTable": {
+    "title": "المتدربون",
+    "inviteTrainee": "دعوة متدرب",
+    "searchPlaceholder": "بحث...",
+    "tabs": {
+      "all": "الكل",
+      "active": "نشط",
+      "fallingBehind": "متأخر",
+      "pendingInvite": "في انتظار الدعوة"
+    },
+    "columns": {
+      "name": "الاسم",
+      "program": "البرنامج",
+      "adherence": "الالتزام",
+      "lastActive": "آخر نشاط",
+      "status": "الحالة",
+      "action": "الإجراء"
+    },
+    "status": {
+      "onTrack": "على المسار الصحيح",
+      "atRisk": "معرض للخطر",
+      "invitePending": "معلقة الدعوة",
+      "fallingBehind": "متأخر"
+    },
+    "actions": {
+      "resend": "إعادة إرسال",
+      "open": "عرض"
+    },
+    "states": {
+      "loading": "جاري تحميل المتدربين...",
+      "empty": "لم يتم العثور على متدربين."
+    }
+  },
+  "InvitationModal": {
+    "title": "دعوة متدرب جديد",
+    "description": "أرسل دعوة عبر البريد الإلكتروني لتسجيل متدرب تحت برنامجك التدريبي.",
+    "emailLabel": "البريد الإلكتروني للمتدرب",
+    "emailPlaceholder": "trainee@example.com",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح.",
+    "genericError": "فشل إرسال الدعوة. يرجى المحاولة مرة أخرى.",
+    "cancel": "إلغاء",
+    "sendInvite": "إرسال الدعوة"
   }
 }
