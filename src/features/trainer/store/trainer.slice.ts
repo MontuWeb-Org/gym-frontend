@@ -21,9 +21,10 @@ export const fetchTrainerTrainees = createAsyncThunk(
   async (params: GetTraineesQueryParams | undefined, { rejectWithValue }) => {
     try {
       return await trainerService.getTrainerTrainees(params);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
       return rejectWithValue(
-        err.response?.data?.message || "Failed to fetch trainees list"
+        error.response?.data?.message || "Failed to fetch trainees list"
       );
     }
   }
