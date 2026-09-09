@@ -11,7 +11,7 @@ import DashboardSkeleton from "./DashboardSkeleton";
 import { useTranslations } from "next-intl";
 
 export default function DynamicDashboard() {
-  const t = useTranslations ("Trainer.dashboard");
+  const t = useTranslations("Trainer.dashboard");
   const [widgets, setWidgets] = useState<DashboardWidgetConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function DynamicDashboard() {
   if (error) {
     return (
       <div className="rounded-xl border border-destructive bg-destructive/10 p-6 text-center text-destructive">
-        <p className="font-semibold">Dashboard Error</p>
+        <p className="font-semibold">{t("errorTitle")}</p>
         <p className="text-sm">{error}</p>
       </div>
     );
@@ -56,9 +56,9 @@ export default function DynamicDashboard() {
       {widgets.map((widget) => (
         <div key={widget.id} className={widget.colSpan || "col-span-1"}>
           <WidgetErrorBoundary widgetId={widget.id}>
-            {widget.type === "score_card" && <ScoreCardWidget data={widget.data as any} />}
-            {widget.type === "chart" && <ChartWidget data={widget.data as any} />}
-            {widget.type === "table" && <TableWidget data={widget.data as any} />}
+            {widget.type === "score_card" && <ScoreCardWidget data={widget.data as Parameters<typeof ScoreCardWidget>[0]["data"]} />}
+            {widget.type === "chart" && <ChartWidget data={widget.data as Parameters<typeof ChartWidget>[0]["data"]} />}
+            {widget.type === "table" && <TableWidget data={widget.data as Parameters<typeof TableWidget>[0]["data"]} />}
           </WidgetErrorBoundary>
         </div>
       ))}

@@ -6,6 +6,7 @@ import { Users, Activity, CheckCircle } from "lucide-react";
 interface ScoreCardProps {
   data: {
     titleKey?: string;
+    title?: string;
     value: string | number;
     iconName?: string;
   };
@@ -14,16 +15,15 @@ interface ScoreCardProps {
 export default function ScoreCardWidget({ data }: ScoreCardProps) {
   const t = useTranslations("Trainer.dashboard");
 
-  // Map the keys or default to safe lookups based on icon/position if titleKey isn't matched
   const getTitle = () => {
     if (data.titleKey) {
       try {
-        return t(data.titleKey as any);
+        return t(data.titleKey as Parameters<typeof t>[0]);
       } catch {
         return data.titleKey;
       }
     }
-    return "";
+    return data.title || "";
   };
 
   const getIcon = (name?: string) => {
