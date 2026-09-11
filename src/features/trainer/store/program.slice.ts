@@ -29,12 +29,21 @@ export interface WorkoutTemplate {
   exerciseTemplateCount: number;
 }
 
+export interface ExerciseItem {
+  id: number;
+  name: string;
+  difficulty: string;
+  equipment: string[];
+  instructions: string;
+  illustrations: string[];
+}
+
 interface ProgramState {
   templates: PlanTemplate[];
   currentTemplate: PlanTemplate | null;
   currentWeek: WeekTemplate | null;
   currentWorkout: WorkoutTemplate | null;
-  exercises: any[];
+  exercises: ExerciseItem[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
@@ -61,7 +70,7 @@ export const createTemplate = createAsyncThunk(
   "trainerProgram/createTemplate",
   async (data: { name: string; description: string }) => {
     const response = await programService.createTemplate(data);
-    return response.data.data; // returns planId
+    return response.data.data;
   }
 );
 
@@ -100,8 +109,8 @@ export const programSlice = createSlice({
         state.status = "failed";
         state.error = action.error.message || "Failed to fetch templates";
       })
-      .addCase(createTemplate.fulfilled, (state, action) => {
-        // Optimistically add or let view handle redirection via returned planId
+      .addCase(createTemplate.fulfilled, () => {
+        // Handled via component redirection and storage sync
       })
       .addCase(fetchExercises.fulfilled, (state, action) => {
         state.exercises = action.payload;
