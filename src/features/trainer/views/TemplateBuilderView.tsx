@@ -7,6 +7,29 @@ import { programService } from "../services/program.service";
 import { Button } from "@/components/ui/button";
 import WeekBuilderView from "./WeekBuilderView";
 
+interface WeekItem {
+  id: number;
+  weekId?: number;
+  sequenceNumber: number;
+  workouts?: unknown[];
+}
+
+interface TemplateDetail {
+  id?: number;
+  name?: string;
+  description?: string;
+  weeks?: WeekItem[];
+}
+
+interface StoredTemplate {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  durationWeekTemplates: number;
+  isFav: boolean;
+}
+
 export default function TemplateBuilderView() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -17,14 +40,14 @@ export default function TemplateBuilderView() {
   const paramName = searchParams.get("name");
   const paramDesc = searchParams.get("desc");
 
-  const [template, setTemplate] = useState<any>(null);
-  const [weeks, setWeeks] = useState<any[]>([]);
+  const [template, setTemplate] = useState<TemplateDetail | null>(null);
+  const [weeks, setWeeks] = useState<WeekItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadTemplate() {
       if (paramName) {
-        setTemplate({ name: paramName, description: paramDesc });
+        setTemplate({ name: paramName, description: paramDesc || "" });
       }
 
       try {
@@ -41,9 +64,12 @@ export default function TemplateBuilderView() {
     if (templateId) loadTemplate();
   }, [templateId, paramName, paramDesc]);
 
+  const displayTitle = paramName || template?.name || "Untitled Template";
+  const displayDesc = paramDesc || template?.description || "No description provided.";
+
   const handleSaveDraft = () => {
-    const currentTemplates = JSON.parse(localStorage.getItem("msw_custom_templates") || "[]");
-    const templateData = {
+    const currentTemplates: StoredTemplate[] = JSON.parse(localStorage.getItem("msw_custom_templates") || "[]");
+    const templateData: StoredTemplate = {
       id: templateId,
       name: displayTitle,
       description: displayDesc,
@@ -52,8 +78,7 @@ export default function TemplateBuilderView() {
       isFav: false
     };
 
-    // Upsert template into local storage drafts list
-    const existingIndex = currentTemplates.findIndex((t: any) => t.id === templateId);
+    const existingIndex = currentTemplates.findIndex((t) => t.id === templateId);
     if (existingIndex >= 0) {
       currentTemplates[existingIndex] = templateData;
     } else {
@@ -65,8 +90,8 @@ export default function TemplateBuilderView() {
   };
 
   const handlePublish = () => {
-    const currentTemplates = JSON.parse(localStorage.getItem("msw_custom_templates") || "[]");
-    const templateData = {
+    const currentTemplates: StoredTemplate[] = JSON.parse(localStorage.getItem("msw_custom_templates") || "[]");
+    const templateData: StoredTemplate = {
       id: templateId,
       name: displayTitle,
       description: displayDesc,
@@ -75,7 +100,7 @@ export default function TemplateBuilderView() {
       isFav: false
     };
 
-    const existingIndex = currentTemplates.findIndex((t: any) => t.id === templateId);
+    const existingIndex = currentTemplates.findIndex((t) => t.id === templateId);
     if (existingIndex >= 0) {
       currentTemplates[existingIndex] = templateData;
     } else {
@@ -104,9 +129,6 @@ export default function TemplateBuilderView() {
 
   if (loading) return <div className="p-6 text-sm text-muted-foreground">Loading template workspace...</div>;
 
-  const displayTitle = paramName || template?.name || "Untitled Template";
-  const displayDesc = paramDesc || template?.description || "No description provided.";
-
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between border-b pb-4">
@@ -116,7 +138,7 @@ export default function TemplateBuilderView() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleSaveDraft}>Save Draft</Button>
-          <Button onClick={handlePublish}>Publish Template →</Button>
+          <Button onClick={handlePublish}>Publish Template &rarr;</Button>
         </div>
       </div>
 
@@ -141,7 +163,7 @@ export default function TemplateBuilderView() {
         <WeekBuilderView />
       ) : (
         <div className="rounded-xl border bg-card p-12 shadow-sm text-center">
-          <p className="text-sm text-muted-foreground">Select a week above or click "+ Add Week" to start building your program.</p>
+          <p className="text-sm text-muted-foreground">Select a week above or click &quot;+ Add Week&quot; to start building your program.</p>
         </div>
       )}
     </div>
