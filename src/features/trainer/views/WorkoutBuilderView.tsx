@@ -1,35 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { programService } from "../services/program.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+interface ExerciseSet {
+  setNumber: number;
+  reps: number;
+  weight: number;
+}
+
+interface AssignedExercise {
+  id: number;
+  exerciseId?: number;
+  name: string;
+  difficulty?: string;
+  equipment?: string[];
+  sets: ExerciseSet[] | number;
+  reps?: number;
+  rest: number;
+}
+
+interface LibraryExercise {
+  id: number;
+  name: string;
+  difficulty: string;
+  equipment: string[];
+  instructions: string;
+  illustrations: string[];
+}
+
+interface WorkoutDetail {
+  id: number;
+  name: string;
+  exercises?: AssignedExercise[];
+}
+
 export default function WorkoutBuilderView() {
   const params = useParams();
   const workoutId = Number(params.workoutId);
 
-  const [workout, setWorkout] = useState<any>(null);
-  const [exercises, setExercises] = useState<any[]>([]);
-  const [libraryExercises, setLibraryExercises] = useState<any[]>([]);
+  const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
+  const [exercises, setExercises] = useState<AssignedExercise[]>([]);
+  const [libraryExercises, setLibraryExercises] = useState<LibraryExercise[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<number[]>([]);
-  const [searchQuery, setSearchQuery] = useState(""); // Search bar state
+  const [searchQuery, setSearchQuery] = useState("");
   
-  // State for editing reps/sets modal
-  const [editingExercise, setEditingExercise] = useState<any>(null);
+  const [editingExercise, setEditingExercise] = useState<AssignedExercise | null>(null);
   const [setsCount, setSetsCount] = useState<number | string>(3);
   const [repsCount, setRepsCount] = useState<number | string>(10);
   const [restTime, setRestTime] = useState<number | string>(60);
 
-  // State for editing workout name inline
   const [isEditingWorkoutName, setIsEditingWorkoutName] = useState(false);
   const [workoutNameInput, setWorkoutNameInput] = useState("");
 
-  // Drag and drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -48,10 +77,9 @@ export default function WorkoutBuilderView() {
         const fetchedLib = exercisesRes.data.data.exercises || exercisesRes.data.data || [];
         setLibraryExercises(fetchedLib);
 
-        // Map and resolve exercise names safely, ensuring sets is an array or structure
         const rawExercises = fetchedWorkout.exercises || [];
-        const formattedExercises = rawExercises.map((ex: any) => {
-          const matchLib = fetchedLib.find((l: any) => l.id === ex.exerciseId);
+        const formattedExercises = rawExercises.map((ex: AssignedExercise) => {
+          const matchLib = fetchedLib.find((l: LibraryExercise) => l.id === ex.exerciseId);
           return {
             ...ex,
             name: ex.name || matchLib?.name || "Exercise",
@@ -89,7 +117,12 @@ export default function WorkoutBuilderView() {
         const res = await programService.addExerciseToWorkout({
           workoutTemplateId: workoutId,
           exerciseId: exerciseId,
-          sets: [{ setNumber: 1, reps: 10, weight: 0 }]
+          sequenceNumber: exercises.length + 1,
+          defaultSets: 3,
+          defaultReps: "10",
+          defaultRestTimeSeconds: 60,
+          defaultDurationMinutes: 0,
+          defaultWeight: 0
         } as any);
 
         const newEx = res.data.data;
@@ -98,7 +131,7 @@ export default function WorkoutBuilderView() {
           exerciseId: exerciseId,
           name: exerciseDef?.name || "Custom Exercise",
           difficulty: exerciseDef?.difficulty || "Intermediate",
-          equipment: exerciseDef?.equipment?.[0] || "Dumbbell",
+          equipment: exerciseDef?.equipment || ["Dumbbell"],
           sets: [{ setNumber: 1, reps: 10, weight: 0 }],
           rest: 60
         }]);
@@ -127,13 +160,12 @@ export default function WorkoutBuilderView() {
     setExercises(updated);
   };
 
-  // Drag and Drop Handlers
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
@@ -151,7 +183,7 @@ export default function WorkoutBuilderView() {
   };
 
   const handleSaveWorkoutName = () => {
-    if (!workoutNameInput.trim()) return;
+    if (!workoutNameInput.trim() || !workout) return;
     setWorkout({ ...workout, name: workoutNameInput.trim() });
     setIsEditingWorkoutName(false);
   };
@@ -214,7 +246,6 @@ export default function WorkoutBuilderView() {
         </Button>
       </div>
 
-      {/* Assigned Exercises List with Drag-and-Drop & Reordering */}
       <div className="space-y-4">
         <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Assigned Exercises</h4>
         
@@ -236,7 +267,7 @@ export default function WorkoutBuilderView() {
                 key={exercise.id} 
                 draggable
                 onDragStart={(e) => handleDragStart(e, index)}
-                onDragOver={(e) => handleDragOver(e, index)}
+                onDragOver={(e) => handleDragOver(e)}
                 onDrop={(e) => handleDrop(e, index)}
                 className="flex items-center justify-between p-4 rounded-lg border bg-background shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
               >
@@ -295,7 +326,6 @@ export default function WorkoutBuilderView() {
         )}
       </div>
 
-      {/* Multi-Select Exercise Library Modal with Search Bar */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl space-y-4">
@@ -304,7 +334,6 @@ export default function WorkoutBuilderView() {
               <Button variant="ghost" size="sm" onClick={() => { setIsModalOpen(false); setSearchQuery(""); }}>✕</Button>
             </div>
 
-            {/* Search Bar */}
             <div>
               <Input 
                 placeholder="Search exercises by name..." 
@@ -336,7 +365,7 @@ export default function WorkoutBuilderView() {
                           <h5 className="font-medium text-sm">{libEx.name}</h5>
                           {isAlreadyAdded && <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-semibold">Added</span>}
                         </div>
-                        <p className="text-xs text-muted-foreground">{libEx.difficulty} • {libEx.equipment?.join(", ")}</p>
+                        <p className="text-xs text-muted-foreground">{libEx.difficulty} &bull; {libEx.equipment?.join(", ")}</p>
                       </div>
                       {!isAlreadyAdded && (
                         <input 
@@ -367,7 +396,6 @@ export default function WorkoutBuilderView() {
         </div>
       )}
 
-      {/* Edit Reps & Sets Modal */}
       {editingExercise && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl space-y-4">
