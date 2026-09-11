@@ -1,22 +1,51 @@
 import { http, HttpResponse } from "msw";
 import exercisesData from "../data/exercises.json";
 
-// Persistent helpers using localStorage so data survives sidebar navigation and reloads
-const getStorage = (key: string, fallback: any) => {
+interface TemplatePlan {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  durationWeekTemplates: number;
+  isFav: boolean;
+}
+
+interface TemplateBody {
+  name: string;
+  description: string;
+}
+
+interface WeekBody {
+  sequenceNumber: number;
+  planTemplateId: number;
+}
+
+interface WorkoutBody {
+  name: string;
+  sequenceNumber: number;
+  weekTemplateId: number;
+}
+
+interface ExerciseBody {
+  workoutTemplateId: number;
+  exerciseId: number;
+  sets: unknown[];
+}
+
+const getStorage = <T>(key: string, fallback: T): T => {
   if (typeof window === "undefined") return fallback;
   const item = localStorage.getItem(key);
   return item ? JSON.parse(item) : fallback;
 };
 
-const setStorage = (key: string, data: any) => {
+const setStorage = <T>(key: string, data: T): void => {
   if (typeof window === "undefined") return;
   localStorage.setItem(key, JSON.stringify(data));
 };
 
 export const programHandlers = [
-  // 1. Get all templates (includes saved drafts)
   http.get('/api/plans/templates', () => {
-    const customTemplates = getStorage("msw_custom_templates", [
+    const customTemplates = getStorage<TemplatePlan[]>("msw_custom_templates", [
       { id: 1, name: "Master Hypertrophy Plan", description: "Advanced volume training block", status: "DRAFT", durationWeekTemplates: 4, isFav: true },
       { id: 2, name: "Custom Hypertrophy Plan", description: "Hypertrophy focus routine", status: "ACTIVE", durationWeekTemplates: 4, isFav: false }
     ]);
@@ -27,7 +56,7 @@ export const programHandlers = [
   }),
 
   http.get('*/api/plans/templates', () => {
-    const customTemplates = getStorage("msw_custom_templates", [
+    const customTemplates = getStorage<TemplatePlan[]>("msw_custom_templates", [
       { id: 1, name: "Master Hypertrophy Plan", description: "Advanced volume training block", status: "DRAFT", durationWeekTemplates: 4, isFav: true },
       { id: 2, name: "Custom Hypertrophy Plan", description: "Hypertrophy focus routine", status: "ACTIVE", durationWeekTemplates: 4, isFav: false }
     ]);
@@ -37,9 +66,8 @@ export const programHandlers = [
     });
   }),
 
-  // 2. Create template / Save Draft
   http.post('/api/plans/templates', async ({ request }) => {
-    const body = (await request.json()) as { name: string; description: string };
+    const body = (await request.json()) as TemplateBody;
     const newPlanId = Date.now();
     const newPlan = {
       planId: newPlanId,
@@ -50,14 +78,14 @@ export const programHandlers = [
       weeks: []
     };
 
-    const templates = getStorage("msw_custom_templates", []);
+    const templates = getStorage<TemplatePlan[]>("msw_custom_templates", []);
     setStorage("msw_custom_templates", [newPlan, ...templates]);
 
     return HttpResponse.json({ data: newPlan }, { status: 200 });
   }),
 
   http.post('*/api/plans/templates', async ({ request }) => {
-    const body = (await request.json()) as { name: string; description: string };
+    const body = (await request.json()) as TemplateBody;
     const newPlanId = Date.now();
     const newPlan = {
       planId: newPlanId,
@@ -68,17 +96,16 @@ export const programHandlers = [
       weeks: []
     };
 
-    const templates = getStorage("msw_custom_templates", []);
+    const templates = getStorage<TemplatePlan[]>("msw_custom_templates", []);
     setStorage("msw_custom_templates", [newPlan, ...templates]);
 
     return HttpResponse.json({ data: newPlan }, { status: 200 });
   }),
 
-  // 3. Get template detail & its weeks (Auto-registers ID if it came from query params/client generation)
   http.get('/api/plans/templates/:id', ({ params }) => {
     const { id } = params;
     const templateIdNum = Number(id);
-    const weeksStore = getStorage("msw_template_weeks", {});
+    const weeksStore = getStorage<Record<number, unknown[]>>("msw_template_weeks", {});
     
     return HttpResponse.json({
       data: {
@@ -93,7 +120,7 @@ export const programHandlers = [
   http.get('*/api/plans/templates/:id', ({ params }) => {
     const { id } = params;
     const templateIdNum = Number(id);
-    const weeksStore = getStorage("msw_template_weeks", {});
+    const weeksStore = getStorage<Record<number, unknown[]>>("msw_template_weeks", {});
     
     return HttpResponse.json({
       data: {
@@ -105,46 +132,40 @@ export const programHandlers = [
     });
   }),
 
-  // 4. Create Week
   http.post('/api/plans/templates/weeks', async ({ request }) => {
-    const body = (await request.json()) as { sequenceNumber: number; planTemplateId: number };
+    const body = (await request.json()) as WeekBody;
     const newWeekId = Date.now();
     const newWeek = { id: newWeekId, weekId: newWeekId, ...body, workouts: [] };
 
-    const weeksStore = getStorage("msw_template_weeks", {});
+    const weeksStore = getStorage<Record<number, unknown[]>>("msw_template_weeks", {});
     if (!weeksStore[body.planTemplateId]) {
       weeksStore[body.planTemplateId] = [];
     }
-    if (!weeksStore[body.planTemplateId].some((w: any) => w.id === newWeekId)) {
-      weeksStore[body.planTemplateId].push(newWeek);
-    }
+    weeksStore[body.planTemplateId].push(newWeek);
     setStorage("msw_template_weeks", weeksStore);
 
     return HttpResponse.json({ data: newWeek }, { status: 200 });
   }),
 
   http.post('*/api/plans/templates/weeks', async ({ request }) => {
-    const body = (await request.json()) as { sequenceNumber: number; planTemplateId: number };
+    const body = (await request.json()) as WeekBody;
     const newWeekId = Date.now();
     const newWeek = { id: newWeekId, weekId: newWeekId, ...body, workouts: [] };
 
-    const weeksStore = getStorage("msw_template_weeks", {});
+    const weeksStore = getStorage<Record<number, unknown[]>>("msw_template_weeks", {});
     if (!weeksStore[body.planTemplateId]) {
       weeksStore[body.planTemplateId] = [];
     }
-    if (!weeksStore[body.planTemplateId].some((w: any) => w.id === newWeekId)) {
-      weeksStore[body.planTemplateId].push(newWeek);
-    }
+    weeksStore[body.planTemplateId].push(newWeek);
     setStorage("msw_template_weeks", weeksStore);
 
     return HttpResponse.json({ data: newWeek }, { status: 200 });
   }),
 
-  // 5. Get Week detail & workouts (Auto-registers empty workouts list if dynamically accessed)
   http.get('/api/plans/templates/weeks/:id', ({ params }) => {
     const { id } = params;
     const weekIdNum = Number(id);
-    const workoutsStore = getStorage("msw_week_workouts", {});
+    const workoutsStore = getStorage<Record<number, unknown[]>>("msw_week_workouts", {});
 
     return HttpResponse.json({
       data: {
@@ -157,7 +178,7 @@ export const programHandlers = [
   http.get('*/api/plans/templates/weeks/:id', ({ params }) => {
     const { id } = params;
     const weekIdNum = Number(id);
-    const workoutsStore = getStorage("msw_week_workouts", {});
+    const workoutsStore = getStorage<Record<number, unknown[]>>("msw_week_workouts", {});
 
     return HttpResponse.json({
       data: {
@@ -167,13 +188,12 @@ export const programHandlers = [
     });
   }),
 
-  // 6. Create Workout
   http.post('/api/plans/templates/workouts', async ({ request }) => {
-    const body = (await request.json()) as { name: string; sequenceNumber: number; weekTemplateId: number };
+    const body = (await request.json()) as WorkoutBody;
     const newWorkoutId = Date.now();
     const newWorkout = { id: newWorkoutId, workoutTemplateId: newWorkoutId, ...body, exercises: [] };
 
-    const workoutsStore = getStorage("msw_week_workouts", {});
+    const workoutsStore = getStorage<Record<number, unknown[]>>("msw_week_workouts", {});
     if (!workoutsStore[body.weekTemplateId]) {
       workoutsStore[body.weekTemplateId] = [];
     }
@@ -184,11 +204,11 @@ export const programHandlers = [
   }),
 
   http.post('*/api/plans/templates/workouts', async ({ request }) => {
-    const body = (await request.json()) as { name: string; sequenceNumber: number; weekTemplateId: number };
+    const body = (await request.json()) as WorkoutBody;
     const newWorkoutId = Date.now();
     const newWorkout = { id: newWorkoutId, workoutTemplateId: newWorkoutId, ...body, exercises: [] };
 
-    const workoutsStore = getStorage("msw_week_workouts", {});
+    const workoutsStore = getStorage<Record<number, unknown[]>>("msw_week_workouts", {});
     if (!workoutsStore[body.weekTemplateId]) {
       workoutsStore[body.weekTemplateId] = [];
     }
@@ -198,16 +218,15 @@ export const programHandlers = [
     return HttpResponse.json({ data: newWorkout }, { status: 200 });
   }),
 
-  // 7. Get Workout detail & exercises (Auto-registers session if accessed directly)
   http.get('/api/plans/templates/workouts/:id', ({ params }) => {
     const { id } = params;
     const workoutIdNum = Number(id);
-    const workoutsStore = getStorage("msw_week_workouts", {});
-    const exercisesStore = getStorage("msw_workout_exercises", {});
+    const workoutsStore = getStorage<Record<number, Array<{ id?: number; workoutTemplateId?: number; name: string }>>>("msw_week_workouts", {});
+    const exercisesStore = getStorage<Record<number, unknown[]>>("msw_workout_exercises", {});
 
     let foundWorkoutName = "Workout Session";
     for (const weekId in workoutsStore) {
-      const match = workoutsStore[weekId].find((w: any) => w.id === workoutIdNum || w.workoutTemplateId === workoutIdNum);
+      const match = workoutsStore[Number(weekId)].find((w) => w.id === workoutIdNum || w.workoutTemplateId === workoutIdNum);
       if (match) {
         foundWorkoutName = match.name;
         break;
@@ -226,12 +245,12 @@ export const programHandlers = [
   http.get('*/api/plans/templates/workouts/:id', ({ params }) => {
     const { id } = params;
     const workoutIdNum = Number(id);
-    const workoutsStore = getStorage("msw_week_workouts", {});
-    const exercisesStore = getStorage("msw_workout_exercises", {});
+    const workoutsStore = getStorage<Record<number, Array<{ id?: number; workoutTemplateId?: number; name: string }>>>("msw_week_workouts", {});
+    const exercisesStore = getStorage<Record<number, unknown[]>>("msw_workout_exercises", {});
 
     let foundWorkoutName = "Workout Session";
     for (const weekId in workoutsStore) {
-      const match = workoutsStore[weekId].find((w: any) => w.id === workoutIdNum || w.workoutTemplateId === workoutIdNum);
+      const match = workoutsStore[Number(weekId)].find((w) => w.id === workoutIdNum || w.workoutTemplateId === workoutIdNum);
       if (match) {
         foundWorkoutName = match.name;
         break;
@@ -247,13 +266,12 @@ export const programHandlers = [
     });
   }),
 
-  // 8. Add Exercise to Workout
   http.post('/api/plans/templates/exercises', async ({ request }) => {
-    const body = (await request.json()) as { workoutTemplateId: number; exerciseId: number; sets: any[] };
+    const body = (await request.json()) as ExerciseBody;
     const newExerciseId = Date.now();
     const newExercise = { id: newExerciseId, ...body };
 
-    const exercisesStore = getStorage("msw_workout_exercises", {});
+    const exercisesStore = getStorage<Record<number, unknown[]>>("msw_workout_exercises", {});
     if (!exercisesStore[body.workoutTemplateId]) {
       exercisesStore[body.workoutTemplateId] = [];
     }
@@ -264,11 +282,11 @@ export const programHandlers = [
   }),
 
   http.post('*/api/plans/templates/exercises', async ({ request }) => {
-    const body = (await request.json()) as { workoutTemplateId: number; exerciseId: number; sets: any[] };
+    const body = (await request.json()) as ExerciseBody;
     const newExerciseId = Date.now();
     const newExercise = { id: newExerciseId, ...body };
 
-    const exercisesStore = getStorage("msw_workout_exercises", {});
+    const exercisesStore = getStorage<Record<number, unknown[]>>("msw_workout_exercises", {});
     if (!exercisesStore[body.workoutTemplateId]) {
       exercisesStore[body.workoutTemplateId] = [];
     }
@@ -278,11 +296,10 @@ export const programHandlers = [
     return HttpResponse.json({ data: newExercise }, { status: 200 });
   }),
 
-  // 9. Get Exercise Library (Loaded from exercises.json)
   http.get('/api/exercises', () => {
     const list = Array.isArray(exercisesData) 
       ? exercisesData 
-      : (exercisesData as any).exercises || (exercisesData as any).data || [];
+      : (exercisesData as { exercises?: unknown[]; data?: unknown[] }).exercises || (exercisesData as { exercises?: unknown[]; data?: unknown[] }).data || [];
 
     return HttpResponse.json({
       data: {
@@ -295,7 +312,7 @@ export const programHandlers = [
   http.get('*/api/exercises', () => {
     const list = Array.isArray(exercisesData) 
       ? exercisesData 
-      : (exercisesData as any).exercises || (exercisesData as any).data || [];
+      : (exercisesData as { exercises?: unknown[]; data?: unknown[] }).exercises || (exercisesData as { exercises?: unknown[]; data?: unknown[] }).data || [];
 
     return HttpResponse.json({
       data: {
