@@ -6,7 +6,14 @@ import { useRouter } from "@/i18n/navigation";
 import { programService } from "../services/program.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import WorkoutBuilderView from "./WorkoutBuilderView"; // Import Tier 3 view
+import WorkoutBuilderView from "./WorkoutBuilderView";
+
+interface WorkoutItem {
+  id: number;
+  workoutTemplateId?: number;
+  name: string;
+  sequenceNumber: number;
+}
 
 export default function WeekBuilderView() {
   const params = useParams();
@@ -17,7 +24,7 @@ export default function WeekBuilderView() {
   const weekId = Number(params.weekId);
   const workoutId = params.workoutId ? Number(params.workoutId) : null;
 
-  const [workouts, setWorkouts] = useState<any[]>([]);
+  const [workouts, setWorkouts] = useState<WorkoutItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,7 +53,7 @@ export default function WeekBuilderView() {
         name: workoutName.trim(),
         sequenceNumber: workouts.length,
         weekTemplateId: weekId,
-      } as any);
+      });
       
       const newWorkout = res.data.data;
       const newWorkoutId = newWorkout.workoutTemplateId || newWorkout.id;
@@ -71,13 +78,11 @@ export default function WeekBuilderView() {
 
   return (
     <div className="space-y-6">
-      {/* Workouts (Days) Navigation Bar */}
       <div className="flex items-center gap-2 border-b pb-4 overflow-x-auto bg-muted/10 p-3 rounded-lg">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mr-2">Workouts (Days):</span>
         {workouts.map((workout) => (
           <Button
             key={workout.id}
-            // Highlights the active day button dynamically
             variant={workoutId === workout.id ? "default" : "outline"}
             size="sm"
             onClick={() => router.push(`/trainer/template/${templateId}/${weekId}/${workout.id}?${searchParams.toString()}`)}
@@ -90,12 +95,11 @@ export default function WeekBuilderView() {
         </Button>
       </div>
 
-      {/* Conditionally render Tier 3 (WorkoutBuilderView) when a specific workout day is selected */}
       {workoutId ? (
         <WorkoutBuilderView />
       ) : (
         <div className="rounded-xl border bg-card p-12 shadow-sm text-center">
-          <p className="text-sm text-muted-foreground">Select a workout day above or click "+ Add Workout" to configure sets and exercises.</p>
+          <p className="text-sm text-muted-foreground">Select a workout day above or click &quot;+ Add Workout&quot; to configure sets and exercises.</p>
         </div>
       )}
 

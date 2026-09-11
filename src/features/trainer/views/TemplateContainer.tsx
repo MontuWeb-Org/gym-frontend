@@ -2,20 +2,31 @@
 
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { RootState } from "@/store";
 import { fetchTemplates, createTemplate, PlanTemplate } from "../store/program.slice";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { TemplateCard } from "../components/TemplateCard";
 import { NewTemplateModal } from "../components/NewTemplateModal";
 
+interface PayloadData {
+  planId?: number | string;
+  id?: number | string;
+  data?: {
+    planId?: number | string;
+    id?: number | string;
+  };
+}
+
 export default function TemplatesContainer() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const rawTemplates = useAppSelector((state) => (state as any).trainerProgram?.templates);
+  
+  const rawTemplates = useAppSelector((state: RootState) => (state as unknown as Record<string, { templates?: PlanTemplate[] | { plans?: PlanTemplate[] } }>).trainerProgram?.templates || (state as unknown as Record<string, { templates?: PlanTemplate[] | { plans?: PlanTemplate[] } }>).trainer?.templates);
   const templates = Array.isArray(rawTemplates) 
     ? rawTemplates 
-    : (rawTemplates?.plans || []);
-  const status = useAppSelector((state) => (state as any).trainerProgram?.status || "idle");
+    : (rawTemplates && typeof rawTemplates === 'object' && 'plans' in rawTemplates && Array.isArray((rawTemplates as { plans?: PlanTemplate[] }).plans) ? (rawTemplates as { plans: PlanTemplate[] }).plans : []);
+  const status = useAppSelector((state: RootState) => (state as unknown as Record<string, { status?: string }>).trainerProgram?.status || (state as unknown as Record<string, { status?: string }>).trainer?.status || "idle");
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -30,7 +41,7 @@ export default function TemplatesContainer() {
     try {
       const resultAction = await dispatch(createTemplate({ name, description }));
       if (createTemplate.fulfilled.match(resultAction)) {
-        const payloadData = resultAction.payload as any;
+        const payloadData = resultAction.payload as PayloadData;
         const planId = payloadData?.planId || payloadData?.data?.planId || payloadData?.data?.id || payloadData?.id || Date.now();
         
         setIsCreating(false);
