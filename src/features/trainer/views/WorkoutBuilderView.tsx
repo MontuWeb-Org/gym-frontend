@@ -123,7 +123,16 @@ export default function WorkoutBuilderView() {
           defaultRestTimeSeconds: 60,
           defaultDurationMinutes: 0,
           defaultWeight: 0
-        } as any);
+        } as {
+          workoutTemplateId: number;
+          exerciseId: number;
+          sequenceNumber: number;
+          defaultSets: number;
+          defaultReps: string;
+          defaultRestTimeSeconds: number;
+          defaultDurationMinutes: number;
+          defaultWeight: number;
+        });
 
         const newEx = res.data.data;
         setExercises(prev => [...prev, {
