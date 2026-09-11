@@ -1,7 +1,4 @@
-"use client";
-
 import TemplateBuilderView from "@/features/trainer/views/TemplateBuilderView";
-
-export default function ProgramsView() {
+export default function Page() {
   return <TemplateBuilderView />;
 }
