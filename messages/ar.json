@@ -166,5 +166,31 @@
     "genericError": "فشل إرسال الدعوة. يرجى المحاولة مرة أخرى.",
     "cancel": "إلغاء",
     "sendInvite": "إرسال الدعوة"
+  },
+  "TraineeDetails": {
+    "backToTrainees": "العودة إلى قائمة المتدربين",
+    "joinedPrefix": "انضم في",
+    "message": "مراسلة",
+    "editProgram": "تعديل البرنامج",
+    "tabs": {
+      "overview": "نظرة عامة",
+      "sessionHistory": "سجل الجلسات",
+      "progressCharts": "مخططات التقدم",
+      "notes": "الملاحظات"
+    },
+    "metrics": {
+      "adherence": "نسبة الالتزام",
+      "streak": "السلسلة المستمرة",
+      "topLiftPr": "أعلى رقم قياسي"
+    },
+    "recentSessions": {
+      "title": "الجلسات الأخيرة",
+      "date": "التاريخ",
+      "session": "الجلسة",
+      "completed": "المكتمل",
+      "notes": "الملاحظات",
+      "empty": "لا توجد جلسات مسجلة مؤخراً."
+    },
+    "loading": "جاري تحميل تفاصيل المتدرب..."
   }
 }
