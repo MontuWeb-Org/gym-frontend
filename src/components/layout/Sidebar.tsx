@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight, Menu, X, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
@@ -27,11 +27,24 @@ export function Sidebar({
   baseUrl = "",
   user,
   activeTab,
-  activePath = "",
+  activePath,
   onItemClick,
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  // Fallback to active route from Next.js App Router if activePath is not passed
+  const currentPathname = usePathname();
+  const currentPath = activePath || currentPathname;
+
+  // Helper to safely construct URLs without double slashes
+  const resolveHref = (href: string) => {
+    if (!href) return baseUrl || "/";
+    if (href.startsWith("/")) return href; // Already an absolute route
+    
+    const cleanBase = baseUrl.replace(/\/$/, "");
+    return cleanBase ? `${cleanBase}/${href}` : `/${href}`;
+  };
 
   return (
     <>
@@ -97,20 +110,21 @@ export function Sidebar({
 
           <nav className="space-y-1.5">
             {items.map((item) => {
-              const fullHref = item.href ? `${baseUrl}/${item.href}`.replace(/\/+/g, '/') : baseUrl;
-              
+              const targetHref = resolveHref(item.href);
+
+              // Check active status
               const isActive = activeTab
                 ? activeTab === item.id
-                : activePath
-                  ? activePath === fullHref || activePath.startsWith(`${fullHref}/`)
-                  : false;
+                : currentPath === targetHref || 
+                  (targetHref !== "/" && 
+                   targetHref !== baseUrl && 
+                   currentPath.startsWith(`${targetHref}/`));
 
               return (
                 <Link
                   key={item.id}
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
+                  href={targetHref}
+                  onClick={() => {
                     setIsMobileOpen(false);
                     if (onItemClick) onItemClick(item);
                   }}
