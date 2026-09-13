@@ -37,9 +37,14 @@ export default function TrainerLayout({
     };
   });
 
-  // 2. Match active item against current URL path using ROUTES constants
+  // 2. Match active item against current URL path
   const activeItem =
     localizedSidebarItems.find((item) => {
+      // Template builder routes should keep the Templates sidebar item active.
+      if (pathname.includes("/trainer/template")) {
+        return item.id === "templates";
+      }
+
       if (
         item.href === ROUTES.TRAINER.ROOT ||
         item.href === ROUTES.TRAINER.DASHBOARD
@@ -49,6 +54,7 @@ export default function TrainerLayout({
           pathname === ROUTES.TRAINER.DASHBOARD
         );
       }
+
       return pathname.startsWith(item.href);
     }) ?? localizedSidebarItems[0];
 
@@ -59,10 +65,13 @@ export default function TrainerLayout({
     const matchedItem = localizedSidebarItems.find(
       (item) => item.id === segment || item.href.endsWith(`/${segment}`)
     );
+
     if (matchedItem) return matchedItem.label;
+
     if (t.has(segment as Parameters<typeof t>[0])) {
       return t(segment as Parameters<typeof t>[0]);
     }
+
     return segment.replace(/-/g, " ");
   };
 
@@ -94,6 +103,7 @@ export default function TrainerLayout({
                   {index > 0 && (
                     <ChevronRight className="size-3 rtl:rotate-180 shrink-0" />
                   )}
+
                   <span
                     className={
                       isLast

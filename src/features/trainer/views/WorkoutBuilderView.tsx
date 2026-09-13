@@ -34,6 +34,10 @@ export default function WorkoutBuilderView() {
 
   useEffect(() => {
     async function loadWorkoutData() {
+      if (!workoutId) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const [workoutRes, exercisesRes] = await Promise.all([
@@ -65,7 +69,7 @@ export default function WorkoutBuilderView() {
         setLoading(false);
       }
     }
-    if (workoutId) loadWorkoutData();
+    loadWorkoutData();
   }, [workoutId]);
 
   const toggleSelectExercise = (id: number) => {
