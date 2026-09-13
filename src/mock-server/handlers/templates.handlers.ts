@@ -53,12 +53,12 @@ export const templateHandlers = [
   http.put('/api/plans/templates/:id', async ({ params, request }) => {
     const { id } = params;
     const planIdNum = Number(id);
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as Record<string, unknown>;
     
     const customTemplates = getStorage<TemplatePlan[]>("msw_custom_templates", []);
     const index = customTemplates.findIndex(t => t.id === planIdNum);
     if (index !== -1) {
-      customTemplates[index] = { ...customTemplates[index], ...body };
+      customTemplates[index] = { ...customTemplates[index], ...body } as TemplatePlan;
       setStorage("msw_custom_templates", customTemplates);
     }
 
@@ -73,7 +73,9 @@ export const templateHandlers = [
       id: templateIdNum,
       name: `Custom Template #${templateIdNum}`,
       description: "Program workspace",
-      status: "DRAFT"
+      status: "DRAFT",
+      durationWeekTemplates: 0,
+      isFav: false
     };
     const weeksStore = getStorage<Record<number, unknown[]>>("msw_template_weeks", {});
     

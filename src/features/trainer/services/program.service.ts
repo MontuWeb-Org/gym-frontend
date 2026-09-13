@@ -68,7 +68,7 @@ export const programService = {
     defaultWeight?: number;
   }) => axios.put(`/api/plans/templates/exercises/${exerciseTemplateId}`, data),
 
-  reorderExercises: (workoutId: number, exercises: any[]) =>
+  reorderExercises: (workoutId: number, exercises: unknown[]) =>
     axios.put(`/api/plans/templates/workouts/${workoutId}/exercises/reorder`, { exercises }),
 
   // Trainees & Plan Assignments
