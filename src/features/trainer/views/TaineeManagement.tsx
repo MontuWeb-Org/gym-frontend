@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchTrainerTrainees } from "@/features/trainer/store/trainer.slice";
@@ -10,6 +11,7 @@ import { InvitationModal } from "../components/InvitationModal";
 
 export default function TraineeManagement() {
   const t = useTranslations("TraineeManagement");
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
@@ -22,7 +24,7 @@ export default function TraineeManagement() {
   }, [dispatch]);
 
   const handleOpenTrainee = (id: number) => {
-    // Navigate to trainee details profile
+    router.push(`/trainer/trainees/${id}`);
   };
 
   const handleInviteTrainee = () => {

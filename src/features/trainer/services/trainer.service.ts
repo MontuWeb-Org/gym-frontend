@@ -1,5 +1,5 @@
 import { authApi } from "@/lib/axios";
-import { GetTraineesQueryParams, GetTraineesResponse } from "../types/trainer.types";
+import { GetTraineesQueryParams, GetTraineesResponse, TraineeDetailedInfo } from "../types/trainer.types";
 
 export const trainerService = {
   async getTrainerTrainees(params?: GetTraineesQueryParams): Promise<GetTraineesResponse> {
@@ -11,4 +11,10 @@ export const trainerService = {
     });
     return response.data;
   },
+  async getTraineeDetailedInfo(traineeId: number): Promise<{ data: TraineeDetailedInfo }> {
+    const response = await authApi.get<{ data: TraineeDetailedInfo }>(
+      `/users/trainer/trainees/${traineeId}`
+    );
+    return response.data;
+  }
 };
