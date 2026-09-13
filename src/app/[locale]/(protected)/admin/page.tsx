@@ -1,4 +1,10 @@
+import { redirect } from "@/i18n/navigation";
 
-export default function AdminPage() {
-  return null; // Layout handles rendering the active tab view entirely
+interface AdminPageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function AdminPage({ params }: AdminPageProps) {
+  const { locale } = await params;
+  redirect({ href: "/admin/dashboard", locale });
 }

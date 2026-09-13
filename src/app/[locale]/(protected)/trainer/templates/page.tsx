@@ -1,4 +1,4 @@
-import TemplatesView from "@/components/views/trainer/TemplatesView";
+import TemplatesView from "@/features/trainer/views/TemplatesView";
 
 export default function TemplatesPage() {
   return <TemplatesView />;

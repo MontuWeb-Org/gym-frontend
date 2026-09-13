@@ -1,55 +1,44 @@
-
+// src/data/sidebars/trainerSidebar.data.tsx
 import { LayoutDashboard, Users, Dumbbell, FileText, CreditCard, Settings } from "lucide-react";
 import type { SidebarItem } from "@/data/sidebar.types";
-import TrainerDashboardView from "@/components/views/trainer/TrainerDashboardView";
-import TraineesView from "@/features/trainer/views/TaineeManagement";
-import ProgramsView from "@/components/views/trainer/ProgramsView";
-import TemplatesView from "@/components/views/trainer/TemplatesView";
-import BillingView from "@/components/views/trainer/BillingView";
-import TrainerSettingsView from "@/components/views/trainer/TrainerSettingsView";
+import { ROUTES } from "@/data/routes";
 
 export const TRAINER_SIDEBAR_DATA: SidebarItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    href: "", 
+    href: ROUTES.TRAINER.DASHBOARD,
     icon: <LayoutDashboard className="size-5" />,
     badge: "Trainer",
-    component: TrainerDashboardView,
   },
   {
     id: "trainees",
     label: "Trainees",
-    href: "trainees",
+    href: ROUTES.TRAINER.TRAINEES,
     icon: <Users className="size-5" />,
-    component: TraineesView,
   },
   {
     id: "programs",
     label: "Programs",
-    href: "programs",
+    href: ROUTES.TRAINER.PROGRAMS, 
     icon: <Dumbbell className="size-5" />,
-    component: ProgramsView,
   },
   {
     id: "templates",
     label: "Templates",
-    href: "templates",
+    href: ROUTES.TRAINER.TEMPLATES,
     icon: <FileText className="size-5" />,
-    component: TemplatesView,
   },
   {
     id: "billing",
     label: "Billing",
-    href: "billing",
+    href: ROUTES.TRAINER.BILLING,
     icon: <CreditCard className="size-5" />,
-    component: BillingView,
   },
   {
     id: "settings",
     label: "Settings",
-    href: "settings",
+    href: ROUTES.TRAINER.SETTINGS,
     icon: <Settings className="size-5" />,
-    component: TrainerSettingsView,
   },
 ];
