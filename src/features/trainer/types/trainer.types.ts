@@ -28,3 +28,26 @@ export interface GetTraineesResponse {
   };
   pagination: OffsetPagination;
 }
+
+export interface TraineeSessionRecord {
+  id: string;
+  date: string;
+  sessionName: string;
+  completedSets: string;
+  notes?: string;
+}
+
+export interface TraineeDetailedInfo {
+  id: number;
+  name: string;
+  adherence: number;
+  programName: string;
+  lastSessionDate: string;
+  status: TraineeStatus;
+  joinedAt: string;
+  programJoinedAt: string;
+  streakWeeks?: number;
+  topLiftPr?: string;
+  recentSessions?: TraineeSessionRecord[];
+  email: string;
+}
