@@ -1,6 +1,22 @@
 import { http, HttpResponse } from "msw";
 import exercisesData from "../data/exercises.json";
 
+interface WorkoutItem {
+  id: number;
+  workoutTemplateId?: number;
+  name?: string;
+  [key: string]: unknown;
+}
+
+interface ExerciseItem {
+  id: number;
+  exerciseId?: number;
+  sets?: Array<{ weight?: number; [key: string]: unknown }>;
+  reps?: string | number;
+  rest?: number;
+  [key: string]: unknown;
+}
+
 const getStorage = <T>(key: string, fallback: T): T => {
   if (typeof window === "undefined") return fallback;
   const item = localStorage.getItem(key);
@@ -18,7 +34,7 @@ export const workoutHandlers = [
     const newWorkoutId = Date.now();
     const newWorkout = { id: newWorkoutId, workoutTemplateId: newWorkoutId, ...body, exercises: [] };
 
-    const workoutsStore = getStorage<Record<number, unknown[]>>("msw_week_workouts", {});
+    const workoutsStore = getStorage<Record<number, WorkoutItem[]>>("msw_week_workouts", {});
     if (!workoutsStore[body.weekTemplateId]) {
       workoutsStore[body.weekTemplateId] = [];
     }
@@ -31,11 +47,11 @@ export const workoutHandlers = [
   http.put('/api/plans/templates/workouts/:id', async ({ params, request }) => {
     const { id } = params;
     const workoutIdNum = Number(id);
-    const body = (await request.json().catch(() => ({}))) as any;
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     
-    const workoutsStore = getStorage<Record<number, any[]>>("msw_week_workouts", {});
+    const workoutsStore = getStorage<Record<number, WorkoutItem[]>>("msw_week_workouts", {});
     for (const weekId in workoutsStore) {
-      workoutsStore[weekId] = workoutsStore[weekId].map(w => {
+      workoutsStore[Number(weekId)] = workoutsStore[Number(weekId)].map((w: WorkoutItem) => {
         if (w.id === workoutIdNum || w.workoutTemplateId === workoutIdNum) {
           return { ...w, ...body };
         }
@@ -50,13 +66,13 @@ export const workoutHandlers = [
   http.get('/api/plans/templates/workouts/:id', ({ params }) => {
     const { id } = params;
     const workoutIdNum = Number(id);
-    const workoutsStore = getStorage<Record<number, Array<{ id?: number; workoutTemplateId?: number; name: string }>>>("msw_week_workouts", {});
+    const workoutsStore = getStorage<Record<number, WorkoutItem[]>>("msw_week_workouts", {});
     const exercisesStore = getStorage<Record<number, unknown[]>>("msw_workout_exercises", {});
 
     let foundWorkoutName = "Workout Session";
     for (const weekId in workoutsStore) {
       const match = workoutsStore[Number(weekId)].find((w) => w.id === workoutIdNum || w.workoutTemplateId === workoutIdNum);
-      if (match) {
+      if (match && match.name) {
         foundWorkoutName = match.name;
         break;
       }
@@ -89,9 +105,9 @@ export const workoutHandlers = [
   http.put('/api/plans/templates/exercises/:id', async ({ params, request }) => {
     const { id } = params;
     const exerciseIdNum = Number(id);
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as Record<string, unknown>;
     
-    const exercisesStore = getStorage<Record<number, any[]>>("msw_workout_exercises", {});
+    const exercisesStore = getStorage<Record<number, ExerciseItem[]>>("msw_workout_exercises", {});
     
     // Map frontend payload fields (defaultSets, defaultReps, defaultRestTimeSeconds)
     const newSetsCount = body.defaultSets !== undefined ? Number(body.defaultSets) : (body.sets !== undefined ? Number(body.sets) : undefined);
@@ -99,9 +115,9 @@ export const workoutHandlers = [
     const newRest = body.defaultRestTimeSeconds !== undefined ? Number(body.defaultRestTimeSeconds) : (body.rest !== undefined ? Number(body.rest) : undefined);
 
     for (const workoutId in exercisesStore) {
-      if (!Array.isArray(exercisesStore[workoutId])) continue;
+      if (!Array.isArray(exercisesStore[Number(workoutId)])) continue;
       
-      exercisesStore[workoutId] = exercisesStore[workoutId].map(ex => {
+      exercisesStore[Number(workoutId)] = exercisesStore[Number(workoutId)].map((ex: ExerciseItem) => {
         if (ex.id === exerciseIdNum || ex.exerciseId === exerciseIdNum) {
           const targetSetsCount = newSetsCount !== undefined ? newSetsCount : (ex.sets?.length || 3);
           const targetReps = newReps !== undefined ? newReps : (ex.reps || 10);
@@ -135,9 +151,9 @@ export const workoutHandlers = [
   http.put('/api/plans/templates/workouts/:id/exercises/reorder', async ({ params, request }) => {
     const { id } = params;
     const workoutIdNum = Number(id);
-    const body = (await request.json().catch(() => ({}))) as { exercises: any[] };
+    const body = (await request.json().catch(() => ({}))) as { exercises: unknown[] };
     
-    const exercisesStore = getStorage<Record<number, any[]>>("msw_workout_exercises", {});
+    const exercisesStore = getStorage<Record<number, unknown[]>>("msw_workout_exercises", {});
     exercisesStore[workoutIdNum] = body.exercises;
     setStorage("msw_workout_exercises", exercisesStore);
 
