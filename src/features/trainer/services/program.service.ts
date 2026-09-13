@@ -1,5 +1,15 @@
 import axios from "axios";
 
+axios.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 export const programService = {
   // Plan Templates
   getTemplates: (page = 1, limit = 10) => 
@@ -11,6 +21,9 @@ export const programService = {
   getTemplateDetail: (planId: number) => 
     axios.get(`/api/plans/templates/${planId}`),
   
+  updatePlanTemplate: (planId: number, data: { name?: string; description?: string; status?: "DRAFT" | "ACTIVE" }) => 
+    axios.put(`/api/plans/templates/${planId}`, data),
+
   duplicateTemplate: (planId: number) => 
     axios.post(`/api/plans/templates/${planId}/duplicate`),
 
@@ -24,6 +37,9 @@ export const programService = {
   // Workout Templates
   createWorkout: (data: { name: string; sequenceNumber: number; weekTemplateId: number }) => 
     axios.post("/api/plans/templates/workouts", data),
+
+  updateWorkout: (workoutId: number, data: { name?: string; sequenceNumber?: number }) =>
+    axios.put(`/api/plans/templates/workouts/${workoutId}`, data),
   
   getWorkoutDetail: (workoutId: number) => 
     axios.get(`/api/plans/templates/workouts/${workoutId}`),
@@ -42,4 +58,27 @@ export const programService = {
     defaultDurationMinutes: number;
     defaultWeight: number;
   }) => axios.post("/api/plans/templates/exercises", data),
+
+  updateWorkoutExercise: (exerciseTemplateId: number, data: {
+    sequenceNumber?: number;
+    defaultReps?: string;
+    defaultSets?: number;
+    defaultRestTimeSeconds?: number;
+    defaultDurationMinutes?: number;
+    defaultWeight?: number;
+  }) => axios.put(`/api/plans/templates/exercises/${exerciseTemplateId}`, data),
+
+  reorderExercises: (workoutId: number, exercises: any[]) =>
+    axios.put(`/api/plans/templates/workouts/${workoutId}/exercises/reorder`, { exercises }),
+
+  // Trainees & Plan Assignments
+  getTrainees: (page = 1, limit = 10) => 
+    axios.get(`/api/users/trainer/trainees?page=${page}&limit=${limit}`),
+
+  assignPlan: (data: {
+    planTemplateId: number;
+    traineeId: number;
+    createdAt: string;
+    endedAt: string;
+  }) => axios.post("/api/plans/assignments", data),
 };

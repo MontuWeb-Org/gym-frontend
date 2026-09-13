@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { AssignedExercise } from "../../types/workout-builder.types";
+import { AssignedExercise } from "../../../types/workout-builder.types";
 
 interface AssignedExerciseListProps {
   exercises: AssignedExercise[];

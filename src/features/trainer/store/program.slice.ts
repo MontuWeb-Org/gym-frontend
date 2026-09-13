@@ -82,6 +82,24 @@ export const fetchExercises = createAsyncThunk(
   }
 );
 
+// Publish a template (updates status to ACTIVE)
+export const publishTemplate = createAsyncThunk(
+  "trainerProgram/publishTemplate",
+  async (planId: number) => {
+    const response = await programService.updatePlanTemplate(planId, { status: "ACTIVE" });
+    return response.data.data;
+  }
+);
+
+// Assign a plan to a trainee
+export const assignPlanToTrainee = createAsyncThunk(
+  "trainerProgram/assignPlanToTrainee",
+  async (data: { planTemplateId: number; traineeId: number; createdAt: string; endedAt: string }) => {
+    const response = await programService.assignPlan(data);
+    return response.data.data;
+  }
+);
+
 export const programSlice = createSlice({
   name: "trainerProgram",
   initialState,
@@ -114,6 +132,13 @@ export const programSlice = createSlice({
       })
       .addCase(fetchExercises.fulfilled, (state, action) => {
         state.exercises = action.payload;
+      })
+      .addCase(publishTemplate.fulfilled, (state, action) => {
+        // Update local template status if it exists in state
+        const updatedPlan = action.payload;
+        if (state.currentTemplate && state.currentTemplate.id === updatedPlan?.planId) {
+          state.currentTemplate.status = "ACTIVE";
+        }
       });
   },
 });

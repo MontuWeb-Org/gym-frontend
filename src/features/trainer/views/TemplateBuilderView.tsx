@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { programService } from "../services/program.service";
 import { Button } from "@/components/ui/button";
 import WeekBuilderView from "./WeekBuilderView";
+import { PublishAssignModal } from "../components/program-builder/PublishAssignModal";
 
 interface WeekItem {
   id: number;
@@ -21,35 +22,20 @@ interface TemplateDetail {
   weeks?: WeekItem[];
 }
 
-interface StoredTemplate {
-  id: number;
-  name: string;
-  description: string;
-  status: string;
-  durationWeekTemplates: number;
-  isFav: boolean;
-}
-
 export default function TemplateBuilderView() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
   
   const templateId = Number(params.templateId);
   const weekId = params.weekId ? Number(params.weekId) : null;
-  const paramName = searchParams.get("name");
-  const paramDesc = searchParams.get("desc");
 
   const [template, setTemplate] = useState<TemplateDetail | null>(null);
   const [weeks, setWeeks] = useState<WeekItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadTemplate() {
-      if (paramName) {
-        setTemplate({ name: paramName, description: paramDesc || "" });
-      }
-
       try {
         const res = await programService.getTemplateDetail(templateId);
         const fetchedTemplate = res.data.data;
@@ -62,52 +48,12 @@ export default function TemplateBuilderView() {
       }
     }
     if (templateId) loadTemplate();
-  }, [templateId, paramName, paramDesc]);
+  }, [templateId]);
 
-  const displayTitle = paramName || template?.name || "Untitled Template";
-  const displayDesc = paramDesc || template?.description || "No description provided.";
+  const displayTitle = template?.name || "Untitled Template";
+  const displayDesc = template?.description || "No description provided.";
 
   const handleSaveDraft = () => {
-    const currentTemplates: StoredTemplate[] = JSON.parse(localStorage.getItem("msw_custom_templates") || "[]");
-    const templateData: StoredTemplate = {
-      id: templateId,
-      name: displayTitle,
-      description: displayDesc,
-      status: "DRAFT",
-      durationWeekTemplates: weeks.length || 1,
-      isFav: false
-    };
-
-    const existingIndex = currentTemplates.findIndex((t) => t.id === templateId);
-    if (existingIndex >= 0) {
-      currentTemplates[existingIndex] = templateData;
-    } else {
-      currentTemplates.unshift(templateData);
-    }
-    localStorage.setItem("msw_custom_templates", JSON.stringify(currentTemplates));
-
-    router.push(`/trainer/templates`);
-  };
-
-  const handlePublish = () => {
-    const currentTemplates: StoredTemplate[] = JSON.parse(localStorage.getItem("msw_custom_templates") || "[]");
-    const templateData: StoredTemplate = {
-      id: templateId,
-      name: displayTitle,
-      description: displayDesc,
-      status: "ACTIVE",
-      durationWeekTemplates: weeks.length || 1,
-      isFav: false
-    };
-
-    const existingIndex = currentTemplates.findIndex((t) => t.id === templateId);
-    if (existingIndex >= 0) {
-      currentTemplates[existingIndex] = templateData;
-    } else {
-      currentTemplates.unshift(templateData);
-    }
-    localStorage.setItem("msw_custom_templates", JSON.stringify(currentTemplates));
-
     router.push(`/trainer/templates`);
   };
 
@@ -121,7 +67,7 @@ export default function TemplateBuilderView() {
       const updatedWeeks = [...weeks, { id: newWeekId, sequenceNumber, workouts: [] }];
       setWeeks(updatedWeeks);
       
-      router.push(`/trainer/template/${templateId}/${newWeekId}?${searchParams.toString()}`);
+      router.push(`/trainer/template/${templateId}/${newWeekId}`);
     } catch (err) {
       console.error("Failed to create week", err);
     }
@@ -138,7 +84,7 @@ export default function TemplateBuilderView() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleSaveDraft}>Save Draft</Button>
-          <Button onClick={handlePublish}>Publish Template &rarr;</Button>
+          <Button onClick={() => setIsPublishModalOpen(true)}>Publish Template &rarr;</Button>
         </div>
       </div>
 
@@ -149,7 +95,7 @@ export default function TemplateBuilderView() {
             key={week.id}
             variant={weekId === week.id ? "default" : "secondary"}
             size="sm"
-            onClick={() => router.push(`/trainer/template/${templateId}/${week.id}?${searchParams.toString()}`)}
+            onClick={() => router.push(`/trainer/template/${templateId}/${week.id}`)}
           >
             Week {idx + 1}
           </Button>
@@ -166,6 +112,15 @@ export default function TemplateBuilderView() {
           <p className="text-sm text-muted-foreground">Select a week above or click &quot;+ Add Week&quot; to start building your program.</p>
         </div>
       )}
+
+      <PublishAssignModal 
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        planId={templateId}
+        onSuccess={() => {
+          router.push(`/trainer/templates`);
+        }}
+      />
     </div>
   );
 }

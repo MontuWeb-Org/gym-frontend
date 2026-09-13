@@ -4,10 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { programService } from "../services/program.service";
 import { AssignedExercise, LibraryExercise, WorkoutDetail } from "../types/workout-builder.types";
-import { WorkoutHeader } from "../components/workout-builder/WorkoutHeader";
-import { AssignedExerciseList } from "../components/workout-builder/AssignedExerciseList";
-import { AddExerciseModal } from "../components/workout-builder/AddExerciseModal";
-import { EditExerciseModal } from "../components/workout-builder/EditExerciseModal";
+import { WorkoutHeader } from "../components/program-builder/workout-builder/WorkoutHeader";
+import { AssignedExerciseList } from "../components/program-builder/workout-builder/AssignedExerciseList";
+import { AddExerciseModal } from "../components/program-builder/workout-builder/AddExerciseModal";
+import { EditExerciseModal } from "../components/program-builder/workout-builder/EditExerciseModal";
 
 export default function WorkoutBuilderView() {
   const params = useParams();
@@ -116,8 +116,17 @@ export default function WorkoutBuilderView() {
     }
   };
 
-  const handleRemoveExercise = (exerciseId: number) => {
+  const handleRemoveExercise = async (exerciseId: number) => {
     setExercises(exercises.filter(ex => ex.id !== exerciseId));
+  };
+
+  const persistExerciseOrder = async (updatedExercises: AssignedExercise[]) => {
+    setExercises(updatedExercises);
+    try {
+      await programService.reorderExercises(workoutId, updatedExercises);
+    } catch (err) {
+      console.error("Failed to save exercise reordering", err);
+    }
   };
 
   const handleMoveExercise = (index: number, direction: 'up' | 'down') => {
@@ -128,7 +137,8 @@ export default function WorkoutBuilderView() {
     const temp = updated[index];
     updated[index] = updated[newIndex];
     updated[newIndex] = temp;
-    setExercises(updated);
+    
+    persistExerciseOrder(updated);
   };
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -149,37 +159,53 @@ export default function WorkoutBuilderView() {
     const [movedItem] = updated.splice(draggedIndex, 1);
     updated.splice(dropIndex, 0, movedItem);
 
-    setExercises(updated);
+    persistExerciseOrder(updated);
     setDraggedIndex(null);
   };
 
-  const handleSaveWorkoutName = () => {
+  const handleSaveWorkoutName = async () => {
     if (!workoutNameInput.trim() || !workout) return;
-    setWorkout({ ...workout, name: workoutNameInput.trim() });
-    setIsEditingWorkoutName(false);
+    try {
+      await programService.updateWorkout(workoutId, { name: workoutNameInput.trim() });
+      setWorkout({ ...workout, name: workoutNameInput.trim() });
+      setIsEditingWorkoutName(false);
+    } catch (err) {
+      console.error("Failed to update workout name", err);
+    }
   };
 
-  const handleSaveReps = () => {
+  const handleSaveReps = async () => {
     if (!editingExercise) return;
     const finalSetsCount = setsCount === "" ? 3 : Number(setsCount);
     const finalRepsCount = repsCount === "" ? 10 : Number(repsCount);
     const finalRestTime = restTime === "" ? 60 : Number(restTime);
 
-    setExercises(exercises.map(ex => {
-      if (ex.id === editingExercise.id) {
-        return { 
-          ...ex, 
-          sets: Array.from({ length: finalSetsCount }, (_, i) => ({
-            setNumber: i + 1,
-            reps: finalRepsCount,
-            weight: 0
-          })),
-          rest: finalRestTime
-        };
-      }
-      return ex;
-    }));
-    setEditingExercise(null);
+    try {
+      await programService.updateWorkoutExercise(editingExercise.id, {
+        defaultSets: finalSetsCount,
+        defaultReps: String(finalRepsCount),
+        defaultRestTimeSeconds: finalRestTime,
+      });
+
+      setExercises(exercises.map(ex => {
+        if (ex.id === editingExercise.id) {
+          return { 
+            ...ex, 
+            sets: Array.from({ length: finalSetsCount }, (_, i) => ({
+              setNumber: i + 1,
+              reps: finalRepsCount,
+              weight: 0
+            })),
+            rest: finalRestTime
+          };
+        }
+        return ex;
+      }));
+    } catch (err) {
+      console.error("Failed to update exercise parameters", err);
+    } finally {
+      setEditingExercise(null);
+    }
   };
 
   if (loading) return <div className="p-6 text-sm text-muted-foreground">Loading workout workspace...</div>;
