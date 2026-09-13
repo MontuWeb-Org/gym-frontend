@@ -35,9 +35,13 @@ export default function TrainerLayout({
     };
   });
 
-  // 2. Determine active item based on current pathname
+  // 2. Determine active item based on current pathname (explicitly handling sub-routes like template builder)
   const activeItem =
     localizedSidebarItems.find((item) => {
+      // If we are in the template builder, highlight the "templates" sidebar menu item
+      if (pathname.includes("/trainer/template")) {
+        return item.id === "templates";
+      }
       if (item.href === "/trainer" || item.href === "/trainer/dashboard") {
         return pathname === "/trainer" || pathname === "/trainer/dashboard";
       }
