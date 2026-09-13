@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlanTemplate } from "../store/program.slice";
+import { PlanTemplate } from "../../store/program.slice";
 
 interface TemplateCardProps {
   template: PlanTemplate;

@@ -6,8 +6,8 @@ import { RootState } from "@/store";
 import { fetchTemplates, createTemplate, PlanTemplate } from "../store/program.slice";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { TemplateCard } from "../components/TemplateCard";
-import { NewTemplateModal } from "../components/NewTemplateModal";
+import { TemplateCard } from "../components/program-builder/TemplateCard";
+import { NewTemplateModal } from "../components/program-builder/NewTemplateModal";
 
 interface PayloadData {
   planId?: number | string;
@@ -26,15 +26,13 @@ export default function TemplatesContainer() {
   const templates = Array.isArray(rawTemplates) 
     ? rawTemplates 
     : (rawTemplates && typeof rawTemplates === 'object' && 'plans' in rawTemplates && Array.isArray((rawTemplates as { plans?: PlanTemplate[] }).plans) ? (rawTemplates as { plans: PlanTemplate[] }).plans : []);
-  const status = useAppSelector((state: RootState) => (state as unknown as Record<string, { status?: string }>).trainerProgram?.status || (state as unknown as Record<string, { status?: string }>).trainer?.status || "idle");
 
   const [isCreating, setIsCreating] = useState(false);
 
+  // Always fetch fresh templates when container mounts
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchTemplates());
-    }
-  }, [dispatch, status]);
+    dispatch(fetchTemplates());
+  }, [dispatch]);
 
   const handleCreate = async (name: string, description: string) => {
     if (!name.trim()) return;
@@ -45,7 +43,8 @@ export default function TemplatesContainer() {
         const planId = payloadData?.planId || payloadData?.data?.planId || payloadData?.data?.id || payloadData?.id || Date.now();
         
         setIsCreating(false);
-        router.push(`/trainer/template/${planId}?name=${encodeURIComponent(name)}&desc=${encodeURIComponent(description)}`);
+        // Clean navigation without query parameters
+        router.push(`/trainer/template/${planId}`);
       }
     } catch (err) {
       console.error("Failed to create template", err);
@@ -65,7 +64,7 @@ export default function TemplatesContainer() {
           <TemplateCard 
             key={template.id} 
             template={template} 
-            onSelect={(id) => router.push(`/trainer/template/${id}?name=${encodeURIComponent(template.name)}&desc=${encodeURIComponent(template.description || "")}`)}
+            onSelect={(id) => router.push(`/trainer/template/${id}`)}
           />
         ))}
       </div>

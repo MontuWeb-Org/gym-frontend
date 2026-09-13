@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LibraryExercise } from "../../types/workout-builder.types";
+import { LibraryExercise } from "../../../types/workout-builder.types";
 
 interface AddExerciseModalProps {
   isOpen: boolean;

@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AssignedExercise } from "../../types/workout-builder.types";
+import { AssignedExercise } from "../../../types/workout-builder.types";
 
 interface EditExerciseModalProps {
   editingExercise: AssignedExercise | null;

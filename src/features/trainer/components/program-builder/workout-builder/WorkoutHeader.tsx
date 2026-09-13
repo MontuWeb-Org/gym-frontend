@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { WorkoutDetail } from "../../types/workout-builder.types";
+import { WorkoutDetail } from "../../../types/workout-builder.types";
 
 interface WorkoutHeaderProps {
   workout: WorkoutDetail | null;
