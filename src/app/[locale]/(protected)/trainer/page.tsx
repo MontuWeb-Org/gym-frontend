@@ -1,4 +1,11 @@
+import { redirect } from "@/i18n/navigation";
 
-export default function TrainerPage() {
-  return null; // Layout handles rendering the active tab view entirely
+interface TrainerPageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function TrainerPage({ params }: TrainerPageProps) {
+  const { locale } = await params;
+
+  redirect({ href: "/trainer/dashboard", locale });
 }

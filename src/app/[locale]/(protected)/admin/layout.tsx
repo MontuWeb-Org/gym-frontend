@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ADMIN_SIDEBAR_DATA } from "@/data/sidebars/adminSidebar.data";
-import type { SidebarItem } from "@/data/sidebar.types";
-import ComingSoonView from "@/components/views/common/ComingSoonView";
+import { ChevronRight } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -14,67 +14,100 @@ export default function AdminLayout({
 }) {
   const t = useTranslations("Nav");
   const locale = useLocale();
-  const [activeTab, setActiveTab] = useState<string>(
-    ADMIN_SIDEBAR_DATA[0]?.id ?? "dashboard"
-  );
+  const pathname = usePathname();
 
+  // 1. Normalize route paths & apply translations
   const localizedSidebarItems = ADMIN_SIDEBAR_DATA.map((item) => {
-    const cleanPath = item.href.replace(/^\/admin/, "").replace(/^\//, "");
     const translationKey = item.id as Parameters<typeof t>[0];
-    
+
+    let targetHref = item.href;
+    if (!targetHref || targetHref === "") {
+      targetHref = "/admin/dashboard";
+    } else if (!targetHref.startsWith("/")) {
+      targetHref = `/admin/${targetHref}`;
+    }
+
     return {
       ...item,
       label: t.has(translationKey) ? t(translationKey) : item.label,
-      href: cleanPath === "" 
-        ? `/${locale}/admin` 
-        : `/${locale}/admin/${cleanPath}`,
+      href: targetHref,
     };
   });
 
-  const handleItemClick = (item: SidebarItem) => {
-    setActiveTab(item.id);
+  // 2. Match active item against current URL path
+  const activeItem =
+    localizedSidebarItems.find((item) => {
+      if (item.href === "/admin" || item.href === "/admin/dashboard") {
+        return pathname === "/admin" || pathname === "/admin/dashboard";
+      }
+      return pathname.startsWith(item.href);
+    }) ?? localizedSidebarItems[0];
+
+  // 3. Generate dynamic breadcrumb segments
+  const pathSegments = pathname.split("/").filter(Boolean);
+
+  const getBreadcrumbLabel = (segment: string) => {
+    const matchedItem = localizedSidebarItems.find(
+      (item) => item.id === segment || item.href.endsWith(`/${segment}`)
+    );
+    if (matchedItem) return matchedItem.label;
+    if (t.has(segment as Parameters<typeof t>[0])) {
+      return t(segment as Parameters<typeof t>[0]);
+    }
+    return segment.replace(/-/g, " ");
   };
 
-  const activeItem = ADMIN_SIDEBAR_DATA.find((item) => item.id === activeTab);
-  const ActiveView = activeItem?.component;
-
-  const activeTranslationKey = (activeItem?.id ?? "") as Parameters<typeof t>[0];
-  const adminHubKey = "adminHub" as Parameters<typeof t>[0];
-
-  const activeLabel = activeItem 
-    ? (t.has(activeTranslationKey) ? t(activeTranslationKey) : activeItem.label) 
-    : "Dashboard";
+  const adminHubTitle = t.has("adminHub" as Parameters<typeof t>[0])
+    ? t("adminHub" as Parameters<typeof t>[0])
+    : "Admin Hub";
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <Sidebar
-        title={t.has(adminHubKey) ? t(adminHubKey) : "Admin Hub"}
+        title={adminHubTitle}
         items={localizedSidebarItems}
-        activeTab={activeTab}
-        onItemClick={handleItemClick}
+        activePath={pathname}
       />
 
       <div className="flex-1 flex flex-col overflow-y-auto bg-background">
-        <header className="p-6 border-b border-border bg-background sticky top-0 z-10">
-          <h1 className="text-2xl font-bold capitalize">
-            {activeLabel}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {locale === "ar"
-              ? `إدارة لوحة ${activeLabel} الخاصة بك.`
-              : `Manage your admin ${String(activeLabel).toLowerCase()} seamlessly.`}
-          </p>
+        <header className="px-6 py-4 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-10 flex flex-col gap-2">
+          {/* Breadcrumbs Navigation */}
+          <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {pathSegments.map((segment, index) => {
+              const isLast = index === pathSegments.length - 1;
+              const label = getBreadcrumbLabel(segment);
+
+              return (
+                <React.Fragment key={index}>
+                  {index > 0 && <ChevronRight className="h-3 w-3 rtl:rotate-180 shrink-0" />}
+                  <span
+                    className={
+                      isLast
+                        ? "text-foreground font-medium capitalize"
+                        : "capitalize hover:text-foreground transition-colors"
+                    }
+                  >
+                    {label}
+                  </span>
+                </React.Fragment>
+              );
+            })}
+          </nav>
+
+          {/* Header Title & Subtitle */}
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight capitalize">
+              {activeItem?.label ?? "Dashboard"}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {locale === "ar"
+                ? `إدارة لوحة ${activeItem?.label} الخاصة بك بسلاسة.`
+                : `Manage your admin ${String(activeItem?.label).toLowerCase()} workspace seamlessly.`}
+            </p>
+          </div>
         </header>
 
-        <main className="p-6 flex-1">
-          {ActiveView ? (
-            <ActiveView />
-          ) : children ? (
-            children
-          ) : (
-            <ComingSoonView />
-          )}
-        </main>
+        <main className="p-6 flex-1">{children}</main>
       </div>
     </div>
   );

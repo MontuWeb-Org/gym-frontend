@@ -166,5 +166,31 @@
     "genericError": "Failed to send invitation. Please try again.",
     "cancel": "Cancel",
     "sendInvite": "Send Invite"
+  },
+  "TraineeDetails": {
+    "backToTrainees": "Back to Trainees",
+    "joinedPrefix": "Joined",
+    "message": "Message",
+    "editProgram": "Edit Program",
+    "tabs": {
+      "overview": "Overview",
+      "sessionHistory": "Session History",
+      "progressCharts": "Progress Charts",
+      "notes": "Notes"
+    },
+    "metrics": {
+      "adherence": "Adherence",
+      "streak": "Streak",
+      "topLiftPr": "Top lift PR"
+    },
+    "recentSessions": {
+      "title": "Recent sessions",
+      "date": "DATE",
+      "session": "SESSION",
+      "completed": "COMPLETED",
+      "notes": "NOTES",
+      "empty": "No recent sessions logged."
+    },
+    "loading": "Loading trainee details..."
   }
 }

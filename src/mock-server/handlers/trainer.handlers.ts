@@ -95,7 +95,7 @@ export const trainerHandlers = [
     });
   }),
 
-  // 2. Get Trainer Dashboard Widgets (Synced with database)
+  // 2. Get Trainer Dashboard Widgets
   http.get("*/api/users/trainer/dashboard", async ({ request }) => {
     const userId = getUserIdFromToken(request);
 
@@ -215,6 +215,95 @@ export const trainerHandlers = [
             },
           },
         ],
+      },
+    });
+  }),
+
+  // 3. Get Detailed Trainee Information
+  http.get("*/api/users/trainer/trainees/:traineeId", async ({ request, params }) => {
+    const userId = getUserIdFromToken(request);
+
+    if (!userId) {
+      return HttpResponse.json(
+        { message: "Unauthorized access token" },
+        { status: 401 }
+      );
+    }
+
+    const currentUser = mockDb.users.find((u) => String(u.id) === String(userId));
+
+    if (!currentUser) {
+      return HttpResponse.json(
+        { message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Restrict access to Trainers and Admins
+    if (currentUser.role !== MockUserRole.TRAINER && currentUser.role !== MockUserRole.ADMIN) {
+      return HttpResponse.json(
+        { message: "Forbidden: Access restricted to trainers" },
+        { status: 403 }
+      );
+    }
+
+    const { traineeId } = params;
+    const targetId = String(traineeId);
+
+    // Search mock database for the target trainee and user account
+    const traineeProfile = mockDb.trainees.find((t) => String(t.userId) === targetId);
+    const traineeUser = mockDb.users.find((u) => String(u.id) === targetId);
+
+    if (!traineeUser || !traineeProfile) {
+      return HttpResponse.json(
+        { message: "Trainee not found" },
+        { status: 404 }
+      );
+    }
+
+    // Deterministic metrics matching the list endpoint calculations
+    const statuses = ["ON_TRACK", "AT_RISK", "INVITE_PENDING", "FALLING_BEHIND"] as const;
+    const computedStatus = statuses[Number(traineeUser.id) % statuses.length];
+    const isPending =
+      computedStatus === "INVITE_PENDING" || traineeUser.activationStatus === "PENDING";
+    const status = isPending ? "INVITE_PENDING" : computedStatus;
+
+    const numId = Number(traineeUser.id);
+
+    return HttpResponse.json({
+      data: {
+        id: traineeUser.id,
+        name: traineeUser.name,
+        adherence: isPending ? 0 : Math.min(100, (numId * 23) % 100),
+        programName: isPending ? "—" : `Strength Block ${(numId % 3) + 1}`,
+        lastSessionDate: isPending
+          ? "—"
+          : new Date(Date.now() - (numId % 5) * 86400000).toISOString(),
+        status,
+        joinedAt: traineeUser.createdAt,
+        programJoinedAt: traineeProfile.createdAt,
+        
+        // Extended UI display metrics
+        streakWeeks: isPending ? 0 : (numId % 6) + 1,
+        topLiftPr: isPending ? "—" : `+${(numId % 10) + 2}kg`,
+        recentSessions: isPending
+          ? []
+          : [
+              {
+                id: "1",
+                date: "Aug 28",
+                sessionName: "Upper A",
+                completedSets: "6/6 sets",
+                notes: "felt strong",
+              },
+              {
+                id: "2",
+                date: "Aug 26",
+                sessionName: "Lower A",
+                completedSets: "5/6 sets",
+                notes: "—",
+              },
+            ],
       },
     });
   }),
