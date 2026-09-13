@@ -1,48 +1,43 @@
+// src/data/sidebars/adminSidebar.data.tsx
 import { LayoutDashboard, Users, Calendar, Dumbbell, User, Settings } from "lucide-react";
 import type { SidebarItem } from "@/data/sidebar.types";
-import PlaceholderView from "@/components/views/PlaceholderView";
+import { ROUTES } from "@/data/routes";
 
 export const ADMIN_SIDEBAR_DATA: SidebarItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    href: "",
+    href: ROUTES.ADMIN.DASHBOARD,
     icon: <LayoutDashboard className="size-5" />,
-    component: PlaceholderView,
   },
   {
     id: "members",
     label: "Members",
-    href: "members",
+    href: ROUTES.ADMIN.MEMBERS,
     icon: <Users className="size-5" />,
-    component: PlaceholderView,
   },
   {
     id: "classes",
     label: "Classes",
-    href: "classes",
+    href: ROUTES.ADMIN.CLASSES,
     icon: <Calendar className="size-5" />,
-    component: PlaceholderView,
   },
   {
     id: "workouts",
     label: "Workouts",
-    href: "workouts",
+    href: ROUTES.ADMIN.WORKOUTS,
     icon: <Dumbbell className="size-5" />,
-    component: PlaceholderView,
   },
   {
     id: "profile",
     label: "Profile",
-    href: "profile",
+    href: ROUTES.ADMIN.PROFILE,
     icon: <User className="size-5" />,
-    component: PlaceholderView,
   },
   {
     id: "settings",
     label: "Settings",
-    href: "settings",
+    href: ROUTES.ADMIN.SETTINGS,
     icon: <Settings className="size-5" />,
-    component: PlaceholderView,
   },
 ];
