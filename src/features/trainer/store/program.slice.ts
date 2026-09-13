@@ -82,24 +82,6 @@ export const fetchExercises = createAsyncThunk(
   }
 );
 
-// Publish a template (updates status to ACTIVE)
-export const publishTemplate = createAsyncThunk(
-  "trainerProgram/publishTemplate",
-  async (planId: number) => {
-    const response = await programService.updatePlanTemplate(planId, { status: "ACTIVE" });
-    return response.data.data;
-  }
-);
-
-// Assign a plan to a trainee
-export const assignPlanToTrainee = createAsyncThunk(
-  "trainerProgram/assignPlanToTrainee",
-  async (data: { planTemplateId: number; traineeId: number; createdAt: string; endedAt: string }) => {
-    const response = await programService.assignPlan(data);
-    return response.data.data;
-  }
-);
-
 export const programSlice = createSlice({
   name: "trainerProgram",
   initialState,
@@ -113,6 +95,14 @@ export const programSlice = createSlice({
     setCurrentWorkout(state, action: PayloadAction<WorkoutTemplate | null>) {
       state.currentWorkout = action.payload;
     },
+    upsertTemplate(state, action: PayloadAction<PlanTemplate>) {
+      const index = state.templates.findIndex((t) => t.id === action.payload.id);
+      if (index !== -1) {
+        state.templates[index] = { ...state.templates[index], ...action.payload };
+      } else {
+        state.templates.unshift(action.payload);
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -121,27 +111,37 @@ export const programSlice = createSlice({
       })
       .addCase(fetchTemplates.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.templates = action.payload;
+        const fetchedPlans = action.payload || [];
+        const existingMap = new Map(state.templates.map(t => [t.id, t]));
+        fetchedPlans.forEach((plan: PlanTemplate) => {
+          existingMap.set(plan.id, plan);
+        });
+        state.templates = Array.from(existingMap.values());
       })
       .addCase(fetchTemplates.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message || "Failed to fetch templates";
       })
-      .addCase(createTemplate.fulfilled, () => {
-        // Handled via component redirection and storage sync
+      .addCase(createTemplate.fulfilled, (state, action) => {
+        const newTemplate = action.payload;
+        if (newTemplate) {
+          const formattedTemplate = {
+            id: newTemplate.id || newTemplate.planId || Date.now(),
+            name: newTemplate.name,
+            description: newTemplate.description,
+            status: newTemplate.status || "DRAFT",
+            durationWeekTemplates: newTemplate.durationWeekTemplates || 0,
+            isFav: newTemplate.isFav || false,
+            weeks: newTemplate.weeks || []
+          };
+          state.templates.unshift(formattedTemplate);
+        }
       })
       .addCase(fetchExercises.fulfilled, (state, action) => {
         state.exercises = action.payload;
-      })
-      .addCase(publishTemplate.fulfilled, (state, action) => {
-        // Update local template status if it exists in state
-        const updatedPlan = action.payload;
-        if (state.currentTemplate && state.currentTemplate.id === updatedPlan?.planId) {
-          state.currentTemplate.status = "ACTIVE";
-        }
       });
   },
 });
 
-export const { setCurrentTemplate, setCurrentWeek, setCurrentWorkout } = programSlice.actions;
+export const { setCurrentTemplate, setCurrentWeek, setCurrentWorkout, upsertTemplate } = programSlice.actions;
 export default programSlice.reducer;

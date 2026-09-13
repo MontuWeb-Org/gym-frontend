@@ -43,9 +43,8 @@ export default function TemplatesContainer() {
         const planId = payloadData?.planId || payloadData?.data?.planId || payloadData?.data?.id || payloadData?.id || Date.now();
         
         setIsCreating(false);
-        // Clean navigation without query parameters
-        router.push(`/trainer/template/${planId}`);
-      }
+       
+       router.push(`/trainer/template/${planId}`);   }
     } catch (err) {
       console.error("Failed to create template", err);
     }
@@ -61,12 +60,11 @@ export default function TemplatesContainer() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {templates.map((template: PlanTemplate) => (
-          <TemplateCard 
-            key={template.id} 
-            template={template} 
-            onSelect={(id) => router.push(`/trainer/template/${id}`)}
-          />
-        ))}
+  <TemplateCard 
+    key={template.id} 
+    template={template} 
+  />
+))}
       </div>
 
       <NewTemplateModal

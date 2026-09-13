@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { programService } from "../services/program.service";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ interface WorkoutItem {
 
 export default function WeekBuilderView() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
   
   const templateId = Number(params.templateId);
@@ -32,17 +31,21 @@ export default function WeekBuilderView() {
 
   useEffect(() => {
     async function loadWeek() {
+      if (!weekId) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const res = await programService.getWeekDetail(weekId);
-        setWorkouts(res.data.data.workouts || []);
+        setWorkouts(res?.data?.data?.workouts || res?.data?.workouts || []);
       } catch (err) {
         console.error("Failed to load week details", err);
       } finally {
         setLoading(false);
       }
     }
-    if (weekId) loadWeek();
+    loadWeek();
   }, [weekId]);
 
   const handleAddWorkout = async () => {
@@ -55,15 +58,15 @@ export default function WeekBuilderView() {
         weekTemplateId: weekId,
       });
       
-      const newWorkout = res.data.data;
-      const newWorkoutId = newWorkout.workoutTemplateId || newWorkout.id;
+      const newWorkout = res?.data?.data || res?.data || {};
+      const newWorkoutId = newWorkout.workoutTemplateId || newWorkout.id || Date.now();
       
       setWorkouts([...workouts, { id: newWorkoutId, name: workoutName.trim(), sequenceNumber: workouts.length }]);
       
       setIsModalOpen(false);
       setWorkoutName("");
       
-      router.push(`/trainer/template/${templateId}/${weekId}/${newWorkoutId}?${searchParams.toString()}`);
+      router.push(`/trainer/template/${templateId}/${weekId}/${newWorkoutId}`);
     } catch (err) {
       console.error("Failed to create workout", err);
     }
@@ -85,7 +88,7 @@ export default function WeekBuilderView() {
             key={workout.id}
             variant={workoutId === workout.id ? "default" : "outline"}
             size="sm"
-            onClick={() => router.push(`/trainer/template/${templateId}/${weekId}/${workout.id}?${searchParams.toString()}`)}
+            onClick={() => router.push(`/trainer/template/${templateId}/${weekId}/${workout.id}`)}
           >
             {workout.name}
           </Button>

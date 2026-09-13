@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
+import { useAppDispatch } from "@/store/hooks";
+import { upsertTemplate, WeekTemplate } from "../store/program.slice";
 import { programService } from "../services/program.service";
 import { Button } from "@/components/ui/button";
 import WeekBuilderView from "./WeekBuilderView";
@@ -19,12 +21,16 @@ interface TemplateDetail {
   id?: number;
   name?: string;
   description?: string;
+  status?: "DRAFT" | "ACTIVE";
+  durationWeekTemplates?: number;
+  isFav?: boolean;
   weeks?: WeekItem[];
 }
 
 export default function TemplateBuilderView() {
   const params = useParams();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   
   const templateId = Number(params.templateId);
   const weekId = params.weekId ? Number(params.weekId) : null;
@@ -36,9 +42,11 @@ export default function TemplateBuilderView() {
 
   useEffect(() => {
     async function loadTemplate() {
+      if (!templateId) return;
       try {
+        setLoading(true);
         const res = await programService.getTemplateDetail(templateId);
-        const fetchedTemplate = res.data.data;
+        const fetchedTemplate = res?.data?.data || res?.data || {};
         setTemplate(fetchedTemplate);
         setWeeks(fetchedTemplate.weeks || []);
       } catch (err) {
@@ -47,13 +55,26 @@ export default function TemplateBuilderView() {
         setLoading(false);
       }
     }
-    if (templateId) loadTemplate();
+    loadTemplate();
   }, [templateId]);
 
   const displayTitle = template?.name || "Untitled Template";
   const displayDesc = template?.description || "No description provided.";
 
   const handleSaveDraft = () => {
+    if (templateId) {
+      dispatch(
+        upsertTemplate({
+          id: templateId,
+          name: displayTitle,
+          description: displayDesc,
+          status: "DRAFT",
+          durationWeekTemplates: weeks.length,
+          isFav: false,
+          weeks: weeks as unknown as WeekTemplate[],
+        })
+      );
+    }
     router.push(`/trainer/templates`);
   };
 
@@ -61,8 +82,8 @@ export default function TemplateBuilderView() {
     try {
       const sequenceNumber = weeks.length;
       const res = await programService.createWeek({ sequenceNumber, planTemplateId: templateId });
-      const newWeek = res.data.data;
-      const newWeekId = newWeek.weekId || newWeek.id;
+      const newWeek = res?.data?.data || res?.data || {};
+      const newWeekId = newWeek.weekId || newWeek.id || Date.now();
       
       const updatedWeeks = [...weeks, { id: newWeekId, sequenceNumber, workouts: [] }];
       setWeeks(updatedWeeks);
@@ -73,7 +94,9 @@ export default function TemplateBuilderView() {
     }
   };
 
-  if (loading) return <div className="p-6 text-sm text-muted-foreground">Loading template workspace...</div>;
+  if (loading && !template) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading template workspace...</div>;
+  }
 
   return (
     <div className="space-y-6 p-6">

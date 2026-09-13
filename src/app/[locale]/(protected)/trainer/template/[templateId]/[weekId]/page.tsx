@@ -1,5 +1,2 @@
-import WeekBuilderView from "@/features/trainer/views/WeekBuilderView";
-
-export default function WeekPage() {
-  return <WeekBuilderView />;
-}
+import TemplateBuilderView from "@/features/trainer/views/TemplateBuilderView";
+export default function Page() { return <TemplateBuilderView />; }

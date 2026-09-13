@@ -1,5 +1,2 @@
-import WorkoutBuilderView from "@/features/trainer/views/WorkoutBuilderView";
-
-export default function WorkoutPage() {
-  return <WorkoutBuilderView />;
-}
+import TemplateBuilderView from "@/features/trainer/views/TemplateBuilderView";
+export default function Page() { return <TemplateBuilderView />; }
