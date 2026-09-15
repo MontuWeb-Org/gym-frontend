@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { logout } from "@/features/auth/store/auth.slice";
-import { authService } from "@/features/auth/services/auth.service";
+import { logoutThunk } from "@/features/auth/store/auth.slice";
+import { selectCurrentUser } from "@/features/user/store/user.slice";
 import { Button } from "@/components/ui/button";
-import { tokenStorage } from "@/lib/storage";
 
 interface NavbarProps {
   brand?: {
@@ -25,8 +24,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
   const t = useTranslations("Nav");
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const user = useAppSelector(selectCurrentUser);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -34,14 +34,12 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
   const safeLinks = publicLinks ?? [];
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     try {
-      setIsLoggingOut(true);
-      await authService.logout();
+      await dispatch(logoutThunk()).unwrap();
     } catch (error) {
-      console.error("Logout request failed, cleaning local state anyway:", error);
+      console.error("Logout request failed, local state was cleared anyway:", error);
     } finally {
-      tokenStorage.clearTokens();
-      dispatch(logout());
       setMobileMenuOpen(false);
       setIsLoggingOut(false);
       router.push("/login");
@@ -64,9 +62,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-6">
           {safeLinks.map((link) => (
-            <Link 
-              key={`desktop-${link.href}`} 
-              href={link.href} 
+            <Link
+              key={`desktop-${link.href}`}
+              href={link.href}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {link.label}
@@ -84,9 +82,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-xs text-muted-foreground">{formatRole(user.role)}</span>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
               >
@@ -123,9 +121,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
       {mobileMenuOpen && (
         <div className="md:hidden mt-4 pt-4 border-t border-border flex flex-col gap-4 pb-2">
           {safeLinks.map((link) => (
-            <Link 
-              key={`mobile-${link.href}`} 
-              href={link.href} 
+            <Link
+              key={`mobile-${link.href}`}
+              href={link.href}
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
@@ -137,9 +135,9 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-xs text-muted-foreground">{formatRole(user.role)}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={handleLogout}
                   disabled={isLoggingOut}
                 >

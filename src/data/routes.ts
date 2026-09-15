@@ -1,4 +1,4 @@
-import { UserRole } from "@/types/user.types";
+import { UserRole } from "@/features/user/types/user.types";
 
 export type IconName =
   | "dashboard"
@@ -164,7 +164,11 @@ export const ROUTES = {
     PROGRAMS: "/trainer/programs",
     TEMPLATES: "/trainer/templates",
     BILLING: "/trainer/billing",
-    SETTINGS: "/trainer/settings",
+    SETTINGS: {
+      ROOT: "/trainer/settings",
+      PROFILE: "/trainer/settings/profile",
+      NOTIFICATIONS: "/trainer/settings/notifications",
+    },
   },
 
   TRAINEE: {

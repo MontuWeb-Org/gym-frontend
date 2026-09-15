@@ -3,12 +3,13 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAppSelector } from "@/store/hooks";
-import { UserRole } from "@/types/user.types";
+import { UserRole } from "@/features/user/types/user.types";
+import { selectCurrentUser } from "@/features/user/store/user.slice";
 
 export default function WelcomePage() {
   const t = useTranslations("Home");
   const loginT = useTranslations("Login");
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector(selectCurrentUser);
 
   const getDashboardHref = () => {
     if (!user) return "/login";

@@ -38,7 +38,7 @@ export const TRAINER_SIDEBAR_DATA: SidebarItem[] = [
   {
     id: "settings",
     label: "Settings",
-    href: ROUTES.TRAINER.SETTINGS,
+    href: ROUTES.TRAINER.SETTINGS.ROOT,
     icon: <Settings className="size-5" />,
   },
 ];

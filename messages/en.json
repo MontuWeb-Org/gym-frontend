@@ -63,7 +63,7 @@
       "errorTitle": "Dashboard Error"
     },
     "trainees": {
-      "title": "Trainees",
+      "title": "Total Trainees",
       "description": "Manage your assigned trainees, track their progress and goals."
     },
     "programs": {
@@ -192,5 +192,21 @@
       "empty": "No recent sessions logged."
     },
     "loading": "Loading trainee details..."
+  },
+  "Profile": {
+    "nameLabel": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "phoneNumberLabel": "Phone Number",
+    "phoneNumberPlaceholder": "Enter your phone number",
+    "birthDateLabel": "Birth Date",
+    "genderLabel": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "experienceLabel": "Experience",
+    "experiencePlaceholder": "Enter your experience (e.g. 5 years in Web Dev)",
+    "bioLabel": "Bio",
+    "bioPlaceholder": "Write a short bio about yourself...",
+    "submitButton": "Save Changes",
+    "saving": "Saving..."
   }
 }
