@@ -62,7 +62,7 @@ export default function ForgotPasswordView() {
     );
 
     if (forgotPasswordCompleteThunk.fulfilled.match(result)) {
-      const { user } = result.payload;
+      const user = result.payload;
       const roleRoute = String(user.role).toLowerCase();
       router.push(`/${roleRoute}`);
     }

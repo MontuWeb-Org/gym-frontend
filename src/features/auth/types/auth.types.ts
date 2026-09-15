@@ -1,4 +1,4 @@
-import { User } from "@/types/user.types";
+import { User } from "@/features/user/types/user.types";
 
 export interface RegisterInitPayload {
   name: string;

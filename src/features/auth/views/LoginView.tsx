@@ -28,19 +28,17 @@ export default function LoginView() {
       const hashedPassword = await hashPassword(password);
 
       // 2. Dispatch loginThunk (fetches token + user profile automatically)
-      const resultAction = await dispatch(
+      const result = await dispatch(
         loginThunk({ email: identifier, password: hashedPassword })
       );
 
-      if (loginThunk.fulfilled.match(resultAction)) {
-        const { user } = resultAction.payload;
-
-      const roleRoute = String(user.role).toLowerCase();
-
+      if (loginThunk.fulfilled.match(result)) {
+        const user = result.payload;
+        const roleRoute = String(user.role).toLowerCase();
         router.push(`/${roleRoute}`);
       } else {
         setError(
-          (resultAction.payload as string) ||
+          (result.payload as string) ||
             "Invalid credentials. Please try again."
         );
       }
