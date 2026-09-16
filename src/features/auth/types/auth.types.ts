@@ -60,3 +60,32 @@ export interface RefreshTokenResponse {
 export interface GetCurrentUserResponse {
   data: User;
 }
+
+export type InviteStatus = "SETUP_PASSWORD" | "ACCEPT_INVITATION";
+
+export interface InviteVerifyData {
+  creationToken: string;
+  trainerName: string;
+  status: InviteStatus;
+}
+
+export interface InviteVerifyResponse {
+  data: InviteVerifyData;
+}
+
+export interface InviteAcceptPayload {
+  creationToken: string;
+  accept: boolean;
+}
+
+export interface InviteAcceptResponse {
+  data: {
+    accessToken?: string;
+  };
+}
+
+export interface InviteSetupPayload {
+  creationToken: string;
+  name: string;
+  password: string;
+}

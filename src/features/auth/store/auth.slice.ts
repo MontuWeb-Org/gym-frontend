@@ -6,6 +6,9 @@ import {
   LoginPayload,
   ForgotPasswordInitPayload,
   ForgotPasswordCompletePayload,
+  InviteAcceptPayload,
+  InviteSetupPayload,
+  InviteVerifyData,
 } from "../types/auth.types";
 import { tokenStorage } from "@/lib/storage";
 import { clearUser, getCurrentUserThunk } from "@/features/user/store/user.slice";
@@ -14,6 +17,7 @@ import { User } from "@/features/user/types/user.types";
 interface AuthState {
   creationToken: string | null;
   verificationToken: string | null;
+  inviteDetails: InviteVerifyData | null;
   isAuthenticated: boolean;
   isInitialized: boolean;
   isLoading: boolean;
@@ -23,6 +27,7 @@ interface AuthState {
 const initialState: AuthState = {
   creationToken: null,
   verificationToken: null,
+  inviteDetails: null,
   isAuthenticated: false,
   isInitialized: false,
   isLoading: false,
@@ -37,7 +42,6 @@ const getErrorMessage = (err: unknown): string => {
   return e.response?.data?.message || e.message || "An unexpected error occurred.";
 };
 
-// Shared by every thunk that ends with "now fetch the profile"
 const completeAuthentication = async (
   accessToken: string,
   dispatch: AppAsyncDispatch
@@ -145,6 +149,45 @@ export const inviteTraineeThunk = createAsyncThunk(
   }
 );
 
+export const inviteVerifyThunk = createAsyncThunk(
+  "auth/inviteVerify",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const res = await authService.inviteVerify(token);
+      return res.data;
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "Invite verification failed.");
+    }
+  }
+);
+
+export const inviteAcceptThunk = createAsyncThunk(
+  "auth/inviteAccept",
+  async (payload: InviteAcceptPayload, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await authService.inviteAccept(payload);
+      if (res.data?.accessToken) {
+        return await completeAuthentication(res.data.accessToken, dispatch);
+      }
+      return null;
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "Failed to accept invite.");
+    }
+  }
+);
+
+export const inviteSetupThunk = createAsyncThunk(
+  "auth/inviteSetup",
+  async (payload: InviteSetupPayload, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await authService.inviteSetup(payload);
+      return await completeAuthentication(res.data.accessToken, dispatch);
+    } catch (err: unknown) {
+      return rejectWithValue(getErrorMessage(err) || "Failed to set up account.");
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -155,6 +198,7 @@ const authSlice = createSlice({
     resetFlowTokens: (state) => {
       state.creationToken = null;
       state.verificationToken = null;
+      state.inviteDetails = null;
     },
   },
   extraReducers: (builder) => {
@@ -243,13 +287,13 @@ const authSlice = createSlice({
       })
 
       // Logout
+      .addCase(logoutThunk.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(logoutThunk.fulfilled, (state) => {
         state.isLoading = false;
         state.isAuthenticated = false;
         state.error = null;
-      })
-      .addCase(logoutThunk.pending, (state) => {
-        state.isLoading = true;
       })
       .addCase(logoutThunk.rejected, (state) => {
         state.isLoading = false;
@@ -265,6 +309,53 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(inviteTraineeThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Invite Verify
+      .addCase(inviteVerifyThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(inviteVerifyThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.creationToken = action.payload.creationToken;
+        state.inviteDetails = action.payload;
+      })
+      .addCase(inviteVerifyThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Invite Accept
+      .addCase(inviteAcceptThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(inviteAcceptThunk.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.creationToken = null;
+        state.inviteDetails = null;
+      })
+      .addCase(inviteAcceptThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Invite Setup
+      .addCase(inviteSetupThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(inviteSetupThunk.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.creationToken = null;
+        state.inviteDetails = null;
+      })
+      .addCase(inviteSetupThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });
