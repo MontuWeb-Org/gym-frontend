@@ -122,7 +122,16 @@
     "resetPasswordTitle": "إعادة تعيين كلمة المرور",
     "resetPasswordSubtitle": "أدخل الرمز المرسل إلى {email} واختر كلمة مرور جديدة.",
     "resetPasswordButton": "إعادة تعيين كلمة المرور",
-    "backToLogin": "العودة لتسجيل الدخول"
+    "backToLogin": "العودة لتسجيل الدخول",
+    "invitationReceivedTitle": "دعوة انضمام",
+    "invitationReceivedSubtitle": "لقد تلقيت دعوة من {trainerName} للانضمام كمتدرب.",
+    "defaultTrainer": "مدربك",
+    "processing": "جاري المعالجة...",
+    "acceptInviteButton": "قبول الدعوة",
+    "rejectInviteButton": "رفض الدعوة",
+    "traineeSetupTitle": "إكمال الحساب",
+    "traineeSetupSubtitle": "قم بإعداد حسابك للبدء في التدريب مع {trainerName}.",
+    "completeSetupButton": "إكمال التجهيز"
   },
   "TraineesTable": {
     "title": "اجمالي المتدربين",
