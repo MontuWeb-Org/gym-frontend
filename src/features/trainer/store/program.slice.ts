@@ -6,6 +6,7 @@ export interface PlanTemplate {
   name: string;
   description: string;
   status: "DRAFT" | "ACTIVE";
+  trainerId?: number;
   durationWeekTemplates: number;
   isFav: boolean;
   weeks?: WeekTemplate[];
@@ -60,25 +61,37 @@ const initialState: ProgramState = {
 
 export const fetchTemplates = createAsyncThunk(
   "trainerProgram/fetchTemplates",
-  async () => {
-    const response = await programService.getTemplates();
-    return response.data.data.plans;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await programService.getTemplates();
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to fetch templates");
+    }
   }
 );
 
 export const createTemplate = createAsyncThunk(
   "trainerProgram/createTemplate",
-  async (data: { name: string; description: string }) => {
-    const response = await programService.createTemplate(data);
-    return response.data.data;
+  async (data: { name: string; description: string }, { rejectWithValue }) => {
+    try {
+      const response = await programService.createTemplate(data);
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to create template");
+    }
   }
 );
 
 export const fetchExercises = createAsyncThunk(
   "trainerProgram/fetchExercises",
-  async () => {
-    const response = await programService.getExercises();
-    return response.data.data.exercises;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await programService.getExercises();
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Failed to fetch exercises");
+    }
   }
 );
 
@@ -106,39 +119,60 @@ export const programSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch Templates
       .addCase(fetchTemplates.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(fetchTemplates.fulfilled, (state, action) => {
         state.status = "succeeded";
-        const fetchedPlans = action.payload || [];
-        const existingMap = new Map(state.templates.map(t => [t.id, t]));
-        fetchedPlans.forEach((plan: PlanTemplate) => {
-          existingMap.set(plan.id, plan);
-        });
-        state.templates = Array.from(existingMap.values());
+        const payload = action.payload;
+        // Unwraps safely across common nested shapes (e.g., payload.data.plans or payload.plans)
+        const plansList = 
+          payload?.data?.plans || 
+          payload?.plans || 
+          payload?.data || 
+          (Array.isArray(payload) ? payload : []);
+          
+        state.templates = Array.isArray(plansList) ? plansList : [];
       })
       .addCase(fetchTemplates.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message || "Failed to fetch templates";
+        state.error = (action.payload as string) || "Failed to fetch templates";
       })
+
+      // Create Template
       .addCase(createTemplate.fulfilled, (state, action) => {
-        const newTemplate = action.payload;
+        const payload = action.payload;
+        const newTemplate = payload?.data || payload;
+        
         if (newTemplate) {
-          const formattedTemplate = {
+          const formattedTemplate: PlanTemplate = {
             id: newTemplate.id || newTemplate.planId || Date.now(),
             name: newTemplate.name,
-            description: newTemplate.description,
+            description: newTemplate.description || "",
             status: newTemplate.status || "DRAFT",
-            durationWeekTemplates: newTemplate.durationWeekTemplates || 0,
+            trainerId: newTemplate.trainerId,
+            durationWeekTemplates: newTemplate.durationWeekTemplates || 4,
             isFav: newTemplate.isFav || false,
             weeks: newTemplate.weeks || []
           };
-          state.templates.unshift(formattedTemplate);
+          if (!state.templates.some(t => t.id === formattedTemplate.id)) {
+            state.templates.unshift(formattedTemplate);
+          }
         }
       })
+
+      // Fetch Exercises
       .addCase(fetchExercises.fulfilled, (state, action) => {
-        state.exercises = action.payload;
+        const payload = action.payload;
+        const exercisesList = 
+          payload?.data?.exercises || 
+          payload?.exercises || 
+          payload?.data || 
+          (Array.isArray(payload) ? payload : []);
+          
+        state.exercises = Array.isArray(exercisesList) ? exercisesList : [];
       });
   },
 });

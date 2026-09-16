@@ -31,7 +31,7 @@
     "dashboard": "Dashboard",
     "trainees": "Trainees",
     "programs": "Programs",
-    "templates": "Templates",
+    "templates": "Workout Plan",
     "billing": "Billing",
     "trainer": "Trainer Panel",
     "admin": "Admin Panel",
@@ -71,18 +71,18 @@
       "description": "Create and manage structured training programs for your trainees."
     },
     "templates": {
-  "title": "Templates",
-  "description": "Build reusable workout templates to quickly assign to trainees.",
-  "weeks": "weeks",
-  "useOrEdit": "Use / Edit",
-  "modalTitle": "Create New Template",
-  "nameLabel": "Template Name",
-  "namePlaceholder": "e.g. Master Hypertrophy Plan",
-  "descLabel": "Description",
-  "descPlaceholder": "Describe your training template...",
-  "cancel": "Cancel",
-  "createButton": "Create & Open Builder"
-},
+      "title": "Workout Plan",
+      "description": "Build reusable workout plans to quickly assign to trainees.",
+      "weeks": "weeks",
+      "useOrEdit": "Use / Edit",
+      "modalTitle": "Create New Workout Plan",
+      "nameLabel": "Workout Plan Name",
+      "namePlaceholder": "e.g. Master Hypertrophy Plan",
+      "descLabel": "Description",
+      "descPlaceholder": "Describe your training plan...",
+      "cancel": "Cancel",
+      "createButton": "Create & Open Builder"
+    },
     "billing": {
       "title": "Billing",
       "description": "View your subscription status, invoices, and payment history."
@@ -92,7 +92,6 @@
       "description": "Configure your trainer profile and account preferences."
     }
   },
-
   "Admin": {
     "title": "Admin Dashboard",
     "description": "Manage platform settings and users seamlessly."

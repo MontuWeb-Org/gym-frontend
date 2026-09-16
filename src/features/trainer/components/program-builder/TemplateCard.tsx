@@ -1,34 +1,67 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { PlanTemplate } from "../../store/program.slice";
+import { FileText, Settings, UserPlus } from "lucide-react";
 
 interface TemplateCardProps {
-  template: PlanTemplate;
+  id: number;
+  name: string;
+  description: string;
+  durationWeeks?: number;
+  status?: string;
+  onConfigure: (id: number) => void;
+  onAssign: (id: number) => void;
 }
 
-export function TemplateCard({ template }: TemplateCardProps) {
-  const t = useTranslations("Trainer.templates");
-  const router = useRouter();
-
+export function TemplateCard({
+  id,
+  name,
+  description,
+  durationWeeks = 4,
+  status = "DRAFT",
+  onConfigure,
+  onAssign,
+}: TemplateCardProps) {
   return (
-    <div className="rounded-xl border bg-card p-5 shadow-sm flex flex-col justify-between">
-      <div>
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-lg">{template.name}</h3>
-          <Badge variant={template.status === "ACTIVE" ? "default" : "secondary"}>
-            {template.status}
-          </Badge>
+    <div className="flex flex-col justify-between rounded-xl border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-base leading-snug">{name}</h4>
+              <span className="text-xs text-muted-foreground">
+                {durationWeeks} Weeks • <span className="uppercase font-medium">{status}</span>
+              </span>
+            </div>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{template.description}</p>
+
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {description || "No description provided for this workout plan template."}
+        </p>
       </div>
-      <div className="flex items-center justify-between mt-6 pt-4 border-t text-xs text-muted-foreground">
-        <span>{template.durationWeekTemplates || 0} {t("weeks")}</span>
-        <Button size="sm" onClick={() => router.push(`/trainer/template/${template.id}`)}>
-          {t("useOrEdit")}
+
+      <div className="flex items-center justify-end gap-2 pt-4 mt-4 border-t border-border">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onConfigure(id)}
+          className="gap-1.5 text-xs"
+        >
+          <Settings className="h-3.5 w-3.5" />
+          Configure
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => onAssign(id)}
+          className="gap-1.5 text-xs"
+        >
+          <UserPlus className="h-3.5 w-3.5" />
+          Assign
         </Button>
       </div>
     </div>
