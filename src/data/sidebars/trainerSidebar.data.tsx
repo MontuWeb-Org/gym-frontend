@@ -25,7 +25,7 @@ export const TRAINER_SIDEBAR_DATA: SidebarItem[] = [
   },
   {
     id: "templates",
-    label: "Templates",
+    label: "Workout Plan",
     href: ROUTES.TRAINER.TEMPLATES,
     icon: <FileText className="size-5" />,
   },
