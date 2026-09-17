@@ -1,5 +1,5 @@
 // src/data/sidebars/traineeSidebar.data.tsx
-import { LayoutDashboard, Dumbbell, Settings } from "lucide-react";
+import { LayoutDashboard, Dumbbell, User } from "lucide-react";
 import type { SidebarItem } from "@/data/sidebar.types";
 import { ROUTES } from "@/data/routes";
 
@@ -17,9 +17,9 @@ export const TRAINEE_SIDEBAR_DATA: SidebarItem[] = [
     icon: <Dumbbell className="size-5" />,
   },
   {
-    id: "settings",
-    label: "Settings",
-    href: ROUTES.TRAINEE.SETTINGS,
-    icon: <Settings className="size-5" />,
+    id: "profile",
+    label: "Profile",
+    href: ROUTES.TRAINEE.profile,
+    icon: <User className="size-5" />,
   },
 ];

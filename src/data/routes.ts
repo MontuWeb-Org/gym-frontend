@@ -175,7 +175,7 @@ export const ROUTES = {
     ROOT: "/trainee",
     DASHBOARD: "/trainee/dashboard",
     WORKOUTS: "/trainee/workouts",
-    SETTINGS: "/trainee/settings",
+    profile: "/trainee/profile",
   },
 
   ADMIN: {
