@@ -27,6 +27,10 @@ function getUserIdFromCookie(request: Request): string | null {
   return match ? match[1] : null;
 }
 
+// In-memory store for pending invites in MSW mock state
+const pendingInvites = new Map<string, { email: string }>();
+const pendingInviteCreations = new Map<string, { email: string }>();
+
 export const authHandlers = [
   // 1. Register Init
   http.post("*/api/auth/register/init", async ({ request }) => {
@@ -48,7 +52,7 @@ export const authHandlers = [
       );
     }
 
-    const creationToken = `mock_token_${Date.now()}`;
+    const creationToken = `mock_creation_token_${Date.now()}`;
 
     mockDb.pendingRegistrations.set(creationToken, {
       name: name || "New User",
@@ -260,7 +264,7 @@ export const authHandlers = [
     );
   }),
 
- // 7. Logout
+  // 7. Logout
   http.post("*/api/auth/logout", async () => {
     return HttpResponse.json(
       { message: "Logout successfully." },
@@ -321,9 +325,128 @@ export const authHandlers = [
       );
     }
 
+    const mockInviteToken = `mock_invite_${Date.now()}`;
+    pendingInvites.set(mockInviteToken, { email });
+
     return HttpResponse.json(
       { message: "Trainee registration initialized successfully." },
       { status: 201 }
+    );
+  }),
+
+  // 10. Invite Trainee Verify
+  http.get("*/api/auth/invite/verify/:token", async ({ params }) => {
+    const { token } = params;
+
+    if (token === "invalid-token") {
+      return HttpResponse.json(
+        { message: "Invitation token not found or expired" },
+        { status: 404 }
+      );
+    }
+
+    const inviteData = pendingInvites.get(String(token));
+    const creationToken = `mock_creation_${Date.now()}`;
+
+    pendingInviteCreations.set(creationToken, {
+      email: inviteData?.email || "trainee@example.com",
+    });
+
+    return HttpResponse.json(
+      {
+        data: {
+          creationToken,
+          trainerName: "John Coach",
+          status: "SETUP_PASSWORD",
+        },
+      },
+      { status: 200 }
+    );
+  }),
+
+  // 11. Invite Trainee Accept (Existing user)
+  http.post("*/api/auth/invite/accept", async ({ request }) => {
+    const body = await parseRequestBody(request);
+    const { creationToken, accept } = body;
+
+    if (!creationToken) {
+      return HttpResponse.json(
+        { message: "Creation token is required" },
+        { status: 422 }
+      );
+    }
+
+    if (!accept) {
+      return HttpResponse.json(
+        { message: "Invitation rejected successfully." },
+        { status: 200 }
+      );
+    }
+
+    const creationData = pendingInviteCreations.get(creationToken);
+    const userId = mockDb.users.length + 1;
+
+    if (creationData) {
+      pendingInviteCreations.delete(creationToken);
+    }
+
+    return HttpResponse.json(
+      {
+        data: {
+          accessToken: `mock_jwt_${userId}_${Date.now()}`,
+        },
+      },
+      {
+        status: 200,
+        headers: {
+          "Set-Cookie": `refreshToken=mock_refresh_${userId}_${Date.now()}; HttpOnly; Path=/; SameSite=Lax`,
+        },
+      }
+    );
+  }),
+
+  // 12. Invite Trainee Setup (New user)
+  http.post("*/api/auth/invite/setup", async ({ request }) => {
+    const body = await parseRequestBody(request);
+    const { creationToken, name, password } = body;
+
+    if (!creationToken || !name || !password) {
+      return HttpResponse.json(
+        { message: "Creation token, name, and password are required" },
+        { status: 422 }
+      );
+    }
+
+    const creationData = pendingInviteCreations.get(creationToken);
+    const email = creationData?.email || `trainee_${Date.now()}@example.com`;
+
+    const newUser: MockUser = {
+      id: mockDb.users.length + 1,
+      email,
+      name,
+      phoneNumber: "",
+      password,
+      role: MockUserRole.TRAINEE || ("TRAINEE" as MockUserRole),
+      activationStatus: "ACTIVATED",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    mockDb.users.push(newUser);
+    pendingInviteCreations.delete(creationToken);
+
+    return HttpResponse.json(
+      {
+        data: {
+          accessToken: `mock_jwt_${newUser.id}_${Date.now()}`,
+        },
+      },
+      {
+        status: 200,
+        headers: {
+          "Set-Cookie": `refreshToken=mock_refresh_${newUser.id}_${Date.now()}; HttpOnly; Path=/; SameSite=Lax`,
+        },
+      }
     );
   }),
 ];

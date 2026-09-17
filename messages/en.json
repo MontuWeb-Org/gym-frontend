@@ -122,7 +122,16 @@
     "resetPasswordTitle": "Reset Password",
     "resetPasswordSubtitle": "Enter the code sent to {email} and choose a new password.",
     "resetPasswordButton": "Reset Password",
-    "backToLogin": "Back to Login"
+    "backToLogin": "Back to Login",
+    "invitationReceivedTitle": "Invitation Received",
+    "invitationReceivedSubtitle": "You have been invited by {trainerName} to join as a trainee.",
+    "defaultTrainer": "your trainer",
+    "processing": "Processing...",
+    "acceptInviteButton": "Accept Invitation",
+    "rejectInviteButton": "Reject Invitation",
+    "traineeSetupTitle": "Complete Your Profile",
+    "traineeSetupSubtitle": "Set up your account to start training with {trainerName}.",
+    "completeSetupButton": "Complete Setup"
   },
   "TraineesTable": {
     "title": "Trainees",

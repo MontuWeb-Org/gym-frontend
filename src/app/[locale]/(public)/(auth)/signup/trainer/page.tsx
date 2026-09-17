@@ -1,5 +1,5 @@
-import { SignupView } from "@/features/auth";
+import { TrainerSignupView } from "@/features/auth";
 
 export default function SignupPage() {
-  return <SignupView />;
+  return <TrainerSignupView />;
 }
