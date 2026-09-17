@@ -48,18 +48,9 @@ export function SelectedTraineesChips({
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] text-muted-foreground">Duration (Weeks)</span>
                   <input 
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={config.durationWeeks}
-                    onChange={(e) => {
-                      // Allows completely wiping the box, backspacing, and typing freely
-                      const val = e.target.value;
-                      // Only allow digits or empty string
-                      if (val === "" || /^\d+$/.test(val)) {
-                        onUpdateConfig(trainee.id, { durationWeeks: val });
-                      }
-                    }}
+                    type="duration"
+                
+                    
                     className="rounded border px-2 py-1 text-xs w-20 bg-background text-center"
                   />
                 </div>
