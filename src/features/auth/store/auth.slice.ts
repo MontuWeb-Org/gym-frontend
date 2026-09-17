@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, type ThunkDispatch, type UnknownAction } from "@reduxjs/toolkit";
 import { authService } from "../services/auth.service";
 import {
   RegisterInitPayload,
@@ -7,12 +7,11 @@ import {
   ForgotPasswordInitPayload,
   ForgotPasswordCompletePayload,
 } from "../types/auth.types";
-import { User } from "@/types/user.types";
 import { tokenStorage } from "@/lib/storage";
+import { clearUser, getCurrentUserThunk } from "@/features/user/store/user.slice";
+import { User } from "@/features/user/types/user.types";
 
 interface AuthState {
-  user: User | null;
-  accessToken: string | null;
   creationToken: string | null;
   verificationToken: string | null;
   isAuthenticated: boolean;
@@ -22,8 +21,6 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: null,
-  accessToken: null,
   creationToken: null,
   verificationToken: null,
   isAuthenticated: false,
@@ -32,30 +29,36 @@ const initialState: AuthState = {
   error: null,
 };
 
+type AppAsyncDispatch = ThunkDispatch<unknown, unknown, UnknownAction>;
+
 const getErrorMessage = (err: unknown): string => {
   if (!err) return "An unexpected error occurred.";
   const e = err as { response?: { data?: { message?: string } }; message?: string };
   return e.response?.data?.message || e.message || "An unexpected error occurred.";
 };
 
-// --- Thunks ---
+// Shared by every thunk that ends with "now fetch the profile"
+const completeAuthentication = async (
+  accessToken: string,
+  dispatch: AppAsyncDispatch
+): Promise<User> => {
+  tokenStorage.setAccessToken(accessToken);
+  return dispatch(getCurrentUserThunk()).unwrap();
+};
 
-// 1. Refresh Token + Profile Fetch
 export const refreshTokenThunk = createAsyncThunk(
   "auth/refreshToken",
-  async (_, { rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue }) => {
     try {
       const res = await authService.refreshToken();
-      tokenStorage.setAccessToken(res.data.accessToken);
-      const userRes = await authService.getCurrentUser();
-      return { user: userRes.data };
+      const user = await completeAuthentication(res.data.accessToken, dispatch);
+      return user;
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err));
     }
   }
 );
 
-// 2. Register Init
 export const registerInitThunk = createAsyncThunk(
   "auth/registerInit",
   async (payload: RegisterInitPayload, { rejectWithValue }) => {
@@ -68,37 +71,32 @@ export const registerInitThunk = createAsyncThunk(
   }
 );
 
-// 3. Register Complete + Profile Fetch
 export const registerCompleteThunk = createAsyncThunk(
   "auth/registerComplete",
-  async (payload: RegisterCompletePayload, { rejectWithValue }) => {
+  async (payload: RegisterCompletePayload, { dispatch, rejectWithValue }) => {
     try {
       const res = await authService.registerComplete(payload);
-      tokenStorage.setAccessToken(res.data.accessToken);
-      const userRes = await authService.getCurrentUser();
-      return { user: userRes.data };
+      const user = await completeAuthentication(res.data.accessToken, dispatch);
+      return user;
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err) || "OTP verification failed.");
     }
   }
 );
 
-// 4. Login + Profile Fetch
 export const loginThunk = createAsyncThunk(
   "auth/login",
-  async (payload: LoginPayload, { rejectWithValue }) => {
+  async (payload: LoginPayload, { dispatch, rejectWithValue }) => {
     try {
       const res = await authService.login(payload);
-      tokenStorage.setAccessToken(res.data.accessToken);
-      const userRes = await authService.getCurrentUser();
-      return { user: userRes.data };
+      const user = await completeAuthentication(res.data.accessToken, dispatch);
+      return user;
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err) || "Login failed.");
     }
   }
 );
 
-// 5. Forgot Password Init
 export const forgotPasswordInitThunk = createAsyncThunk(
   "auth/forgotPasswordInit",
   async (payload: ForgotPasswordInitPayload, { rejectWithValue }) => {
@@ -111,42 +109,30 @@ export const forgotPasswordInitThunk = createAsyncThunk(
   }
 );
 
-// 6. Forgot Password Complete + Profile Fetch
 export const forgotPasswordCompleteThunk = createAsyncThunk(
   "auth/forgotPasswordComplete",
-  async (payload: ForgotPasswordCompletePayload, { rejectWithValue }) => {
+  async (payload: ForgotPasswordCompletePayload, { dispatch, rejectWithValue }) => {
     try {
       const res = await authService.forgotPasswordComplete(payload);
-      tokenStorage.setAccessToken(res.data.accessToken);
-      const userRes = await authService.getCurrentUser();
-      return { user: userRes.data };
+      const user = await completeAuthentication(res.data.accessToken, dispatch);
+      return user;
     } catch (err: unknown) {
       return rejectWithValue(getErrorMessage(err) || "Password reset failed.");
     }
   }
 );
 
-// 7. Get Current User Direct Call
-export const getCurrentUserThunk = createAsyncThunk(
-  "auth/getCurrentUser",
-  async (_, { rejectWithValue }) => {
+export const logoutThunk = createAsyncThunk(
+  "auth/logout",
+  async (_, { dispatch }) => {
     try {
-      const res = await authService.getCurrentUser();
-      return res.data;
-    } catch (err: unknown) {
-      return rejectWithValue(getErrorMessage(err) || "Failed to fetch user profile.");
+      await authService.logout();
+    } finally {
+      tokenStorage.clearTokens();
+      dispatch(clearUser());
     }
   }
 );
-
-// 8. Logout
-export const logoutThunk = createAsyncThunk("auth/logout", async () => {
-  try {
-    await authService.logout();
-  } finally {
-    tokenStorage.clearTokens();
-  }
-});
 
 export const inviteTraineeThunk = createAsyncThunk(
   "auth/inviteTrainee",
@@ -159,8 +145,6 @@ export const inviteTraineeThunk = createAsyncThunk(
   }
 );
 
-// --- Slice ---
-
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -172,26 +156,20 @@ const authSlice = createSlice({
       state.creationToken = null;
       state.verificationToken = null;
     },
-    logout: (state) => {
-      state.user = null;
-      state.accessToken = null;
-      state.creationToken = null;
-      state.verificationToken = null;
-      state.isAuthenticated = false;
-      state.error = null;
-    },
   },
   extraReducers: (builder) => {
     builder
       // Refresh Token
-      .addCase(refreshTokenThunk.fulfilled, (state, action) => {
-        state.user = action.payload.user;
+      .addCase(refreshTokenThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(refreshTokenThunk.fulfilled, (state) => {
+        state.isLoading = false;
         state.isAuthenticated = true;
         state.isInitialized = true;
       })
       .addCase(refreshTokenThunk.rejected, (state) => {
-        state.user = null;
-        state.accessToken = null;
+        state.isLoading = false;
         state.isAuthenticated = false;
         state.isInitialized = true;
       })
@@ -215,9 +193,8 @@ const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(registerCompleteThunk.fulfilled, (state, action) => {
+      .addCase(registerCompleteThunk.fulfilled, (state) => {
         state.isLoading = false;
-        state.user = action.payload.user;
         state.isAuthenticated = true;
         state.creationToken = null;
       })
@@ -231,9 +208,8 @@ const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(loginThunk.fulfilled, (state, action) => {
+      .addCase(loginThunk.fulfilled, (state) => {
         state.isLoading = false;
-        state.user = action.payload.user;
         state.isAuthenticated = true;
       })
       .addCase(loginThunk.rejected, (state, action) => {
@@ -256,9 +232,8 @@ const authSlice = createSlice({
       })
 
       // Forgot Password Complete
-      .addCase(forgotPasswordCompleteThunk.fulfilled, (state, action) => {
+      .addCase(forgotPasswordCompleteThunk.fulfilled, (state) => {
         state.isLoading = false;
-        state.user = action.payload.user;
         state.isAuthenticated = true;
         state.verificationToken = null;
       })
@@ -267,45 +242,34 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Get Current User
-      .addCase(getCurrentUserThunk.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(getCurrentUserThunk.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload;
-      })
-      .addCase(getCurrentUserThunk.rejected, (state, action) => {
-        state.isLoading = false;
-        state.user = null;
-        state.error = action.payload as string;
-      })
-
       // Logout
       .addCase(logoutThunk.fulfilled, (state) => {
-        state.user = null;
-        state.accessToken = null;
-        state.creationToken = null;
-        state.verificationToken = null;
+        state.isLoading = false;
         state.isAuthenticated = false;
         state.error = null;
-      });
+      })
+      .addCase(logoutThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutThunk.rejected, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+      })
 
       // Invite Trainee
-      builder
-        .addCase(inviteTraineeThunk.pending, (state) => {
-          state.isLoading = true;
-          state.error = null;
-        })
-        .addCase(inviteTraineeThunk.fulfilled, (state) => {
-          state.isLoading = false;
-        })
-        .addCase(inviteTraineeThunk.rejected, (state, action) => {
-          state.isLoading = false;
-          state.error = action.payload as string;
-        });
+      .addCase(inviteTraineeThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(inviteTraineeThunk.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(inviteTraineeThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const { clearError, resetFlowTokens, logout } = authSlice.actions;
+export const { clearError, resetFlowTokens } = authSlice.actions;
 export default authSlice.reducer;

@@ -11,7 +11,6 @@ import {
   ForgotPasswordInitResponse,
   ForgotPasswordCompletePayload,
 } from "../types/auth.types";
-import { User } from "@/types/user.types";
 
 export const authService = {
   async registerInit(payload: RegisterInitPayload): Promise<RegisterInitResponse> {
@@ -20,17 +19,17 @@ export const authService = {
   },
 
   async registerComplete(payload: RegisterCompletePayload): Promise<RegisterCompleteResponse> {
-    const response = await publicApi.post("/auth/register/complete", payload);
+    const response = await authApi.post("/auth/register/complete", payload);
     return response.data;
   },
 
   async login(payload: LoginPayload): Promise<AuthResponse> {
-    const response = await publicApi.post("/auth/login", payload);
+    const response = await authApi.post("/auth/login", payload);
     return response.data;
   },
 
   async refreshToken(): Promise<RefreshTokenResponse> {
-    const response = await publicApi.post("/auth/refresh", {}, { withCredentials: true });
+    const response = await authApi.post("/auth/refresh", {});
     return response.data;
   },
 
@@ -40,20 +39,15 @@ export const authService = {
   },
 
   async forgotPasswordComplete(payload: ForgotPasswordCompletePayload): Promise<AuthResponse> {
-    const response = await publicApi.post("/auth/forgot/complete", payload);
+    const response = await authApi.post("/auth/forgot/complete", payload);
     return response.data;
   },
 
   async logout(): Promise<void> {
-    await publicApi.post("/auth/logout", {}, { withCredentials: true });
-  },
-
-  async getCurrentUser(): Promise<{ data: User }> {
-    const response = await authApi.get<{ data: User }>("/users/me");
-    return response.data;
+    await authApi.post("/auth/logout", {});
   },
 
   async inviteTrainee(email: string): Promise<void> {
-    await authApi.post("auth/invite/init", { email });
-  }
+    await authApi.post("/auth/invite/init", { email });
+  },
 };
