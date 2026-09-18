@@ -1,18 +1,20 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authReducer } from "@/features/auth";
 import { trainerReducer } from "@/features/trainer";
-import  userReducer  from "@/features/user/store/user.slice";
-
+import programReducer from "@/features/trainer/store/program.slice"; // Import your program slice reducer
+import userReducer from "@/features/user/store/user.slice";
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    trainer: trainerReducer,
-    user: userReducer,
-  },
+ reducer: {
+  auth: authReducer,
+  user: userReducer,
+  trainer: trainerReducer,
+  trainerProgram: programReducer,
+},
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
+  devTools: process.env.NODE_ENV !== "production", // Explicitly enable Redux DevTools for debugging
 });
 
 export type RootState = ReturnType<typeof store.getState>;
