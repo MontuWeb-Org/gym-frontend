@@ -2,13 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import { authReducer } from "@/features/auth";
 import { trainerReducer } from "@/features/trainer";
 import programReducer from "@/features/trainer/store/program.slice"; // Import your program slice reducer
-
+import userReducer from "@/features/user/store/user.slice";
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    trainer: trainerReducer,
-    trainerProgram: programReducer, 
-  },
+ reducer: {
+  auth: authReducer,
+  user: userReducer,
+  trainer: trainerReducer,
+  trainerProgram: programReducer,
+},
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,

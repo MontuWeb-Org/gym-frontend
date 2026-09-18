@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TRAINER_SIDEBAR_DATA } from "@/data/sidebars/trainerSidebar.data";
-
+import { ROUTES } from "@/data/routes";
 export default function TrainerLayout({
   children,
 }: {
