@@ -25,20 +25,43 @@ export function AssignedExerciseList({
 }: AssignedExerciseListProps) {
   return (
     <div className="space-y-4">
-      <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Assigned Exercises</h4>
+      <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Assigned Exercises
+      </h4>
       
       {exercises.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center">
-          <p className="text-sm text-muted-foreground mb-4">No exercises added to this workout session yet.</p>
-          <Button size="sm" variant="secondary" onClick={() => setIsModalOpen(true)}>
+          <p className="text-sm text-muted-foreground mb-4">
+            No exercises added to this workout session yet.
+          </p>
+
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setIsModalOpen(true)}
+          >
             + Add Exercise
           </Button>
         </div>
       ) : (
         exercises.map((exercise, index) => {
-          const setsLen = Array.isArray(exercise.sets) ? exercise.sets.length : 3;
-          const repsVal = Array.isArray(exercise.sets) && exercise.sets[0]?.reps ? exercise.sets[0].reps : 10;
+          const setsLen = Array.isArray(exercise.sets)
+            ? exercise.sets.length
+            : 3;
+
+          const repsVal =
+            Array.isArray(exercise.sets) &&
+            exercise.sets[0]?.reps
+              ? exercise.sets[0].reps
+              : 10;
+
           const restVal = exercise.rest || 60;
+
+          const weightVal =
+            Array.isArray(exercise.sets) &&
+            exercise.sets[0]?.weight !== undefined
+              ? exercise.sets[0].weight
+              : 0;
 
           return (
             <div 
@@ -60,6 +83,7 @@ export function AssignedExerciseList({
                   >
                     ▲
                   </Button>
+
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -70,25 +94,40 @@ export function AssignedExerciseList({
                     ▼
                   </Button>
                 </div>
+
                 <div>
-                  <h5 className="font-semibold text-base">{exercise.name}</h5>
+                  <h5 className="font-semibold text-base">
+                    {exercise.name}
+                  </h5>
+
                   <p className="text-xs text-muted-foreground mt-1">
-                    Sets: {setsLen} | Reps: {repsVal} | Rest: {restVal}s
+                    Sets: {setsLen} | Reps: {repsVal} | Rest: {restVal}s | Weight: {weightVal} kg
                   </p>
                 </div>
               </div>
+
               <div className="flex gap-2">
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => onEditExercise(exercise, setsLen, repsVal, restVal)}
+                  onClick={() =>
+                    onEditExercise(
+                      exercise,
+                      setsLen,
+                      repsVal,
+                      restVal
+                    )
+                  }
                 >
                   Edit Reps
                 </Button>
+
                 <Button 
                   variant="destructive" 
                   size="sm"
-                  onClick={() => handleRemoveExercise(exercise.id)}
+                  onClick={() =>
+                    handleRemoveExercise(exercise.id)
+                  }
                 >
                   Remove
                 </Button>
@@ -100,3 +139,4 @@ export function AssignedExerciseList({
     </div>
   );
 }
+
