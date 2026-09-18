@@ -17,11 +17,6 @@ interface WorkoutSessionDetailsDialogProps {
   isLoadingLogDetail: boolean;
   logDetailError: string | null;
   onClose: () => void;
-  formatDateTime: (date: string) => string;
-  getWorkoutDuration: (
-    startedAt: string,
-    endedAt: string
-  ) => string;
 }
 
 export default function WorkoutSessionDetailsDialog({
@@ -30,8 +25,6 @@ export default function WorkoutSessionDetailsDialog({
   isLoadingLogDetail,
   logDetailError,
   onClose,
-  formatDateTime,
-  getWorkoutDuration,
 }: WorkoutSessionDetailsDialogProps) {
   return (
     <Dialog
@@ -42,21 +35,20 @@ export default function WorkoutSessionDetailsDialog({
         }
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] w-[95vw] max-w-5xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             Workout Session Details
           </DialogTitle>
 
           <DialogDescription>
-            Detailed information about this workout
-            session.
+            Details of the selected workout session.
           </DialogDescription>
         </DialogHeader>
 
         {isLoadingLogDetail && (
           <p className="text-sm text-muted-foreground">
-            Loading workout details...
+            Loading workout session details...
           </p>
         )}
 
@@ -70,52 +62,46 @@ export default function WorkoutSessionDetailsDialog({
           !logDetailError &&
           selectedWorkoutLog && (
             <div className="space-y-6">
-              {/* Workout summary */}
-              <div className="rounded-lg border p-4">
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">
-                      Completed on
-                    </p>
+              {/* Session Summary */}
+              <div className="grid gap-4 sm:grid-cols-[1fr_1fr_2fr]">
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm font-medium">
+                    Status
+                  </p>
 
-                    <p className="text-sm font-medium">
-                      {formatDateTime(
-                        selectedWorkoutLog.startedAt
-                      )}
-                    </p>
-                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedWorkoutLog.status}
+                  </p>
+                </div>
 
-                  <div>
-                    <p className="text-xs text-muted-foreground">
-                      Status
-                    </p>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm font-medium">
+                    Duration
+                  </p>
 
-                    <p className="text-sm font-medium">
-                      {selectedWorkoutLog.status}
-                    </p>
-                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedWorkoutLog.durationMinutes}{" "}
+                    min
+                  </p>
+                </div>
 
-                  <div>
-                    <p className="text-xs text-muted-foreground">
-                      Duration
-                    </p>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm font-medium">
+                    Session ID
+                  </p>
 
-                    <p className="text-sm font-medium">
-                      {getWorkoutDuration(
-                        selectedWorkoutLog.startedAt,
-                        selectedWorkoutLog.endedAt
-                      )}
-                    </p>
-                  </div>
+                  <p className="mt-1 break-all text-sm text-muted-foreground">
+                    {selectedWorkoutLog.id}
+                  </p>
                 </div>
 
                 {selectedWorkoutLog.notes && (
-                  <div className="mt-4">
-                    <p className="text-xs text-muted-foreground">
+                  <div className="rounded-lg border p-4 sm:col-span-3">
+                    <p className="text-sm font-medium">
                       Notes
                     </p>
 
-                    <p className="mt-1 text-sm">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {selectedWorkoutLog.notes}
                     </p>
                   </div>
@@ -123,84 +109,110 @@ export default function WorkoutSessionDetailsDialog({
               </div>
 
               {/* Exercises */}
-              <div>
-                <h3 className="mb-4 text-base font-semibold">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">
                   Exercises
                 </h3>
 
                 {selectedWorkoutLog.exerciseLogs
                   .length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No exercise logs found for this
-                    workout.
+                    No exercise logs found.
                   </p>
                 ) : (
-                  <div className="space-y-5">
-                    {selectedWorkoutLog.exerciseLogs.map(
-                      (exercise) => (
-                        <div
-                          key={exercise.id}
-                          className="rounded-lg border p-4"
-                        >
-                          <div className="mb-4 flex items-center justify-between gap-4">
-                            <p className="font-medium">
+                  selectedWorkoutLog.exerciseLogs.map(
+                    (exercise) => (
+                      <div
+                        key={exercise.id}
+                        className="rounded-lg border p-4"
+                      >
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <h4 className="font-medium">
                               {exercise.exerciseName}
+                            </h4>
+
+                            <p className="text-sm text-muted-foreground">
+                              Expected:{" "}
+                              {exercise.expectedSets}{" "}
+                              sets ×{" "}
+                              {exercise.expectedReps}{" "}
+                              reps
+                              {exercise.expectedWeight >
+                                0 &&
+                                ` × ${exercise.expectedWeight} kg`}
                             </p>
-
-                            <div className="text-right">
-                              <p className="text-xs text-muted-foreground">
-                                Duration
-                              </p>
-
-                              <p className="text-sm font-medium">
-                                {
-                                  exercise.durationMinutes
-                                }{" "}
-                                min
-                              </p>
-                            </div>
                           </div>
 
-                          <div className="overflow-hidden rounded-md border">
-                            <table className="w-full text-sm">
-                              <thead className="bg-muted/50">
-                                <tr>
-                                  <th className="px-4 py-2 text-left font-medium">
-                                    Set
-                                  </th>
-
-                                  <th className="px-4 py-2 text-left font-medium">
-                                    Reps
-                                  </th>
-                                </tr>
-                              </thead>
-
-                              <tbody>
-                                {exercise.sets.map(
-                                  (set) => (
-                                    <tr
-                                      key={`${exercise.id}-${set.setNumber}`}
-                                      className="border-t"
-                                    >
-                                      <td className="px-4 py-2">
-                                        {
-                                          set.setNumber
-                                        }
-                                      </td>
-
-                                      <td className="px-4 py-2">
-                                        {set.reps}
-                                      </td>
-                                    </tr>
-                                  )
-                                )}
-                              </tbody>
-                            </table>
-                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Duration:{" "}
+                            {Math.round(
+                              exercise.durationSeconds /
+                                60
+                            )}{" "}
+                            min
+                          </p>
                         </div>
-                      )
-                    )}
-                  </div>
+
+                        {/* Set Logs */}
+                        <div className="mt-4 overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b text-left">
+                                <th className="px-3 py-2 font-medium">
+                                  Set
+                                </th>
+
+                                <th className="px-3 py-2 font-medium">
+                                  Reps
+                                </th>
+
+                                <th className="px-3 py-2 font-medium">
+                                  Weight
+                                </th>
+
+                                <th className="px-3 py-2 font-medium">
+                                  Rest
+                                </th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              {exercise.setLogs.map(
+                                (setLog) => (
+                                  <tr
+                                    key={setLog.id}
+                                    className="border-b last:border-0"
+                                  >
+                                    <td className="px-3 py-2">
+                                      {
+                                        setLog.sequenceNumber
+                                      }
+                                    </td>
+
+                                    <td className="px-3 py-2">
+                                      {setLog.reps}
+                                    </td>
+
+                                    <td className="px-3 py-2">
+                                      {setLog.weight} kg
+                                    </td>
+
+                                    <td className="px-3 py-2">
+                                      {
+                                        setLog.restTimeSeconds
+                                      }{" "}
+                                      sec
+                                    </td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )
+                  )
                 )}
               </div>
             </div>
