@@ -70,36 +70,60 @@ const getResponseData = <T,>(response: {
 };
 
 const getLibraryExercises = (
-  response: any
+  response: unknown
 ): RawLibraryExercise[] => {
+  if (
+    !response ||
+    typeof response !== "object"
+  ) {
+    return [];
+  }
+
+  const responseObject =
+    response as {
+      data?: unknown;
+    };
+
+  const outerData =
+    responseObject.data;
+
+  if (
+    !outerData ||
+    typeof outerData !== "object"
+  ) {
+    return [];
+  }
+
+  const dataObject =
+    outerData as {
+      data?: unknown;
+      exercises?: unknown;
+    };
+
   const data =
-    response?.data?.data ??
-    response?.data ??
-    [];
+    dataObject.data ??
+    outerData;
 
   if (Array.isArray(data)) {
-    return data;
+    return data as RawLibraryExercise[];
   }
 
   if (
     data &&
-    Array.isArray(data.exercises)
+    typeof data === "object" &&
+    "exercises" in data
   ) {
-    return data.exercises;
+    const exercises =
+      (data as {
+        exercises?: unknown;
+      }).exercises;
+
+    if (Array.isArray(exercises)) {
+      return exercises as RawLibraryExercise[];
+    }
   }
 
   return [];
-};
-
-const getNumber = (
-  value: unknown,
-  fallback: number
-) => {
-  const numberValue = Number(value);
-
-  return Number.isFinite(numberValue)
-    ? numberValue
-    : fallback;
 };
 
 const buildPrintableExercise = (
@@ -118,11 +142,6 @@ const buildPrintableExercise = (
     ? exercise.sets
     : [];
 
-  /*
-   * Use the edited/default values first.
-   * Fall back to the original saved exercise
-   * values for exercises that have not been edited.
-   */
   const sets =
     exercise.defaultSets ??
     (savedSets.length || 3);
@@ -145,18 +164,13 @@ const buildPrintableExercise = (
 
   return {
     id: Number(exercise.id),
-
     name:
       exercise.name ||
       libraryExercise?.name ||
       "Exercise",
-
     sets: Number(sets),
-
     reps: String(reps),
-
     weight: Number(weight),
-
     rest: Number(rest),
   };
 };
@@ -164,10 +178,6 @@ const buildPrintableExercise = (
 export async function prepareProgramForExport(
   templateId: number
 ): Promise<PrintableProgram> {
-  /*
-   * Fetch the template and exercise library
-   * at the same time.
-   */
   const [
     templateResponse,
     exercisesResponse,
@@ -194,9 +204,6 @@ export async function prepareProgramForExport(
   const rawWeeks =
     template.weeks || [];
 
-  /*
-   * Fetch complete week details.
-   */
   const weekDetails =
     await Promise.all(
       rawWeeks.map(
@@ -213,9 +220,6 @@ export async function prepareProgramForExport(
       )
     );
 
-  /*
-   * Build the printable week structure.
-   */
   const weeks: PrintableWeek[] =
     await Promise.all(
       weekDetails.map(
@@ -226,9 +230,6 @@ export async function prepareProgramForExport(
           const rawWorkouts =
             week.workouts || [];
 
-          /*
-           * Fetch complete workout details.
-           */
           const workouts: PrintableWorkout[] =
             await Promise.all(
               rawWorkouts.map(
@@ -266,21 +267,18 @@ export async function prepareProgramForExport(
                       detailedWorkout.id ??
                         workout.id
                     ),
-
                     name:
                       detailedWorkout.name ||
                       workout.name ||
                       `Workout ${
                         workoutIndex + 1
                       }`,
-
                     sequenceNumber:
                       Number(
                         detailedWorkout.sequenceNumber ??
                           workout.sequenceNumber ??
                           workoutIndex + 1
                       ),
-
                     exercises,
                   };
                 }
@@ -295,13 +293,11 @@ export async function prepareProgramForExport(
 
           return {
             id: Number(week.id),
-
             sequenceNumber:
               Number(
                 week.sequenceNumber ??
                   weekIndex + 1
               ),
-
             workouts,
           };
         }
@@ -318,17 +314,13 @@ export async function prepareProgramForExport(
     name:
       template.name ||
       "Workout Program",
-
     description:
       template.description ||
       "",
-
     durationWeeks: weeks.length,
-
     status:
       template.status ||
       "DRAFT",
-
     weeks,
   };
 }

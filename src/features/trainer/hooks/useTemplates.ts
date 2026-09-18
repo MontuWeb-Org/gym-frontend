@@ -19,6 +19,7 @@ import {
 import {
   prepareProgramForExport,
 } from "../services/program-export.service";
+import axios from "axios";
 
 interface PayloadData {
   planId?: number | string;
@@ -286,11 +287,12 @@ export function useTemplates() {
       await dispatch(
         fetchTemplates()
       );
-    } catch (err: any) {
-      if (
-        err?.response?.status ===
-        409
-      ) {
+    }  catch (err: unknown) {
+  if (
+    axios.isAxiosError(err) &&
+    err.response?.status ===
+      409
+  ) {
         window.alert(
           "This template cannot be deleted because it is currently assigned to a trainee."
         );
