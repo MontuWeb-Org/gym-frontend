@@ -133,7 +133,7 @@
     "backToLogin": "العودة لتسجيل الدخول"
   },
   "TraineesTable": {
-    "title": "المتدربون",
+    "title": "اجمالي المتدربين",
     "inviteTrainee": "دعوة متدرب",
     "searchPlaceholder": "بحث...",
     "tabs": {
@@ -200,5 +200,27 @@
       "empty": "لا توجد جلسات مسجلة مؤخراً."
     },
     "loading": "جاري تحميل تفاصيل المتدرب..."
+  },
+  "Profile": {
+    "nameLabel": "الاسم الكامل",
+    "namePlaceholder": "أدخل اسمك الكامل",
+    "phoneNumberLabel": "رقم الهاتف",
+    "phoneNumberPlaceholder": "أدخل رقم الهاتف",
+    "birthDateLabel": "تاريخ الميلاد",
+    "weightLabel": "الوزن (كغ)",
+    "weightPlaceholder": "أدخل وزنك بالكيلوغرام",
+    "heightLabel": "الطول (سم)",
+    "heightPlaceholder": "أدخل طولك بالسنتيمتر",
+    "targetWeightLabel": "الوزن المستهدف (كغ)",
+    "targetWeightPlaceholder": "أدخل وزنك المستهدف بالكيلوغرام",
+    "genderLabel": "الجنس",
+    "male": "ذكر",
+    "female": "أنثى",
+    "experienceLabel": "الخبرة",
+    "experiencePlaceholder": "أدخل خبرتك (مثال: 5 سنوات في تطوير الويب)",
+    "bioLabel": "النبذة الشخصية",
+    "bioPlaceholder": "اكتب نبذة قصيرة عن نفسك...",
+    "submitButton": "حفظ التغييرات",
+    "saving": "جاري الحفظ..."
   }
 }

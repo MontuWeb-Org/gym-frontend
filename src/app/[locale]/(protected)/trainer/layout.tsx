@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TRAINER_SIDEBAR_DATA } from "@/data/sidebars/trainerSidebar.data";
@@ -12,19 +12,20 @@ export default function TrainerLayout({
   children: React.ReactNode;
 }) {
   const t = useTranslations("Nav");
-  const locale = useLocale();
   const pathname = usePathname();
 
-  // 1. Normalize paths & apply translations to sidebar items
+  // 1. Normalize paths safely & apply translations
   const localizedSidebarItems = TRAINER_SIDEBAR_DATA.map((item) => {
     const translationKey = item.id as Parameters<typeof t>[0];
 
-    // Safely construct normalized absolute URLs
-    let targetHref = item.href;
-    if (!targetHref || targetHref === "") {
-      targetHref = "/trainer/dashboard";
+    // Ensure item.href is safely handled as a string
+    const rawHref = typeof item.href === "string" ? item.href : "";
+
+    let targetHref = rawHref;
+    if (!targetHref) {
+      targetHref = ROUTES.TRAINER.DASHBOARD;
     } else if (!targetHref.startsWith("/")) {
-      targetHref = `/trainer/${targetHref}`;
+      targetHref = `${ROUTES.TRAINER.ROOT}/${targetHref}`;
     }
 
     return {
