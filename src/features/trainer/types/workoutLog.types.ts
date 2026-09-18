@@ -1,6 +1,10 @@
 export interface WorkoutLog {
   id: number;
-  status: string;
+  notes?: string;
+  status:
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "SKIPPED";
   workoutTemplateId: number;
   planAssignmentId: number;
   traineeUserId: number;
@@ -8,18 +12,39 @@ export interface WorkoutLog {
   endedAt: string;
   createdAt: string;
   updatedAt: string;
-  notes?: string;
 }
 
-export interface WorkoutLogDetail extends WorkoutLog {
+export interface WorkoutLogDetail {
+  id: number;
+  planAssignmentId: number;
+  workoutTemplateId: number;
+  durationMinutes: number;
+  status:
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "SKIPPED";
+  notes?: string;
+
   exerciseLogs: Array<{
     id: number;
-    exerciseId: number;
     exerciseName: string;
-    sets: Array<{
-      setNumber: number;
+    workoutExerciseTemplateId: number;
+    expectedSets: number;
+    expectedReps: string;
+    expectedWeight: number;
+    expectedRestTimeSeconds: number;
+
+    setLogs: Array<{
+      id: number;
+      exerciseLogId: number;
       reps: number;
+      weight: number;
+      durationSeconds: number;
+      restTimeSeconds: number;
+      sequenceNumber: number;
     }>;
-    durationMinutes: number;
+
+    durationSeconds: number;
+    sequenceNumber: number;
   }>;
 }

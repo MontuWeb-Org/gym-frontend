@@ -16,6 +16,7 @@ interface WorkoutHistoryDialogProps {
   open: boolean;
   selectedProgram: ProgramHistoryRow | null;
   workoutLogs: WorkoutLog[];
+  workoutNames: Record<number, string>;
   isLoadingLogs: boolean;
   logsError: string | null;
   onClose: () => void;
@@ -31,6 +32,7 @@ export default function WorkoutHistoryDialog({
   open,
   selectedProgram,
   workoutLogs,
+  workoutNames,
   isLoadingLogs,
   logsError,
   onClose,
@@ -84,7 +86,7 @@ export default function WorkoutHistoryDialog({
 
           {!isLoadingLogs &&
             !logsError &&
-            workoutLogs.map((log, index) => (
+            workoutLogs.map((log) => (
               <button
                 key={log.id}
                 type="button"
@@ -96,8 +98,10 @@ export default function WorkoutHistoryDialog({
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="font-medium">
-                      Workout Session{" "}
-                      {workoutLogs.length - index}
+                      {workoutNames[
+                        log.workoutTemplateId
+                      ] ??
+                        `Workout ${log.workoutTemplateId}`}
                     </p>
 
                     <p className="text-sm text-muted-foreground">

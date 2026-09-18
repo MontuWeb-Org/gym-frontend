@@ -72,6 +72,9 @@ export default function ProgramsView() {
   const [workoutLogs, setWorkoutLogs] =
     useState<WorkoutLog[]>([]);
 
+  const [workoutNames, setWorkoutNames] =
+    useState<Record<number, string>>({});
+
   const [isLoadingLogs, setIsLoadingLogs] =
     useState(false);
 
@@ -159,6 +162,7 @@ export default function ProgramsView() {
   ) => {
     setSelectedProgram(row);
     setWorkoutLogs([]);
+    setWorkoutNames({});
     setLogsError(null);
     setIsLoadingLogs(true);
 
@@ -177,7 +181,51 @@ export default function ProgramsView() {
           Number(row.id)
       );
 
+      const uniqueWorkoutIds = [
+        ...new Set(
+          assignmentLogs.map(
+            (log) => log.workoutTemplateId
+          )
+        ),
+      ];
+
+      const workoutDetails =
+        await Promise.all(
+          uniqueWorkoutIds.map(async (workoutId) => {
+            try {
+              const workoutResponse =
+                await programService.getWorkoutDetail(
+                  workoutId
+                );
+
+              return {
+                id: workoutId,
+                name:
+                  workoutResponse.data?.data?.name ??
+                  `Workout ${workoutId}`,
+              };
+            } catch (error) {
+              console.error(
+                `Failed to fetch workout ${workoutId}:`,
+                error
+              );
+
+              return {
+                id: workoutId,
+                name: `Workout ${workoutId}`,
+              };
+            }
+          })
+        );
+
+      const names: Record<number, string> = {};
+
+      workoutDetails.forEach((workout) => {
+        names[workout.id] = workout.name;
+      });
+
       setWorkoutLogs(assignmentLogs);
+      setWorkoutNames(names);
     } catch (error) {
       console.error(
         "Failed to fetch workout logs:",
@@ -297,7 +345,6 @@ export default function ProgramsView() {
 
   return (
     <div className="space-y-6">
-      
       {/* Filter */}
       <div className="flex items-center gap-3">
         <Filter className="h-4 w-4 text-muted-foreground" />
@@ -530,11 +577,13 @@ export default function ProgramsView() {
         open={selectedProgram !== null}
         selectedProgram={selectedProgram}
         workoutLogs={workoutLogs}
+        workoutNames={workoutNames}
         isLoadingLogs={isLoadingLogs}
         logsError={logsError}
         onClose={() => {
           setSelectedProgram(null);
           setWorkoutLogs([]);
+          setWorkoutNames({});
           setLogsError(null);
         }}
         onWorkoutLogClick={handleWorkoutLogClick}
@@ -552,8 +601,6 @@ export default function ProgramsView() {
           setSelectedWorkoutLog(null);
           setLogDetailError(null);
         }}
-        formatDateTime={formatDateTime}
-        getWorkoutDuration={getWorkoutDuration}
       />
     </div>
   );

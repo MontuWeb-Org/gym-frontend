@@ -11,9 +11,12 @@ import {
   PlanAssignment,
 } from "../types/program.types";
 
-
 import {
   getNextId,
+  getTemplates,
+  getTemplateWeeks,
+  getWeekWorkouts,
+  getWorkoutExercises,
   getWeeksStore,
   getWorkoutsStore,
   getExercisesStore,
@@ -29,16 +32,61 @@ import {
 
 interface WorkoutLog {
   id: number;
-  traineeId: number;
-  planAssignmentId?: number;
-  workoutTemplateId?: number;
-  [key: string]: unknown;
+  notes?: string;
+  status:
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "SKIPPED";
+  workoutTemplateId: number;
+  planAssignmentId: number;
+  traineeUserId: number;
+  startedAt: string;
+  endedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-interface WorkoutLogDetail
-  extends WorkoutLog {
-  exercises?: unknown[];
-}
+interface WorkoutLogDetail {
+  id: number;
+  planAssignmentId: number;
+  workoutTemplateId: number;
+  durationMinutes: number;
+  status:
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "SKIPPED";
+  notes?: string;
+  exerciseLogs: Array<{
+    id: number;
+    exerciseName: string;
+    workoutExerciseTemplateId: number;
+    expectedSets: number;
+    expectedReps: string;
+    expectedWeight: number;
+    expectedRestTimeSeconds: number;
+    setLogs: Array<{
+      id: number;
+      exerciseLogId: number;
+      reps: number;
+      weight: number;
+      durationSeconds: number;
+      restTimeSeconds: number;
+      sequenceNumber: number;
+    }>;
+    durationSeconds: number;
+    sequenceNumber: number;
+  }>;
+};
+
+/*
+ * Generated mock logs are kept here so the
+ * detail endpoint can find the workout that
+ * belongs to each generated session.
+ */
+const mockWorkoutLogs = new Map<
+  number,
+  WorkoutLog
+>();
 
 /* -------------------------------------------------------------------------- */
 /* WORKOUT HELPERS                                                            */
@@ -56,15 +104,18 @@ function findWorkout(
   for (const [
     weekKey,
     workouts,
-  ] of Object.entries(workoutsStore)) {
-    const workout = workouts.find(
-      (item) =>
-        Number(item.id) ===
-          workoutId ||
-        Number(
-          item.workoutTemplateId
-        ) === workoutId
-    );
+  ] of Object.entries(
+    workoutsStore
+  )) {
+    const workout =
+      workouts.find(
+        (item) =>
+          Number(item.id) ===
+            workoutId ||
+          Number(
+            item.workoutTemplateId
+          ) === workoutId
+      );
 
     if (workout) {
       return {
@@ -81,31 +132,143 @@ function findWorkout(
   return null;
 }
 
+/* -------------------------------------------------------------------------- */
+/* MOCK WORKOUT LOGS                                                          */
+/* -------------------------------------------------------------------------- */
+
 function createMockLogsForAssignment(
   assignment: PlanAssignment
 ): WorkoutLog[] {
-  const workoutsStore =
-    getWorkoutsStore();
+  const templates =
+    getTemplates();
 
-  const logs: WorkoutLog[] =
-    [];
+  const template =
+    templates.find(
+      (item) =>
+        Number(item.id) ===
+          Number(
+            assignment.planTemplateId
+          ) ||
+        Number(item.planId) ===
+          Number(
+            assignment.planTemplateId
+          )
+    );
 
-  let logId = Date.now();
+  if (!template) {
+    return [];
+  }
 
-  for (const workouts of Object.values(
-    workoutsStore
-  )) {
+  const weeks =
+    getTemplateWeeks(
+      template
+    );
+
+  const logs: WorkoutLog[] = [];
+
+  let workoutIndex = 0;
+
+  for (const week of weeks) {
+    const workouts =
+      getWeekWorkouts(week);
+
     for (const workout of workouts) {
-      logs.push({
-        id: logId++,
-        traineeId:
-          assignment.traineeId,
-        planAssignmentId:
-          assignment.id,
+      /*
+       * Generate a unique mock log ID.
+       */
+      const logId =
+        Date.now() +
+        Number(
+          assignment.id
+        ) *
+          1000 +
+        workoutIndex;
+
+      /*
+       * Make every workout look like
+       * a session completed by the
+       * trainee on a different day.
+       */
+      const daysAgo =
+        workoutIndex * 2 + 1;
+
+      const endedAtDate =
+        new Date(
+          Date.now() -
+            daysAgo *
+              24 *
+              60 *
+              60 *
+              1000
+        );
+
+      /*
+       * Use the workout's configured
+       * duration when available.
+       *
+       * Otherwise generate a mock
+       * duration.
+       */
+      const durationMinutes =
+        Number(
+          workout.durationMinutes
+        ) > 0
+          ? Number(
+              workout.durationMinutes
+            )
+          : 30 +
+            (workoutIndex % 4) *
+              5;
+
+      const startedAtDate =
+        new Date(
+          endedAtDate.getTime() -
+            durationMinutes *
+              60 *
+              1000
+        );
+
+      const startedAt =
+        startedAtDate.toISOString();
+
+      const endedAt =
+        endedAtDate.toISOString();
+
+      const log: WorkoutLog = {
+        id: logId,
+        status:
+          "COMPLETED",
         workoutTemplateId:
           Number(workout.id),
-        completed: false,
-      });
+        planAssignmentId:
+          Number(
+            assignment.id
+          ),
+        traineeUserId:
+          Number(
+            assignment.traineeId
+          ),
+        startedAt,
+        endedAt,
+        createdAt: startedAt,
+        updatedAt: endedAt,
+        notes:
+          "Workout completed by trainee.",
+      };
+
+      logs.push(log);
+
+      /*
+       * Keep the generated log so
+       * the detail endpoint can
+       * resolve it later.
+       */
+      mockWorkoutLogs.set(
+        logId,
+        log
+      );
+
+      workoutIndex += 1;
     }
   }
 
@@ -127,7 +290,8 @@ const createWorkoutResolver =
         name: string;
         sequenceNumber: number;
         weekTemplateId:
-          number | string;
+          | number
+          | string;
       };
 
     const workoutsStore =
@@ -139,7 +303,9 @@ const createWorkoutResolver =
       ).flat();
 
     const newWorkoutId =
-      getNextId(allWorkouts);
+      getNextId(
+        allWorkouts
+      );
 
     const weekTemplateId =
       Number(
@@ -164,8 +330,9 @@ const createWorkoutResolver =
       );
 
     workoutsStore[weekKey] = [
-      ...(workoutsStore[weekKey] ||
-        []),
+      ...(workoutsStore[
+        weekKey
+      ] || []),
       newWorkout,
     ];
 
@@ -198,9 +365,15 @@ const updateWorkoutResolver =
     request: Request;
   }) => {
     const workoutId =
-      Number(params.workoutId);
+      Number(
+        params.workoutId
+      );
 
-    if (!Number.isFinite(workoutId)) {
+    if (
+      !Number.isFinite(
+        workoutId
+      )
+    ) {
       return HttpResponse.json(
         {
           message:
@@ -243,7 +416,8 @@ const updateWorkoutResolver =
       }
 
       if (
-        body.name !== undefined
+        body.name !==
+        undefined
       ) {
         workout.name =
           body.name;
@@ -301,9 +475,15 @@ const getWorkoutDetailResolver = ({
   };
 }) => {
   const workoutId =
-    Number(params.workoutId);
+    Number(
+      params.workoutId
+    );
 
-  if (!Number.isFinite(workoutId)) {
+  if (
+    !Number.isFinite(
+      workoutId
+    )
+  ) {
     return HttpResponse.json(
       {
         message:
@@ -316,7 +496,9 @@ const getWorkoutDetailResolver = ({
   }
 
   const result =
-    findWorkout(workoutId);
+    findWorkout(
+      workoutId
+    );
 
   if (!result) {
     return HttpResponse.json(
@@ -377,7 +559,9 @@ function getWorkoutExercisesFromStore(
       String(workout.id)
     ] || [];
 
-  if (directExercises.length > 0) {
+  if (
+    directExercises.length > 0
+  ) {
     return directExercises;
   }
 
@@ -390,7 +574,9 @@ function getWorkoutExercisesFromStore(
         Number(
           exercise.workoutTemplateId
         ) ===
-        Number(workout.id)
+        Number(
+          workout.id
+        )
     );
 }
 
@@ -406,9 +592,15 @@ const duplicateWorkoutResolver = ({
   };
 }) => {
   const workoutId =
-    Number(params.workoutId);
+    Number(
+      params.workoutId
+    );
 
-  if (!Number.isFinite(workoutId)) {
+  if (
+    !Number.isFinite(
+      workoutId
+    )
+  ) {
     return HttpResponse.json(
       {
         message:
@@ -421,7 +613,9 @@ const duplicateWorkoutResolver = ({
   }
 
   const result =
-    findWorkout(workoutId);
+    findWorkout(
+      workoutId
+    );
 
   if (!result) {
     return HttpResponse.json(
@@ -458,10 +652,14 @@ const duplicateWorkoutResolver = ({
    * receives a unique ID.
    */
   let nextWorkoutId =
-    getNextId(allWorkouts);
+    getNextId(
+      allWorkouts
+    );
 
   let nextExerciseId =
-    getNextId(allExercises);
+    getNextId(
+      allExercises
+    );
 
   const newWorkoutId =
     nextWorkoutId;
@@ -484,7 +682,9 @@ const duplicateWorkoutResolver = ({
     index++
   ) {
     const originalExercise =
-      originalExercises[index];
+      originalExercises[
+        index
+      ];
 
     const newExerciseId =
       nextExerciseId;
@@ -510,7 +710,9 @@ const duplicateWorkoutResolver = ({
 
   const currentWorkouts =
     workoutsStore[
-      String(result.weekId)
+      String(
+        result.weekId
+      )
     ] || [];
 
   const newWorkout:
@@ -560,6 +762,7 @@ const duplicateWorkoutResolver = ({
     }
   );
 };
+
 /* -------------------------------------------------------------------------- */
 /* DELETE WORKOUT                                                             */
 /* -------------------------------------------------------------------------- */
@@ -572,9 +775,15 @@ const deleteWorkoutResolver = ({
   };
 }) => {
   const workoutId =
-    Number(params.workoutId);
+    Number(
+      params.workoutId
+    );
 
-  if (!Number.isFinite(workoutId)) {
+  if (
+    !Number.isFinite(
+      workoutId
+    )
+  ) {
     return HttpResponse.json(
       {
         message:
@@ -595,20 +804,25 @@ const deleteWorkoutResolver = ({
     workoutsStore
   )) {
     const workouts =
-      workoutsStore[key] || [];
+      workoutsStore[key] ||
+      [];
 
     const filteredWorkouts =
       workouts.filter(
         (workout) => {
           const matches =
-            Number(workout.id) ===
+            Number(
+              workout.id
+            ) ===
               workoutId ||
             Number(
               workout.workoutTemplateId
-            ) === workoutId;
+            ) ===
+              workoutId;
 
           if (matches) {
-            foundWorkout = true;
+            foundWorkout =
+              true;
           }
 
           return !matches;
@@ -630,7 +844,8 @@ const deleteWorkoutResolver = ({
     weeksStore
   )) {
     const weeks =
-      weeksStore[planId] || [];
+      weeksStore[planId] ||
+      [];
 
     for (const week of weeks) {
       if (
@@ -647,18 +862,22 @@ const deleteWorkoutResolver = ({
       week.workouts =
         week.workouts.filter(
           (workout) =>
-            Number(workout.id) !==
+            Number(
+              workout.id
+            ) !==
               workoutId &&
             Number(
               workout.workoutTemplateId
-            ) !== workoutId
+            ) !==
+              workoutId
         );
 
       if (
         week.workouts.length !==
         originalLength
       ) {
-        foundWorkout = true;
+        foundWorkout =
+          true;
       }
     }
   }
@@ -695,21 +914,25 @@ const deleteWorkoutResolver = ({
     exercisesStore
   )) {
     const exercises =
-      exercisesStore[key] || [];
+      exercisesStore[key] ||
+      [];
 
     const remainingExercises =
       exercises.filter(
         (exercise) =>
           Number(
             exercise.workoutTemplateId
-          ) !== workoutId
+          ) !==
+          workoutId
       );
 
     if (
       remainingExercises.length ===
       0
     ) {
-      delete exercisesStore[key];
+      delete exercisesStore[
+        key
+      ];
     } else {
       exercisesStore[key] =
         remainingExercises;
@@ -766,7 +989,8 @@ const getExercisesResolver = ({
     );
 
   const start =
-    (page - 1) * limit;
+    (page - 1) *
+    limit;
 
   const end =
     start + limit;
@@ -822,7 +1046,9 @@ const addExerciseResolver =
       ).flat();
 
     const exerciseTemplateId =
-      getNextId(allExercises);
+      getNextId(
+        allExercises
+      );
 
     const newExercise:
       StoredExercise = {
@@ -850,7 +1076,9 @@ const addExerciseResolver =
         body.workoutTemplateId
       );
 
-    exercisesStore[workoutKey] = [
+    exercisesStore[
+      workoutKey
+    ] = [
       ...(exercisesStore[
         workoutKey
       ] || []),
@@ -924,7 +1152,9 @@ const updateExerciseResolver =
       const exercise =
         exercises.find(
           (item) =>
-            Number(item.id) ===
+            Number(
+              item.id
+            ) ===
             exerciseTemplateId
         );
 
@@ -1014,7 +1244,9 @@ const deleteExerciseResolver = ({
     const exerciseIndex =
       exercises.findIndex(
         (item) =>
-          Number(item.id) ===
+          Number(
+            item.id
+          ) ===
           exerciseTemplateId
       );
 
@@ -1025,7 +1257,9 @@ const deleteExerciseResolver = ({
     }
 
     deletedExercise =
-      exercises[exerciseIndex];
+      exercises[
+        exerciseIndex
+      ];
 
     exercises.splice(
       exerciseIndex,
@@ -1077,9 +1311,15 @@ const reorderExercisesResolver =
     request: Request;
   }) => {
     const workoutId =
-      Number(params.workoutId);
+      Number(
+        params.workoutId
+      );
 
-    if (!Number.isFinite(workoutId)) {
+    if (
+      !Number.isFinite(
+        workoutId
+      )
+    ) {
       return HttpResponse.json(
         {
           message:
@@ -1130,22 +1370,98 @@ const getWorkoutLogsResolver = ({
   const url =
     new URL(request.url);
 
-  const traineeId =
+  const traineeIdParam =
+    url.searchParams.get(
+      "traineeId"
+    );
+
+  const status =
+    url.searchParams.get(
+      "status"
+    );
+
+  const pageNumberRaw =
     Number(
       url.searchParams.get(
-        "traineeId"
-      )
+        "pageNumber"
+      ) || "1"
     );
+
+  const pageSizeRaw =
+    Number(
+      url.searchParams.get(
+        "pageSize"
+      ) || "10"
+    );
+
+  const pageNumber =
+    Number.isFinite(
+      pageNumberRaw
+    ) &&
+    pageNumberRaw > 0
+      ? Math.floor(
+          pageNumberRaw
+        )
+      : 1;
+
+  const pageSize =
+    Number.isFinite(
+      pageSizeRaw
+    ) &&
+    pageSizeRaw > 0
+      ? Math.floor(
+          pageSizeRaw
+        )
+      : 10;
+
+  const sortBy =
+    url.searchParams.get(
+      "sortBy"
+    ) || "createdAt";
+
+  const sortOrder =
+    url.searchParams.get(
+      "sortOrder"
+    ) || "desc";
+
+  const traineeId =
+    traineeIdParam !== null
+      ? Number(
+          traineeIdParam
+        )
+      : null;
 
   const assignments =
     getAssignments();
 
+  /*
+   * Only generate logs for assignments
+   * belonging to the requested trainee.
+   */
   const traineeAssignments =
     assignments.filter(
-      (assignment) =>
-        Number(
-          assignment.traineeId
-        ) === traineeId
+      (assignment) => {
+        if (
+          traineeId === null
+        ) {
+          return true;
+        }
+
+        if (
+          !Number.isFinite(
+            traineeId
+          )
+        ) {
+          return false;
+        }
+
+        return (
+          Number(
+            assignment.traineeId
+          ) ===
+          traineeId
+        );
+      }
     );
 
   const allLogs: WorkoutLog[] =
@@ -1160,9 +1476,87 @@ const getWorkoutLogsResolver = ({
     );
   }
 
+  /*
+   * Filter by status.
+   */
+  const filteredLogs =
+    status
+      ? allLogs.filter(
+          (log) =>
+            log.status ===
+            status
+        )
+      : allLogs;
+
+  /*
+   * Sort logs.
+   *
+   * The API documentation lists
+   * totalAmount as a possible value,
+   * although workout logs do not
+   * contain that field. createdAt
+   * remains the meaningful sort field
+   * for this resource.
+   */
+  const sortedLogs = [
+    ...filteredLogs,
+  ].sort((a, b) => {
+    if (
+      sortBy ===
+      "createdAt"
+    ) {
+      const aValue =
+        new Date(
+          a.createdAt
+        ).getTime();
+
+      const bValue =
+        new Date(
+          b.createdAt
+        ).getTime();
+
+      return sortOrder ===
+        "asc"
+        ? aValue - bValue
+        : bValue - aValue;
+    }
+
+    return 0;
+  });
+
+  /*
+   * Pagination.
+   */
+  const total =
+    sortedLogs.length;
+
+  const totalPages =
+    Math.ceil(
+      total / pageSize
+    );
+
+  const start =
+    (pageNumber - 1) *
+    pageSize;
+
+  const end =
+    start + pageSize;
+
+  const paginatedLogs =
+    sortedLogs.slice(
+      start,
+      end
+    );
+
   return HttpResponse.json(
     {
-      data: allLogs,
+      data: paginatedLogs,
+      pagination: {
+        total,
+        page: pageNumber,
+        limit: pageSize,
+        totalPages,
+      },
     },
     {
       status: 200,
@@ -1176,22 +1570,354 @@ const getWorkoutLogsResolver = ({
 
 const getWorkoutLogDetailResolver = ({
   params,
+  request,
 }: {
   params: {
     workoutLogId?: string;
   };
+  request: Request;
 }) => {
   const workoutLogId =
     Number(
       params.workoutLogId
     );
 
+  if (
+    !Number.isFinite(
+      workoutLogId
+    )
+  ) {
+    return HttpResponse.json(
+      {
+        message:
+          "Workout log not found.",
+      },
+      {
+        status: 404,
+      }
+    );
+  }
+
+  const log =
+    mockWorkoutLogs.get(
+      workoutLogId
+    );
+
+  if (!log) {
+    return HttpResponse.json(
+      {
+        message:
+          "Workout log not found.",
+      },
+      {
+        status: 404,
+      }
+    );
+  }
+
+  /*
+   * The real API accepts traineeId
+   * as an optional query parameter.
+   */
+  const url =
+    new URL(request.url);
+
+  const traineeIdParam =
+    url.searchParams.get(
+      "traineeId"
+    );
+
+  if (
+    traineeIdParam !== null &&
+    Number(
+      traineeIdParam
+    ) !==
+      Number(
+        log.traineeUserId
+      )
+  ) {
+    return HttpResponse.json(
+      {
+        message:
+          "Workout log not found.",
+      },
+      {
+        status: 404,
+      }
+    );
+  }
+
+  const workoutsStore =
+    getWorkoutsStore();
+
+  const exercisesStore =
+    getExercisesStore();
+
+  const workout =
+    Object.values(
+      workoutsStore
+    )
+      .flat()
+      .find(
+        (item) =>
+          Number(item.id) ===
+            Number(
+              log.workoutTemplateId
+            ) ||
+          Number(
+            item.workoutTemplateId
+          ) ===
+            Number(
+              log.workoutTemplateId
+            )
+      );
+
+  if (!workout) {
+    return HttpResponse.json(
+      {
+        message:
+          "Workout template not found.",
+      },
+      {
+        status: 404,
+      }
+    );
+  }
+
+  const exercises =
+    getWorkoutExercises(
+      workout,
+      exercisesStore
+    );
+
+  const exerciseLibrary =
+    exercisesData as Array<{
+      id: number;
+      name?: string;
+      [key: string]: unknown;
+    }>;
+
+  const exerciseLogs =
+    exercises.map(
+      (
+        exercise,
+        exerciseIndex
+      ) => {
+        const exerciseId =
+          Number(
+            exercise.exerciseId ??
+              exercise.id
+          );
+
+        const libraryExercise =
+          exerciseLibrary.find(
+            (item) =>
+              Number(
+                item.id
+              ) ===
+              exerciseId
+          );
+
+        const exerciseName =
+          typeof libraryExercise?.name ===
+          "string"
+            ? libraryExercise.name
+            : `Exercise ${exerciseId}`;
+
+        const expectedSets =
+          Number(
+            exercise.defaultSets
+          ) > 0
+            ? Number(
+                exercise.defaultSets
+              )
+            : 3;
+
+        const expectedReps =
+          typeof exercise.defaultReps ===
+          "string"
+            ? exercise.defaultReps
+            : String(
+                exercise.defaultReps ??
+                  "10"
+              );
+
+        const expectedWeight =
+          Number(
+            exercise.defaultWeight
+          ) >= 0
+            ? Number(
+                exercise.defaultWeight
+              )
+            : 0;
+
+        const expectedRestTimeSeconds =
+          Number(
+            exercise.defaultRestTimeSeconds
+          ) >= 0
+            ? Number(
+                exercise.defaultRestTimeSeconds
+              )
+            : 60;
+
+        const durationMinutes =
+          Number(
+            exercise.defaultDurationMinutes
+          ) > 0
+            ? Number(
+                exercise.defaultDurationMinutes
+              )
+            : 5;
+
+        const durationSeconds =
+          durationMinutes * 60;
+
+        /*
+         * Convert configured reps into
+         * a number for the mock set logs.
+         *
+         * Examples:
+         * "10"      -> 10
+         * "8-12"    -> 8
+         * "10 reps" -> 10
+         */
+        let reps = 10;
+
+        if (
+          typeof exercise.defaultReps ===
+            "number" &&
+          Number.isFinite(
+            exercise.defaultReps
+          )
+        ) {
+          reps =
+            exercise.defaultReps;
+        } else if (
+          typeof exercise.defaultReps ===
+          "string"
+        ) {
+          const firstNumber =
+            Number(
+              exercise.defaultReps.match(
+                /\d+/
+              )?.[0]
+            );
+
+          if (
+            Number.isFinite(
+              firstNumber
+            )
+          ) {
+            reps =
+              firstNumber;
+          }
+        }
+
+        const exerciseLogId =
+          Date.now() +
+          exerciseIndex *
+            1000;
+
+        const setLogs =
+          Array.from(
+            {
+              length:
+                expectedSets,
+            },
+            (
+              _,
+              setIndex
+            ) => {
+              /*
+               * Slightly vary the performed
+               * reps so the mock looks like
+               * actual trainee activity.
+               */
+              const performedReps =
+                reps -
+                ((exerciseIndex +
+                  setIndex) %
+                  3 ===
+                0
+                  ? 2
+                  : 0);
+
+              return {
+                id:
+                  exerciseLogId +
+                  setIndex +
+                  1,
+                exerciseLogId,
+                reps:
+                  Math.max(
+                    0,
+                    performedReps
+                  ),
+                weight:
+                  expectedWeight,
+                durationSeconds:
+                  Math.round(
+                    durationSeconds /
+                      expectedSets
+                  ),
+                restTimeSeconds:
+                  expectedRestTimeSeconds,
+                sequenceNumber:
+                  setIndex + 1,
+              };
+            }
+          );
+
+        return {
+          id: exerciseLogId,
+          exerciseName,
+          workoutExerciseTemplateId:
+            Number(
+              exercise.id
+            ),
+          expectedSets,
+          expectedReps,
+          expectedWeight,
+          expectedRestTimeSeconds,
+          setLogs,
+          durationSeconds,
+          sequenceNumber:
+            exerciseIndex + 1,
+        };
+      }
+    );
+
+  /*
+   * Calculate the workout duration
+   * from the generated timer data.
+   */
+  const durationMinutes =
+    Math.max(
+      0,
+      Math.round(
+        (
+          new Date(
+            log.endedAt
+          ).getTime() -
+          new Date(
+            log.startedAt
+          ).getTime()
+        ) /
+          (60 * 1000)
+      )
+    );
+
   const detail:
     WorkoutLogDetail = {
-    id: workoutLogId,
-    traineeId: 1,
-    completed: false,
-    exercises: [],
+    id: log.id,
+    planAssignmentId:
+      log.planAssignmentId,
+    workoutTemplateId:
+      log.workoutTemplateId,
+    durationMinutes,
+    status: log.status,
+    notes: log.notes,
+    exerciseLogs,
   };
 
   return HttpResponse.json(
