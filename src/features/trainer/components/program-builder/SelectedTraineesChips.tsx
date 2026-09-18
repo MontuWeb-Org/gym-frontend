@@ -47,12 +47,17 @@ export function SelectedTraineesChips({
 
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] text-muted-foreground">Duration (Weeks)</span>
-                  <input 
-                    type="duration"
-                
-                    
-                    className="rounded border px-2 py-1 text-xs w-20 bg-background text-center"
-                  />
+                  <input
+                     type="number"
+                     min={1}
+                     value={config.durationWeeks}
+                     onChange={(e) =>
+                     onUpdateConfig(trainee.id, {
+                     durationWeeks: e.target.value,
+                    })
+                   }
+                     className="rounded border px-2 py-1 text-xs w-20 bg-background text-center"
+                   />
                 </div>
 
                 <button 

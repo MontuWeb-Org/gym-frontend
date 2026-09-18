@@ -3,10 +3,12 @@ import { tokenStorage } from "@/lib/storage";
 
 axios.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const token = tokenStorage.getAccessToken();
+    const token =
+      tokenStorage.getAccessToken();
 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization =
+        `Bearer ${token}`;
     }
   }
 
@@ -14,15 +16,33 @@ axios.interceptors.request.use((config) => {
 });
 
 export const programService = {
+  // ---------------------------------------------------------------------------
   // Plan Templates
-  getTemplates: (page = 1, limit = 10) =>
-    axios.get(`/api/plans/templates?page=${page}&limit=${limit}`),
+  // ---------------------------------------------------------------------------
 
-  createTemplate: (data: { name: string; description: string }) =>
-    axios.post("/api/plans/templates", data),
+  getTemplates: (
+    page = 1,
+    limit = 10
+  ) =>
+    axios.get(
+      `/api/plans/templates?page=${page}&limit=${limit}`
+    ),
 
-  getTemplateDetail: (planId: number) =>
-    axios.get(`/api/plans/templates/${planId}`),
+  createTemplate: (data: {
+    name: string;
+    description: string;
+  }) =>
+    axios.post(
+      "/api/plans/templates",
+      data
+    ),
+
+  getTemplateDetail: (
+    planId: number
+  ) =>
+    axios.get(
+      `/api/plans/templates/${planId}`
+    ),
 
   updatePlanTemplate: (
     planId: number,
@@ -32,27 +52,72 @@ export const programService = {
       status?: "DRAFT" | "ACTIVE";
     }
   ) =>
-    axios.put(`/api/plans/templates/${planId}`, data),
+    axios.put(
+      `/api/plans/templates/${planId}`,
+      data
+    ),
 
-  duplicateTemplate: (planId: number) =>
-    axios.post(`/api/plans/templates/${planId}/duplicate`),
+  duplicateTemplate: (
+    planId: number
+  ) =>
+    axios.post(
+      `/api/plans/templates/${planId}/duplicate`
+    ),
 
+  deleteTemplate: (
+    planId: number
+  ) =>
+    axios.delete(
+      `/api/plans/templates/${planId}`
+    ),
+
+  // ---------------------------------------------------------------------------
   // Week Templates
+  // ---------------------------------------------------------------------------
+
   createWeek: (data: {
     sequenceNumber: number;
     planTemplateId: number;
-  }) => axios.post("/api/plans/templates/weeks", data),
+  }) =>
+    axios.post(
+      "/api/plans/templates/weeks",
+      data
+    ),
 
-  getWeekDetail: (weekId: number) =>
-    axios.get(`/api/plans/templates/weeks/${weekId}`),
+  getWeekDetail: (
+    weekId: number
+  ) =>
+    axios.get(
+      `/api/plans/templates/weeks/${weekId}`
+    ),
 
+  duplicateWeek: (
+    weekId: number
+  ) =>
+    axios.post(
+      `/api/plans/templates/weeks/${weekId}/duplicate`
+    ),
+
+  deleteWeek: (
+    weekId: number
+  ) =>
+    axios.delete(
+      `/api/plans/templates/weeks/${weekId}`
+    ),
+
+  // ---------------------------------------------------------------------------
   // Workout Templates
+  // ---------------------------------------------------------------------------
+
   createWorkout: (data: {
     name: string;
     sequenceNumber: number;
     weekTemplateId: number;
   }) =>
-    axios.post("/api/plans/templates/workouts", data),
+    axios.post(
+      "/api/plans/templates/workouts",
+      data
+    ),
 
   updateWorkout: (
     workoutId: number,
@@ -61,14 +126,43 @@ export const programService = {
       sequenceNumber?: number;
     }
   ) =>
-    axios.put(`/api/plans/templates/workouts/${workoutId}`, data),
+    axios.put(
+      `/api/plans/templates/workouts/${workoutId}`,
+      data
+    ),
 
-  getWorkoutDetail: (workoutId: number) =>
-    axios.get(`/api/plans/templates/workouts/${workoutId}`),
+  getWorkoutDetail: (
+    workoutId: number
+  ) =>
+    axios.get(
+      `/api/plans/templates/workouts/${workoutId}`
+    ),
 
+  duplicateWorkout: (
+    workoutId: number
+  ) =>
+    axios.post(
+      `/api/plans/templates/workouts/${workoutId}/duplicate`
+    ),
+
+  deleteWorkout: (
+    workoutId: number
+  ) =>
+    axios.delete(
+      `/api/plans/templates/workouts/${workoutId}`
+    ),
+
+   // ---------------------------------------------------------------------------
   // Exercise Library & Workout Exercises
-  getExercises: (page = 1, limit = 50) =>
-    axios.get(`/api/exercises?page=${page}&limit=${limit}`),
+  // ---------------------------------------------------------------------------
+
+  getExercises: (
+    page = 1,
+    limit = 50
+  ) =>
+    axios.get(
+      `/api/exercises?page=${page}&limit=${limit}`
+    ),
 
   addExerciseToWorkout: (data: {
     exerciseId: number;
@@ -80,7 +174,10 @@ export const programService = {
     defaultDurationMinutes: number;
     defaultWeight: number;
   }) =>
-    axios.post("/api/plans/templates/exercises", data),
+    axios.post(
+      "/api/plans/templates/exercises",
+      data
+    ),
 
   updateWorkoutExercise: (
     exerciseTemplateId: number,
@@ -98,20 +195,38 @@ export const programService = {
       data
     ),
 
-  reorderExercises: (workoutId: number, exercises: unknown[]) =>
+  deleteWorkoutExercise: (
+    exerciseTemplateId: number
+  ) =>
+    axios.delete(
+      `/api/plans/templates/exercises/${exerciseTemplateId}`
+    ),
+
+  reorderExercises: (
+    workoutId: number,
+    exercises: unknown[]
+  ) =>
     axios.put(
       `/api/plans/templates/workouts/${workoutId}/exercises/reorder`,
       { exercises }
     ),
 
-    // Trainees & Plan Assignments
-  getTrainees: (page = 1, limit = 10) =>
+  // ---------------------------------------------------------------------------
+  // Trainees & Plan Assignments
+  // ---------------------------------------------------------------------------
+
+  getTrainees: (
+    page = 1,
+    limit = 10
+  ) =>
     axios.get(
       `/api/users/trainer/trainees?page=${page}&limit=${limit}`
     ),
 
   getAssignments: () =>
-    axios.get("/api/plans/assignments"),
+    axios.get(
+      "/api/plans/assignments"
+    ),
 
   assignPlan: (data: {
     planTemplateId: number;
@@ -119,7 +234,10 @@ export const programService = {
     createdAt: string;
     endedAt: string;
   }) =>
-    axios.post("/api/plans/assignments", data),
+    axios.post(
+      "/api/plans/assignments",
+      data
+    ),
 
   updateAssignment: (
     assignmentId: number,
@@ -128,8 +246,44 @@ export const programService = {
       endedAt?: string;
     }
   ) =>
-    axios.put(`/api/plans/assignments/${assignmentId}`, data),
+    axios.put(
+      `/api/plans/assignments/${assignmentId}`,
+      data
+    ),
 
-  deleteAssignment: (assignmentId: number) =>
-    axios.delete(`/api/plans/assignments/${assignmentId}`),
+  deleteAssignment: (
+    assignmentId: number
+  ) =>
+    axios.delete(
+      `/api/plans/assignments/${assignmentId}`
+    ),
+
+  // ---------------------------------------------------------------------------
+  // Workout Logs
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Get all workout session logs for a trainee.
+   *
+   * The returned logs contain planAssignmentId,
+   * so the caller can filter them to a specific
+   * program assignment.
+   */
+  getWorkoutLogs: (
+    traineeId: number
+  ) =>
+    axios.get(
+      `/api/logs/workouts?traineeId=${traineeId}`
+    ),
+
+  /**
+   * Get the complete details of one workout session,
+   * including its exercise logs and sets.
+   */
+  getWorkoutLogDetail: (
+    workoutLogId: number
+  ) =>
+    axios.get(
+      `/api/logs/workouts/${workoutLogId}`
+    ),
 };

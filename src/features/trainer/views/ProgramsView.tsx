@@ -3,9 +3,17 @@
 import { useMemo, useState } from "react";
 import { Filter } from "lucide-react";
 
-import ProgramsHistoryTable, {
-  ProgramHistoryRow,
-} from "../components/programs/ProgramHistoryTable";
+import ProgramsHistoryTable from "../components/programs/ProgramHistoryTable";
+import type { ProgramHistoryRow } from "../components/programs/ProgramHistoryTable";
+
+import WorkoutHistoryDialog from "../components/programs/WorkoutHistoryDialog";
+import WorkoutSessionDetailsDialog from "../components/programs/WorkoutSessionDetailsDialog";
+
+import type {
+  WorkoutLog,
+  WorkoutLogDetail,
+} from "../types/workoutLog.types";
+
 import { useProgramsHistory } from "../hooks/useProgramHistory";
 import { programService } from "../services/program.service";
 
@@ -38,13 +46,13 @@ export default function ProgramsView() {
   } = useProgramsHistory();
 
   const [selectedTemplate, setSelectedTemplate] =
-    useState<string>("ALL");
+    useState<string>("all");
 
   const [selectedRow, setSelectedRow] =
     useState<ProgramHistoryRow | null>(null);
 
   const [durationWeeks, setDurationWeeks] =
-    useState<string>("4");
+    useState<number>(1);
 
   const [rowToRemove, setRowToRemove] =
     useState<ProgramHistoryRow | null>(null);
@@ -58,8 +66,29 @@ export default function ProgramsView() {
   const [actionError, setActionError] =
     useState<string | null>(null);
 
+  const [selectedProgram, setSelectedProgram] =
+    useState<ProgramHistoryRow | null>(null);
+
+  const [workoutLogs, setWorkoutLogs] =
+    useState<WorkoutLog[]>([]);
+
+  const [isLoadingLogs, setIsLoadingLogs] =
+    useState(false);
+
+  const [logsError, setLogsError] =
+    useState<string | null>(null);
+
+  const [selectedWorkoutLog, setSelectedWorkoutLog] =
+    useState<WorkoutLogDetail | null>(null);
+
+  const [isLoadingLogDetail, setIsLoadingLogDetail] =
+    useState(false);
+
+  const [logDetailError, setLogDetailError] =
+    useState<string | null>(null);
+
   const filteredRows = useMemo(() => {
-    if (selectedTemplate === "ALL") {
+    if (selectedTemplate === "all") {
       return rows;
     }
 
@@ -76,188 +105,257 @@ export default function ProgramsView() {
     const start = new Date(createdAt).getTime();
     const end = new Date(endedAt).getTime();
 
-    if (!start || !end || end <= start) {
-      return 4;
+    if (
+      Number.isNaN(start) ||
+      Number.isNaN(end) ||
+      end <= start
+    ) {
+      return 1;
     }
 
     return Math.max(
       1,
       Math.round(
         (end - start) /
-          (7 * 24 * 60 * 60 * 1000)
+          (1000 * 60 * 60 * 24 * 7)
       )
     );
   };
 
-  const handleRowClick = (
-    row: ProgramHistoryRow
+  const formatDateTime = (date: string) => {
+    const value = new Date(date);
+
+    if (Number.isNaN(value.getTime())) {
+      return date;
+    }
+
+    return value.toLocaleString();
+  };
+
+  const getWorkoutDuration = (
+    startedAt: string,
+    endedAt: string
   ) => {
-    console.log(
-      "Selected program assignment:",
-      row
+    const start = new Date(startedAt).getTime();
+    const end = new Date(endedAt).getTime();
+
+    if (
+      Number.isNaN(start) ||
+      Number.isNaN(end) ||
+      end <= start
+    ) {
+      return "0 min";
+    }
+
+    const minutes = Math.round(
+      (end - start) / (1000 * 60)
     );
+
+    return `${minutes} min`;
   };
 
-  const handleUpdateDuration = (
+  const handleRowClick = async (
     row: ProgramHistoryRow
   ) => {
-    setActionError(null);
-    setSelectedRow(row);
+    setSelectedProgram(row);
+    setWorkoutLogs([]);
+    setLogsError(null);
+    setIsLoadingLogs(true);
 
-    setDurationWeeks(
-      String(
-        getDurationWeeks(
-          row.createdAt,
-          row.endedAt
-        )
-      )
-    );
+    try {
+      const response =
+        await programService.getWorkoutLogs(
+          row.traineeId
+        );
+
+      const logs: WorkoutLog[] =
+        response.data?.data ?? [];
+
+      const assignmentLogs = logs.filter(
+        (log) =>
+          Number(log.planAssignmentId) ===
+          Number(row.id)
+      );
+
+      setWorkoutLogs(assignmentLogs);
+    } catch (error) {
+      console.error(
+        "Failed to fetch workout logs:",
+        error
+      );
+
+      setLogsError(
+        "Failed to load workout history."
+      );
+    } finally {
+      setIsLoadingLogs(false);
+    }
   };
 
-  const handleConfirmUpdateDuration =
-    async () => {
-      if (!selectedRow) return;
-
-      const weeks = Number(durationWeeks);
-
-      if (!Number.isInteger(weeks) || weeks < 1) {
-        setActionError(
-          "Duration must be at least 1 week."
-        );
-        return;
-      }
-
-      try {
-        setIsUpdating(true);
-        setActionError(null);
-
-        const start = new Date(
-          selectedRow.createdAt
-        );
-
-        const endedAt = new Date(
-          start.getTime() +
-            weeks *
-              7 *
-              24 *
-              60 *
-              60 *
-              1000
-        ).toISOString();
-
-        await programService.updateAssignment(
-          selectedRow.id,
-          {
-            endedAt,
-          }
-        );
-
-        setSelectedRow(null);
-        refresh();
-      } catch (err) {
-        console.error(
-          "Failed to update duration:",
-          err
-        );
-
-        setActionError(
-          "Failed to update program duration."
-        );
-      } finally {
-        setIsUpdating(false);
-      }
-    };
-
-  const handleRemove = (
-    row: ProgramHistoryRow
+  const handleWorkoutLogClick = async (
+    log: WorkoutLog
   ) => {
-    setActionError(null);
-    setRowToRemove(row);
+    setSelectedWorkoutLog(null);
+    setLogDetailError(null);
+    setIsLoadingLogDetail(true);
+
+    try {
+      const response =
+        await programService.getWorkoutLogDetail(
+          log.id
+        );
+
+      const detail: WorkoutLogDetail =
+        response.data?.data;
+
+      setSelectedWorkoutLog(detail);
+    } catch (error) {
+      console.error(
+        "Failed to fetch workout log details:",
+        error
+      );
+
+      setLogDetailError(
+        "Failed to load workout session details."
+      );
+    } finally {
+      setIsLoadingLogDetail(false);
+    }
   };
 
-  const handleConfirmRemove =
-    async () => {
-      if (!rowToRemove) return;
+  const handleUpdateDuration = async () => {
+    if (!selectedRow) {
+      return;
+    }
 
-      try {
-        setIsRemoving(true);
-        setActionError(null);
+    setIsUpdating(true);
+    setActionError(null);
 
-        await programService.deleteAssignment(
-          rowToRemove.id
-        );
+    try {
+      const startDate = new Date(
+        selectedRow.createdAt
+      );
 
-        setRowToRemove(null);
-        refresh();
-      } catch (err) {
-        console.error(
-          "Failed to remove assignment:",
-          err
-        );
+      const newEndDate = new Date(startDate);
 
-        setActionError(
-          "Failed to remove program assignment."
-        );
-      } finally {
-        setIsRemoving(false);
-      }
-    };
+      newEndDate.setDate(
+        newEndDate.getDate() +
+          durationWeeks * 7
+      );
+
+      await programService.updateAssignment(
+        selectedRow.id,
+        {
+          endedAt: newEndDate.toISOString(),
+        }
+      );
+
+      setSelectedRow(null);
+      await refresh();
+    } catch (error) {
+      console.error(
+        "Failed to update program duration:",
+        error
+      );
+
+      setActionError(
+        "Failed to update program duration."
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleRemoveAssignment = async () => {
+    if (!rowToRemove) {
+      return;
+    }
+
+    setIsRemoving(true);
+    setActionError(null);
+
+    try {
+      await programService.deleteAssignment(
+        rowToRemove.id
+      );
+
+      setRowToRemove(null);
+      await refresh();
+    } catch (error) {
+      console.error(
+        "Failed to remove program assignment:",
+        error
+      );
+
+      setActionError(
+        "Failed to remove program assignment."
+      );
+    } finally {
+      setIsRemoving(false);
+    }
+  };
 
   return (
-    <>
-      <div className="p-6 space-y-6">
-        <div className="flex justify-end">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
+    <div className="space-y-6">
+      
+      {/* Filter */}
+      <div className="flex items-center gap-3">
+        <Filter className="h-4 w-4 text-muted-foreground" />
 
-            <Select
-              value={selectedTemplate}
-              onValueChange={setSelectedTemplate}
-            >
-              <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Filter by template" />
-              </SelectTrigger>
+        <Select
+          value={selectedTemplate}
+          onValueChange={setSelectedTemplate}
+        >
+          <SelectTrigger className="w-[240px]">
+            <SelectValue placeholder="Filter by template" />
+          </SelectTrigger>
 
-              <SelectContent>
-                <SelectItem value="ALL">
-                  All Templates
-                </SelectItem>
+          <SelectContent>
+            <SelectItem value="all">
+              All Templates
+            </SelectItem>
 
-                {templateOptions.map(
-                  (template) => (
-                    <SelectItem
-                      key={template.id}
-                      value={String(
-                        template.id
-                      )}
-                    >
-                      {template.name}
-                    </SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {error ? (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-            <p className="text-sm text-destructive">
-              {error}
-            </p>
-          </div>
-        ) : (
-          <ProgramsHistoryTable
-            rows={filteredRows}
-            isLoading={isLoading}
-            onRowClick={handleRowClick}
-            onUpdateDuration={
-              handleUpdateDuration
-            }
-            onRemove={handleRemove}
-          />
-        )}
+            {templateOptions.map((template) => (
+              <SelectItem
+                key={template.id}
+                value={String(template.id)}
+              >
+                {template.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
+      {/* Error */}
+      {error && (
+        <p className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
+
+      {/* Table */}
+      <ProgramsHistoryTable
+        rows={filteredRows}
+        isLoading={isLoading}
+        onRowClick={handleRowClick}
+        onUpdateDuration={(row) => {
+          setSelectedRow(row);
+
+          setDurationWeeks(
+            getDurationWeeks(
+              row.createdAt,
+              row.endedAt
+            )
+          );
+
+          setActionError(null);
+        }}
+        onRemove={(row) => {
+          setRowToRemove(row);
+          setActionError(null);
+        }}
+      />
 
       {/* Update Duration Dialog */}
       <Dialog
@@ -276,65 +374,55 @@ export default function ProgramsView() {
             </DialogTitle>
 
             <DialogDescription>
-              Update the duration of{" "}
-              <strong>
-                {selectedRow?.templateName}
-              </strong>{" "}
-              for{" "}
-              <strong>
-                {selectedRow?.traineeName}
-              </strong>
-              .
+              Update the duration of this program
+              assignment.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4">
-            <label className="text-sm font-medium">
-              Duration
-            </label>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium">
+                Program
+              </p>
 
-            <Select
-              value={durationWeeks}
-              onValueChange={setDurationWeeks}
-              disabled={isUpdating}
-            >
-              <SelectTrigger className="mt-2">
-                <SelectValue />
-              </SelectTrigger>
+              <p className="text-sm text-muted-foreground">
+                {selectedRow?.templateName}
+              </p>
+            </div>
 
-              <SelectContent>
-                <SelectItem value="1">
-                  1 week
-                </SelectItem>
+            <div>
+              <p className="text-sm font-medium">
+                Trainee
+              </p>
 
-                <SelectItem value="2">
-                  2 weeks
-                </SelectItem>
+              <p className="text-sm text-muted-foreground">
+                {selectedRow?.traineeName}
+              </p>
+            </div>
 
-                <SelectItem value="4">
-                  4 weeks
-                </SelectItem>
+            <div>
+              <label className="text-sm font-medium">
+                Duration (weeks)
+              </label>
 
-                <SelectItem value="6">
-                  6 weeks
-                </SelectItem>
-
-                <SelectItem value="8">
-                  8 weeks
-                </SelectItem>
-
-                <SelectItem value="12">
-                  12 weeks
-                </SelectItem>
-
-                <SelectItem value="16">
-                  16 weeks
-                </SelectItem>
-              </SelectContent>
-            </Select>
+              <input
+                type="number"
+                min={1}
+                value={durationWeeks}
+                onChange={(event) =>
+                  setDurationWeeks(
+                    Math.max(
+                      1,
+                      Number(event.target.value)
+                    )
+                  )
+                }
+                className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </div>
 
             {actionError && (
-              <p className="mt-2 text-sm text-destructive">
+              <p className="text-sm text-destructive">
                 {actionError}
               </p>
             )}
@@ -342,30 +430,31 @@ export default function ProgramsView() {
 
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
-              onClick={() =>
-                setSelectedRow(null)
-              }
               disabled={isUpdating}
+              onClick={() => {
+                setSelectedRow(null);
+                setActionError(null);
+              }}
             >
               Cancel
             </Button>
 
             <Button
-              onClick={
-                handleConfirmUpdateDuration
-              }
+              type="button"
               disabled={isUpdating}
+              onClick={handleUpdateDuration}
             >
               {isUpdating
                 ? "Updating..."
-                : "Update Duration"}
+                : "Update"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Remove Confirmation Dialog */}
+      {/* Remove Assignment Dialog */}
       <Dialog
         open={rowToRemove !== null}
         onOpenChange={(open) => {
@@ -382,48 +471,90 @@ export default function ProgramsView() {
             </DialogTitle>
 
             <DialogDescription>
-              Are you sure you want to remove the{" "}
-              <strong>
-                {rowToRemove?.templateName}
-              </strong>{" "}
-              assignment from{" "}
-              <strong>
-                {rowToRemove?.traineeName}
-              </strong>
-              ? This will remove this assignment
-              from the program history.
+              Are you sure you want to remove this
+              program assignment?
             </DialogDescription>
           </DialogHeader>
 
-          {actionError && (
-            <p className="text-sm text-destructive">
-              {actionError}
+          <div className="space-y-2">
+            <p className="text-sm">
+              <span className="font-medium">
+                Trainee:
+              </span>{" "}
+              {rowToRemove?.traineeName}
             </p>
-          )}
+
+            <p className="text-sm">
+              <span className="font-medium">
+                Program:
+              </span>{" "}
+              {rowToRemove?.templateName}
+            </p>
+
+            {actionError && (
+              <p className="text-sm text-destructive">
+                {actionError}
+              </p>
+            )}
+          </div>
 
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
-              onClick={() =>
-                setRowToRemove(null)
-              }
               disabled={isRemoving}
+              onClick={() => {
+                setRowToRemove(null);
+                setActionError(null);
+              }}
             >
               Cancel
             </Button>
 
             <Button
+              type="button"
               variant="destructive"
-              onClick={handleConfirmRemove}
               disabled={isRemoving}
+              onClick={handleRemoveAssignment}
             >
               {isRemoving
                 ? "Removing..."
-                : "Remove Assignment"}
+                : "Remove"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+
+      {/* Workout History */}
+      <WorkoutHistoryDialog
+        open={selectedProgram !== null}
+        selectedProgram={selectedProgram}
+        workoutLogs={workoutLogs}
+        isLoadingLogs={isLoadingLogs}
+        logsError={logsError}
+        onClose={() => {
+          setSelectedProgram(null);
+          setWorkoutLogs([]);
+          setLogsError(null);
+        }}
+        onWorkoutLogClick={handleWorkoutLogClick}
+        formatDateTime={formatDateTime}
+        getWorkoutDuration={getWorkoutDuration}
+      />
+
+      {/* Workout Session Details */}
+      <WorkoutSessionDetailsDialog
+        open={selectedWorkoutLog !== null}
+        selectedWorkoutLog={selectedWorkoutLog}
+        isLoadingLogDetail={isLoadingLogDetail}
+        logDetailError={logDetailError}
+        onClose={() => {
+          setSelectedWorkoutLog(null);
+          setLogDetailError(null);
+        }}
+        formatDateTime={formatDateTime}
+        getWorkoutDuration={getWorkoutDuration}
+      />
+    </div>
   );
 }
