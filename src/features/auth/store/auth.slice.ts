@@ -63,6 +63,23 @@ export const refreshTokenThunk = createAsyncThunk(
   }
 );
 
+export const initializeAuthThunk = createAsyncThunk(
+  "auth/initialize",
+  async (_, { dispatch, rejectWithValue }) => {
+    const token = tokenStorage.getAccessToken();
+    if (!token) {
+      return rejectWithValue("No token");
+    }
+    try {
+      const user = await dispatch(getCurrentUserThunk()).unwrap();
+      return user;
+    } catch (err) {
+      tokenStorage.clearTokens();
+      return rejectWithValue(getErrorMessage(err));
+    }
+  }
+);
+
 export const registerInitThunk = createAsyncThunk(
   "auth/registerInit",
   async (payload: RegisterInitPayload, { rejectWithValue }) => {
@@ -218,6 +235,21 @@ const authSlice = createSlice({
         state.isInitialized = true;
       })
 
+      // Initialize Auth
+      .addCase(initializeAuthThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(initializeAuthThunk.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.isInitialized = true;
+      })
+      .addCase(initializeAuthThunk.rejected, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.isInitialized = true;
+      })
+
       // Register Init
       .addCase(registerInitThunk.pending, (state) => {
         state.isLoading = true;
@@ -320,7 +352,7 @@ const authSlice = createSlice({
       })
       .addCase(inviteVerifyThunk.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.creationToken = action.payload.creationToken;
+        state.creationToken = action.payload.result.creationToken;
         state.inviteDetails = action.payload;
       })
       .addCase(inviteVerifyThunk.rejected, (state, action) => {

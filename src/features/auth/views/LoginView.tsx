@@ -29,7 +29,7 @@ export default function LoginView() {
 
       // 2. Dispatch loginThunk (fetches token + user profile automatically)
       const result = await dispatch(
-        loginThunk({ email: identifier, password: hashedPassword })
+        loginThunk({ identifier: identifier, password: hashedPassword })
       );
 
       if (loginThunk.fulfilled.match(result)) {

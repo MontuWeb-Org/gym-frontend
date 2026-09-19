@@ -33,7 +33,7 @@ export const authService = {
   },
 
   async refreshToken(): Promise<RefreshTokenResponse> {
-    const response = await authApi.post("/auth/refresh", {});
+    const response = await authApi.post("/auth/refresh-token", {});
     return response.data;
   },
 
