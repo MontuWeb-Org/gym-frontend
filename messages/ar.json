@@ -83,7 +83,6 @@
       "description": "ضبط الملف الشخصي للمدرب وتفضيلات الحساب."
     }
   },
-
   "Admin": {
     "title": "لوحة تحكم المسؤول",
     "description": "إدارة إعدادات المنصة والمستخدمين بسلاسة."
@@ -131,17 +130,32 @@
     "rejectInviteButton": "رفض الدعوة",
     "traineeSetupTitle": "إكمال الحساب",
     "traineeSetupSubtitle": "قم بإعداد حسابك للبدء في التدريب مع {trainerName}.",
-    "completeSetupButton": "إكمال التجهيز"
+    "completeSetupButton": "إكمال التجهيز",
+    "setupAccountTitle": "إكمال الحساب",
+    "setupAccountSubtitle": "يرجى إدخال بياناتك لإعداد حسابك.",
+    "finishSetupButton": "إكمال إعداد الحساب",
+    "backButton": "العودة",
+    "creatingAccount": "جاري إنشاء حسابك...",
+    "acceptingInvite": "جاري قبول الدعوة...",
+    "decliningInvite": "جاري رفض الدعوة...",
+    "confirmDeclineInvitation": "هل أنت تأكد من أنك تريد رفض هذه الدعوة؟ لا يمكن التراجع عن هذا الإجراء.",
+    "invalidInvitationTitle": "رابط دعوة غير صالح",
+    "invalidInvitationSubtitle": "لم يتم العثور على رمز تحقق في الرابط.",
+    "verifyingInvitation": "جاري التحقق من رابط الدعوة...",
+    "invitationNotFoundTitle": "لم يتم العثور على الدعوة",
+    "nameAndPasswordRequired": "الاسم وكلمة المرور مطلوبان.",
+    "somethingWentWrong": "حدث خطأ ما.",
+    "unexpectedError": "حدث خطأ غير متوقع."
   },
   "TraineesTable": {
-    "title": "اجمالي المتدربين",
+    "title": "المتدربين",
     "inviteTrainee": "دعوة متدرب",
     "searchPlaceholder": "بحث...",
     "tabs": {
       "all": "الكل",
       "active": "نشط",
       "fallingBehind": "متأخر",
-      "pendingInvite": "في انتظار الدعوة"
+      "pendingInvite": "لم يبدأ"
     },
     "columns": {
       "name": "الاسم",
@@ -149,21 +163,34 @@
       "adherence": "الالتزام",
       "lastActive": "آخر نشاط",
       "status": "الحالة",
-      "action": "الإجراء"
+      "action": "إجراء"
     },
     "status": {
       "onTrack": "على المسار الصحيح",
       "atRisk": "معرض للخطر",
-      "invitePending": "معلقة الدعوة",
-      "fallingBehind": "متأخر"
+      "fallingBehind": "متأخر",
+      "notStarted": "لم يبدأ",
+      "needsPlan": "يحتاج خطة"
     },
     "actions": {
-      "resend": "إعادة إرسال",
-      "open": "عرض"
+    "resend": "إعادة الإرسال",
+    "open": "فتح",
+    "delete": "حذف المتدرب"
+    },
+    "deleteDialog": {
+      "title": "إزالة المتدرب؟",
+      "description": "سيتم إزالة {name} من قائمتك. لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "confirm": "إزالة"
+    },
+    "toasts": {
+      "deleteSuccess": "تم حذف المتدرب بنجاح.",
+      "deleteError": "فشل حذف المتدرب."
     },
     "states": {
       "loading": "جاري تحميل المتدربين...",
-      "empty": "لم يتم العثور على متدربين."
+      "empty": "لم يتم العثور على متدربين.",
+      "error": "فشل تحميل المتدربين."
     }
   },
   "InvitationModal": {
@@ -188,9 +215,16 @@
       "notes": "الملاحظات"
     },
     "metrics": {
-      "adherence": "نسبة الالتزام",
-      "streak": "السلسلة المستمرة",
-      "topLiftPr": "أعلى رقم قياسي"
+    "personalRecords": "السجلات الشخصية",
+    "latestPr": "أحدث رقم قياسي"
+    },
+    "personalRecords": {
+      "title": "السجلات الشخصية",
+      "exercise": "التمرين",
+      "heaviestWeight": "أثقل وزن",
+      "estimatedOneRm": "تقدير 1RM",
+      "updatedAt": "محدث",
+      "empty": "لا توجد سجلات شخصية بعد."
     },
     "recentSessions": {
       "title": "الجلسات الأخيرة",
