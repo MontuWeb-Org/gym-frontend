@@ -25,7 +25,7 @@ export interface RegisterCompleteResponse {
 }
 
 export interface LoginPayload {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -64,9 +64,11 @@ export interface GetCurrentUserResponse {
 export type InviteStatus = "SETUP_PASSWORD" | "ACCEPT_INVITATION";
 
 export interface InviteVerifyData {
-  creationToken: string;
-  trainerName: string;
-  status: InviteStatus;
+  result: {
+    creationToken: string;
+    trainerName: string;
+    status: InviteStatus;
+  };
 }
 
 export interface InviteVerifyResponse {
