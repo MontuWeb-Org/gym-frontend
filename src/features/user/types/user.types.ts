@@ -9,11 +9,6 @@ export enum Gender {
   FEMALE = "FEMALE",
 }
 
-export enum ActivationStatus {
-  ACTIVATED = "ACTIVATED",
-  PENDING = "PENDING",
-}
-
 export interface BodyMetrics {
   weightKg?: number;
   heightCm?: number;
@@ -26,47 +21,36 @@ export interface BaseUserEntity {
   email: string;
   name: string;
   role: UserRole;
-  status: ActivationStatus;
-  createdAt: string;
-  updatedAt: string;
 }
 
-export interface TrainerProfileEntity {
-  userId: number;
-  experience?: string | null;
-  bio?: string | null;
-  createdAt: string;
-  updatedAt: string;
+export interface TrainerProfile {
+  bio?: string;
+  experience?: string;
+  traineesFallingBehindThreshold?: number;
+  traineesAtRiskThreshold?: number;
 }
 
-export interface TraineeProfileEntity {
-  userId: number;
-  gender: Gender;
-  birthDate: string;
-  bodyMetrics: BodyMetrics;
-  trainerId?: number | null;
-  createdAt: string;
-  updatedAt: string;
+export interface TraineeProfile {
+  birthDate?: string;
+  gender?: Gender;
+  bodyMetrics?: BodyMetrics;
+  trainerId?: number;
+  trainerName?: string;
 }
 
 export interface TrainerUser extends BaseUserEntity {
   role: UserRole.TRAINER;
-  trainerProfile?: TrainerProfileEntity;
-  experience?: string | null;
-  bio?: string | null;
+  profile: TrainerProfile;
 }
 
 export interface TraineeUser extends BaseUserEntity {
   role: UserRole.TRAINEE;
-  traineeProfile?: TraineeProfileEntity;
-  gender?: Gender;
-  birthDate?: string;
-  bodyMetrics?: BodyMetrics;
-  trainerId?: number | null;
+  profile: TraineeProfile;
 }
 
 export interface AdminUser extends BaseUserEntity {
   role: UserRole.ADMIN;
+  profile?: Record<string, never>;
 }
 
 export type User = TrainerUser | TraineeUser | AdminUser;
@@ -74,11 +58,13 @@ export type User = TrainerUser | TraineeUser | AdminUser;
 export interface UpdateProfilePayload {
   name?: string;
   phoneNumber?: string;
-  bio?: string;          // trainer only
-  experience?: string;   // trainer only
-  birthDate?: string;    // trainee only, ISO date-time
-  gender?: Gender;       // trainee only
-  bodyMetrics?: BodyMetrics;      // trainee only
+  profile?: {
+    bio?: string;
+    experience?: string;
+    birthDate?: string;
+    gender?: Gender;
+    bodyMetrics?: BodyMetrics;
+  };
 }
 
 export interface UserProfileResponse {

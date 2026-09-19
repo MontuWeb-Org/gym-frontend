@@ -4,16 +4,19 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchTrainerTrainees } from "@/features/trainer/store/trainer.slice";
+import { deleteTrainee, fetchTrainerTrainees } from "@/features/trainer/store/trainer.slice";
 import { inviteTraineeThunk } from "@/features/auth/store/auth.slice"; 
 import { TraineesTable } from "../components/TraineesTable";
 import { InvitationModal } from "../components/InvitationModal";
+import { toast } from "sonner";
 
 export default function TraineeManagement() {
   const t = useTranslations("TraineeManagement");
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [deletingTraineeId, setDeletingTraineeId] = useState<number | null>(null);
+
 
   const { trainees = [], pagination, isLoading } = useAppSelector(
     (state) => state.trainer
@@ -44,11 +47,24 @@ export default function TraineeManagement() {
   };
 
   const handleResendInvite = (id: number) => {
-    const trainee = trainees.find((t) => t.id === id);
+    // Adjusted key match: traineeId instead of id
+    const trainee = trainees.find((t) => t.traineeId === id);
     if (trainee?.email) {
       dispatch(inviteTraineeThunk(trainee.email));
     }
   };
+
+const handleDeleteTrainee = async (traineeId: number) => {
+  setDeletingTraineeId(traineeId);
+  try {
+    await dispatch(deleteTrainee(traineeId)).unwrap();
+    toast.success(t("toasts.deleteSuccess"));
+  } catch (err) {
+    toast.error(typeof err === "string" ? err : t("toasts.deleteError"));
+  } finally {
+    setDeletingTraineeId(null);
+  }
+};
 
   return (
     <main className="container mx-auto p-6">
@@ -59,6 +75,8 @@ export default function TraineeManagement() {
         onInvite={handleInviteTrainee}
         onOpenTrainee={handleOpenTrainee}
         onResendInvite={handleResendInvite}
+        onDeleteTrainee={handleDeleteTrainee}
+        deletingTraineeId={deletingTraineeId}
       />
 
       <InvitationModal

@@ -16,5 +16,8 @@ export const trainerService = {
       `/users/trainer/trainees/${traineeId}`
     );
     return response.data;
-  }
+  },
+  async DeleteTrainee(traineeId: number): Promise<void> {
+    await authApi.delete(`/users/trainer/trainees/${traineeId}`);
+  },
 };
