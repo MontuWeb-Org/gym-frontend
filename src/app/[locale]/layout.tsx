@@ -14,6 +14,7 @@ import { siteConfig } from "@/config/site";
 import { MSWProvider } from "@/mock-server/MSWProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -94,6 +95,7 @@ export default async function RootLayout({
                   <div className="flex-1 flex flex-col">{children}</div>
                   <ThemeToggle />
                 </AuthProvider>
+                <Toaster richColors position={locale === "ar" ? "top-left" : "top-right"} />
               </NextIntlClientProvider>
             </StoreProvider>
           </QueryProvider>
