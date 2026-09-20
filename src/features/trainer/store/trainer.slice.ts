@@ -51,6 +51,20 @@ export const fetchTraineeDetails = createAsyncThunk(
   }
 );
 
+export const deleteTrainee = createAsyncThunk(
+  "trainees/deleteTrainee",
+  async (traineeId: number, { rejectWithValue }) => {
+    try {
+      await trainerService.DeleteTrainee(traineeId);
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete trainee"
+      );
+    }
+  }
+);
+
 const traineesSlice = createSlice({
   name: "trainees",
   initialState,
@@ -68,7 +82,8 @@ const traineesSlice = createSlice({
       })
       .addCase(fetchTrainerTrainees.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.trainees = action.payload.data.trainees;
+        // Adjusted to match API structure (data is Trainee[])
+        state.trainees = action.payload.data;
         state.pagination = action.payload.pagination;
       })
       .addCase(fetchTrainerTrainees.rejected, (state, action) => {
@@ -86,6 +101,22 @@ const traineesSlice = createSlice({
         state.selectedTrainee = action.payload.data;
       })
       .addCase(fetchTraineeDetails.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as string) || "An error occurred";
+      })
+
+      // Delete Trainee
+      .addCase(deleteTrainee.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteTrainee.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.trainees = state.trainees.filter(
+          (trainee) => trainee.traineeId !== action.meta.arg
+        );
+      })
+      .addCase(deleteTrainee.rejected, (state, action) => {
         state.isLoading = false;
         state.error = (action.payload as string) || "An error occurred";
       });

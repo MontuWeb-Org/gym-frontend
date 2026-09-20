@@ -103,12 +103,12 @@ export const APP_ROUTES: RouteConfig[] = [
     iconName: "billing",
   },
   {
-    id: "trainer-settings",
-    path: "/trainer/settings",
-    titleKey: "settings",
+    id: "trainer-profile",
+    path: "/trainer/profile",
+    titleKey: "profile",
     showInSidebar: true,
     allowedRoles: [UserRole.TRAINER],
-    iconName: "settings",
+    iconName: "profile",
   },
 
   // Trainee Routes
@@ -129,12 +129,12 @@ export const APP_ROUTES: RouteConfig[] = [
     iconName: "workouts",
   },
   {
-    id: "trainee-settings",
-    path: "/trainee/settings",
-    titleKey: "settings",
+    id: "trainee-profile",
+    path: "/trainee/profile",
+    titleKey: "profile",
     showInSidebar: true,
     allowedRoles: [UserRole.TRAINEE],
-    iconName: "settings",
+    iconName: "profile",
   },
 
   // Admin Routes
@@ -164,11 +164,7 @@ export const ROUTES = {
     PROGRAMS: "/trainer/programs",
     TEMPLATES: "/trainer/templates",
     BILLING: "/trainer/billing",
-    SETTINGS: {
-      ROOT: "/trainer/settings",
-      PROFILE: "/trainer/settings/profile",
-      NOTIFICATIONS: "/trainer/settings/notifications",
-    },
+    PROFILE: "/trainer/profile",
   },
 
   TRAINEE: {

@@ -15,9 +15,9 @@ export const tokenStorage = {
     
     // 2. Save in Cookie (readable by Next.js middleware / SSR)
     Cookies.set(ACCESS_TOKEN_KEY, token, {
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      expires: 1, // 1 day fallback expiration
+      expires: 1,
     });
   },
 

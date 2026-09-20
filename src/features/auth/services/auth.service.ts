@@ -10,6 +10,10 @@ import {
   ForgotPasswordInitPayload,
   ForgotPasswordInitResponse,
   ForgotPasswordCompletePayload,
+  InviteVerifyResponse,
+  InviteAcceptPayload,
+  InviteAcceptResponse,
+  InviteSetupPayload,
 } from "../types/auth.types";
 
 export const authService = {
@@ -29,7 +33,7 @@ export const authService = {
   },
 
   async refreshToken(): Promise<RefreshTokenResponse> {
-    const response = await authApi.post("/auth/refresh", {});
+    const response = await authApi.post("/auth/refresh-token", {});
     return response.data;
   },
 
@@ -49,5 +53,20 @@ export const authService = {
 
   async inviteTrainee(email: string): Promise<void> {
     await authApi.post("/auth/invite/init", { email });
+  },
+
+  async inviteVerify(token: string): Promise<InviteVerifyResponse> {
+    const response = await publicApi.get(`/auth/invite/verify/${token}`);
+    return response.data;
+  },
+
+  async inviteAccept(payload: InviteAcceptPayload): Promise<InviteAcceptResponse> {
+    const response = await publicApi.post("/auth/invite/accept", payload);
+    return response.data;
+  },
+
+  async inviteSetup(payload: InviteSetupPayload): Promise<AuthResponse> {
+    const response = await publicApi.post("/auth/invite/setup", payload);
+    return response.data;
   },
 };

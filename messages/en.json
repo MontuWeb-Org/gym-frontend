@@ -122,7 +122,31 @@
     "resetPasswordTitle": "Reset Password",
     "resetPasswordSubtitle": "Enter the code sent to {email} and choose a new password.",
     "resetPasswordButton": "Reset Password",
-    "backToLogin": "Back to Login"
+    "backToLogin": "Back to Login",
+    "invitationReceivedTitle": "Invitation Received",
+    "invitationReceivedSubtitle": "You have been invited by {trainerName} to join as a trainee.",
+    "defaultTrainer": "your trainer",
+    "processing": "Processing...",
+    "acceptInviteButton": "Accept Invitation",
+    "rejectInviteButton": "Reject Invitation",
+    "traineeSetupTitle": "Complete Your Profile",
+    "traineeSetupSubtitle": "Set up your account to start training with {trainerName}.",
+    "completeSetupButton": "Complete Setup",
+    "setupAccountTitle": "Complete Your Profile",
+    "setupAccountSubtitle": "Please enter your details to set up your account.",
+    "finishSetupButton": "Complete Account Setup",
+    "backButton": "Back",
+    "creatingAccount": "Creating your account...",
+    "acceptingInvite": "Accepting invitation...",
+    "decliningInvite": "Declining invitation...",
+    "confirmDeclineInvitation": "Are you sure you want to decline this invitation? This can't be undone.",
+    "invalidInvitationTitle": "Invalid Invitation Link",
+    "invalidInvitationSubtitle": "No verification token was found in the URL.",
+    "verifyingInvitation": "Verifying invitation link...",
+    "invitationNotFoundTitle": "Invitation Not Found",
+    "nameAndPasswordRequired": "Name and password are required.",
+    "somethingWentWrong": "Something went wrong.",
+    "unexpectedError": "An unexpected error occurred."
   },
   "TraineesTable": {
     "title": "Trainees",
@@ -132,7 +156,7 @@
       "all": "All",
       "active": "Active",
       "fallingBehind": "Falling behind",
-      "pendingInvite": "Pending invite"
+      "pendingInvite": "Not Started"
     },
     "columns": {
       "name": "Name",
@@ -145,16 +169,29 @@
     "status": {
       "onTrack": "On track",
       "atRisk": "At risk",
-      "invitePending": "Invite pending",
-      "fallingBehind": "Falling behind"
+      "fallingBehind": "Falling behind",
+      "notStarted": "Not started",
+      "needsPlan": "Needs plan"
     },
     "actions": {
       "resend": "Resend",
-      "open": "Open"
+      "open": "Open",
+      "delete": "Delete trainee"
+    },
+    "deleteDialog": {
+      "title": "Remove trainee?",
+      "description": "This will remove {name} from your roster. This can't be undone.",
+      "cancel": "Cancel",
+      "confirm": "Remove"
+    },
+    "toasts": {
+      "deleteSuccess": "Trainee removed successfully.",
+      "deleteError": "Failed to remove trainee."
     },
     "states": {
       "loading": "Loading trainees...",
-      "empty": "No trainees found."
+      "empty": "No trainees found.",
+      "error": "Failed to load trainees."
     }
   },
   "InvitationModal": {
@@ -179,9 +216,16 @@
       "notes": "Notes"
     },
     "metrics": {
-      "adherence": "Adherence",
-      "streak": "Streak",
-      "topLiftPr": "Top lift PR"
+    "personalRecords": "Personal Records",
+    "latestPr": "Latest PR"
+    },
+    "personalRecords": {
+      "title": "Personal Records",
+      "exercise": "Exercise",
+      "heaviestWeight": "Heaviest Weight",
+      "estimatedOneRm": "Est. 1RM",
+      "updatedAt": "Updated",
+      "empty": "No personal records yet."
     },
     "recentSessions": {
       "title": "Recent sessions",

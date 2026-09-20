@@ -1,5 +1,5 @@
 // src/data/sidebars/trainerSidebar.data.tsx
-import { LayoutDashboard, Users, Dumbbell, FileText, CreditCard, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Dumbbell, FileText, CreditCard, User } from "lucide-react";
 import type { SidebarItem } from "@/data/sidebar.types";
 import { ROUTES } from "@/data/routes";
 
@@ -29,16 +29,16 @@ export const TRAINER_SIDEBAR_DATA: SidebarItem[] = [
     href: ROUTES.TRAINER.TEMPLATES,
     icon: <FileText className="size-5" />,
   },
+  // {
+  //   id: "billing",
+  //   label: "Billing",
+  //   href: ROUTES.TRAINER.BILLING,
+  //   icon: <CreditCard className="size-5" />,
+  // },
   {
-    id: "billing",
-    label: "Billing",
-    href: ROUTES.TRAINER.BILLING,
-    icon: <CreditCard className="size-5" />,
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    href: ROUTES.TRAINER.SETTINGS.ROOT,
-    icon: <Settings className="size-5" />,
+    id: "profile",
+    label: "Profile",
+    href: ROUTES.TRAINER.PROFILE,
+    icon: <User className="size-5" />,
   },
 ];

@@ -42,21 +42,21 @@ export const userHandlers = [
     if (currentUser.role === "TRAINER" || currentUser.role === "ADMIN") {
       const trainerProfile = mockDb.trainers.find((t) => String(t.userId) === String(userId));
       if (trainerProfile) {
-        if (body.bio !== undefined) trainerProfile.bio = body.bio;
-        if (body.experience !== undefined) trainerProfile.experience = body.experience;
+        if (body.profile?.bio !== undefined) trainerProfile.bio = body.profile.bio;
+        if (body.profile?.experience !== undefined) trainerProfile.experience = body.profile.experience;
         trainerProfile.updatedAt = currentUser.updatedAt;
       }
     } else if (currentUser.role === "TRAINEE") {
       const traineeProfile = mockDb.trainees.find((t) => String(t.userId) === String(userId));
       if (traineeProfile) {
-        if (body.gender !== undefined) {
-          traineeProfile.gender = body.gender.toUpperCase() as "MALE" | "FEMALE";
+        if (body.profile?.gender !== undefined) {
+          traineeProfile.gender = body.profile.gender.toUpperCase() as "MALE" | "FEMALE";
         }
-        if (body.birthDate !== undefined) traineeProfile.birthDate = body.birthDate;
-        if (body.bodyMetrics !== undefined && body.bodyMetrics !== null) {
+        if (body.profile?.birthDate !== undefined) traineeProfile.birthDate = body.profile.birthDate;
+        if (body.profile?.bodyMetrics !== undefined && body.profile.bodyMetrics !== null) {
           traineeProfile.bodyMetrics = {
             ...traineeProfile.bodyMetrics,
-            ...body.bodyMetrics,
+            ...body.profile.bodyMetrics,
           };
         }
         traineeProfile.updatedAt = currentUser.updatedAt;

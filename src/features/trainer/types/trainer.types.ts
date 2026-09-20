@@ -1,18 +1,33 @@
-export type TraineeStatus = "ON_TRACK" | "AT_RISK" | "INVITE_PENDING" | "FALLING_BEHIND";
-
-export interface Trainee {
-  id: number;
-  name: string;
-  adherence: number;
-  programName: string;
-  lastSessionDate: string;
-  status: TraineeStatus;
-  email: string;
+export type TraineeStatus =
+  | "ON_TRACK"
+  | "AT_RISK"
+  | "NOT_STARTED"
+  | "FALLING_BEHIND"
+  | "NEEDS_PLAN";
+export interface TraineePlanTemplate {
+  templateName: string;
+  templateId: number;
 }
 
-export interface GetTraineesQueryParams {
-  page?: number;
-  limit?: number;
+export interface TraineePlanLastSession {
+  status: string;
+  startedAt: string;
+}
+
+export interface TraineePlan {
+  adherencePercentage: number;
+  template: TraineePlanTemplate;
+  lastSession?: TraineePlanLastSession | null;
+  status: string;
+  planAdherenceStatus: string;
+}
+
+export interface Trainee {
+  traineeId: number;
+  traineeName: string;
+  traineeStatus: TraineeStatus;
+  plans: TraineePlan[];
+  email?: string;
 }
 
 export interface OffsetPagination {
@@ -23,10 +38,13 @@ export interface OffsetPagination {
 }
 
 export interface GetTraineesResponse {
-  data: {
-    trainees: Trainee[];
-  };
+  data: Trainee[];
   pagination: OffsetPagination;
+}
+
+export interface GetTraineesQueryParams {
+  page?: number;
+  limit?: number;
 }
 
 export interface TraineeSessionRecord {
@@ -37,17 +55,61 @@ export interface TraineeSessionRecord {
   notes?: string;
 }
 
-export interface TraineeDetailedInfo {
+export interface ExerciseRef {
   id: number;
   name: string;
-  adherence: number;
-  programName: string;
-  lastSessionDate: string;
-  status: TraineeStatus;
-  joinedAt: string;
-  programJoinedAt: string;
-  streakWeeks?: number;
-  topLiftPr?: string;
-  recentSessions?: TraineeSessionRecord[];
+}
+
+export interface SetLog {
+  id: number;
+  reps: number;
+  weight: number;
+  endedAt: string;
+}
+
+export interface TraineeProfileDetails {
+  bio?: string;
+  experience?: string;
+  traineesFallingBehindThreshold?: number;
+  traineesAtRiskThreshold?: number;
+  birthDate: string;
+  gender: string;
+  bodyMetrics: Record<string, unknown>;
+  trainerId: number;
+  trainerName: string;
+}
+
+export interface TraineeProfile {
+  id: number;
   email: string;
+  name: string;
+  phoneNumber: string;
+  role: string;
+  profile: TraineeProfileDetails;
+}
+
+export interface PersonalRecord {
+  exercise: ExerciseRef;
+  heaviestWeight: number;
+  heaviestWeightSet: SetLog;
+  estimatedOneRm: number;
+  estimatedOneRmSet: SetLog;
+  updatedAt: string;
+}
+
+export interface ProgressionEntry {
+  id: number;
+  exercise: ExerciseRef;
+  heaviestWeight: number;
+  estimatedOneRm: number;
+  isWeightPr: boolean;
+  isOneRmPr: boolean;
+  achievedAt: string;
+  setLog: SetLog;
+}
+
+export interface TraineeDetailedInfo {
+  traineeProfile: TraineeProfile;
+  personalRecords: PersonalRecord[];
+  progression: ProgressionEntry[];
 }

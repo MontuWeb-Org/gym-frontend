@@ -39,7 +39,6 @@ export function TraineeDetailsView({ traineeId }: TraineeDetailsViewProps) {
 
   useEffect(() => {
     dispatch(fetchTraineeDetails(traineeId));
-
     return () => {
       dispatch(clearSelectedTrainee());
     };
@@ -64,14 +63,21 @@ export function TraineeDetailsView({ traineeId }: TraineeDetailsViewProps) {
 
   if (!data) return null;
 
-  const joinedMonthYear = new Date(data.joinedAt).toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  });
+  const { traineeProfile, personalRecords, progression } = data;
+  const initials = traineeProfile.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("");
+
+  // Latest PR-worthy lift, if any — closest thing to "top lift" in this payload
+  const topPr = progression
+    .filter((p) => p.isOneRmPr)
+    .sort(
+      (a, b) => new Date(b.achievedAt).getTime() - new Date(a.achievedAt).getTime()
+    )[0];
 
   return (
     <div className="w-full space-y-6 p-6">
-      {/* Back Link */}
       <div>
         <Link
           href="/trainer/trainees"
@@ -82,21 +88,19 @@ export function TraineeDetailsView({ traineeId }: TraineeDetailsViewProps) {
         </Link>
       </div>
 
-      {/* Header Profile Section */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 border border-border bg-muted">
             <AvatarFallback className="text-lg font-semibold text-muted-foreground">
-              {data.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
+              {initials}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{data.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              {traineeProfile.name}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              {t("joinedPrefix")} {joinedMonthYear} · {data.programName}
+              {traineeProfile.email}
             </p>
           </div>
         </div>
@@ -116,7 +120,6 @@ export function TraineeDetailsView({ traineeId }: TraineeDetailsViewProps) {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
       <div className="border-b border-border">
         <nav className="-mb-px flex gap-6" aria-label="Tabs">
           {[
@@ -143,81 +146,69 @@ export function TraineeDetailsView({ traineeId }: TraineeDetailsViewProps) {
         </nav>
       </div>
 
-      {/* Tab Panels */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* Metric Summary Cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-lg border border-border bg-card p-5 text-center shadow-xs">
               <span className="text-xs font-semibold uppercase text-muted-foreground">
-                {t("metrics.adherence")}
+                {t("metrics.personalRecords")}
               </span>
               <p className="mt-2 text-2xl font-bold text-foreground">
-                {data.adherence}%
+                {personalRecords.length}
               </p>
             </div>
 
             <div className="rounded-lg border border-border bg-card p-5 text-center shadow-xs">
               <span className="text-xs font-semibold uppercase text-muted-foreground">
-                {t("metrics.streak")}
+                {t("metrics.latestPr")}
               </span>
               <p className="mt-2 text-2xl font-bold text-foreground">
-                {data.streakWeeks ?? 0}w
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-border bg-card p-5 text-center shadow-xs">
-              <span className="text-xs font-semibold uppercase text-muted-foreground">
-                {t("metrics.topLiftPr")}
-              </span>
-              <p className="mt-2 text-2xl font-bold text-foreground">
-                {data.topLiftPr ?? "—"}
+                {topPr ? `${topPr.exercise.name} · ${topPr.estimatedOneRm}` : "—"}
               </p>
             </div>
           </div>
 
-          {/* Recent Sessions Card */}
           <div className="rounded-lg border border-border bg-card shadow-xs">
             <div className="p-4 border-b border-border">
               <h2 className="text-sm font-semibold text-muted-foreground">
-                {t("recentSessions.title")}
+                {t("personalRecords.title")}
               </h2>
             </div>
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-border hover:bg-transparent">
-                  <TableHead className="w-[140px] text-xs font-semibold uppercase text-muted-foreground">
-                    {t("recentSessions.date")}
+                  <TableHead className="text-xs font-semibold uppercase text-muted-foreground">
+                    {t("personalRecords.exercise")}
                   </TableHead>
                   <TableHead className="text-xs font-semibold uppercase text-muted-foreground">
-                    {t("recentSessions.session")}
+                    {t("personalRecords.heaviestWeight")}
                   </TableHead>
                   <TableHead className="text-xs font-semibold uppercase text-muted-foreground">
-                    {t("recentSessions.completed")}
+                    {t("personalRecords.estimatedOneRm")}
                   </TableHead>
                   <TableHead className="text-xs font-semibold uppercase text-muted-foreground">
-                    {t("recentSessions.notes")}
+                    {t("personalRecords.updatedAt")}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.recentSessions && data.recentSessions.length > 0 ? (
-                  data.recentSessions.map((session) => (
+                {personalRecords.length > 0 ? (
+                  personalRecords.map((pr) => (
                     <TableRow
-                      key={session.id}
+                      key={pr.exercise.id}
                       className="border-b border-border hover:bg-muted/50"
                     >
                       <TableCell className="text-sm text-foreground">
-                        {session.date}
+                        {pr.exercise.name}
                       </TableCell>
                       <TableCell className="text-sm text-foreground">
-                        {session.sessionName}
+                        {pr.heaviestWeight}
                       </TableCell>
                       <TableCell className="text-sm text-foreground">
-                        {session.completedSets}
+                        {pr.estimatedOneRm}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {session.notes ? `"${session.notes}"` : "—"}
+                        {new Date(pr.updatedAt).toLocaleDateString()}
                       </TableCell>
                     </TableRow>
                   ))
@@ -227,7 +218,7 @@ export function TraineeDetailsView({ traineeId }: TraineeDetailsViewProps) {
                       colSpan={4}
                       className="h-24 text-center text-sm text-muted-foreground"
                     >
-                      {t("recentSessions.empty")}
+                      {t("personalRecords.empty")}
                     </TableCell>
                   </TableRow>
                 )}
