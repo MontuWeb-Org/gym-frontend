@@ -43,7 +43,7 @@ export default function TraineeSignupView() {
 
   return (
     <TraineeSignupForm
-      trainerName={inviteDetails?.trainerName}
+      trainerName={inviteDetails?.result?.trainerName || ""}
       values={formData}
       isLoading={isLoading}
       globalError={globalError}
