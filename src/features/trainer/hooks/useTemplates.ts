@@ -192,8 +192,7 @@ export function useTemplates() {
           payloadData?.planId ||
           payloadData?.id ||
           payloadData?.data?.planId ||
-          payloadData?.data?.id ||
-          Date.now();
+          payloadData?.data?.id;
 
         setIsCreating(false);
 
@@ -208,9 +207,7 @@ export function useTemplates() {
 
         setIsCreating(false);
 
-        router.push(
-          `/trainer/template/${Date.now()}`
-        );
+
       }
     } catch (err) {
       console.error(

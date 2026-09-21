@@ -161,9 +161,14 @@ export function useWeekBuilder() {
           {};
 
         const newWorkoutId =
-          newWorkout.workoutTemplateId ||
-          newWorkout.id ||
-          Date.now();
+          Number(
+            newWorkout.workoutTemplateId ??
+              newWorkout.id
+          );
+
+        if (!Number.isFinite(newWorkoutId)) {
+          throw new Error("Create workout response did not contain a workout ID.");
+        }
 
         setWorkouts([
           ...workouts,

@@ -149,9 +149,14 @@ export function useTemplateBuilder() {
           {};
 
         const newWeekId =
-          newWeek.weekId ||
-          newWeek.id ||
-          Date.now();
+          Number(
+            newWeek.weekId ??
+              newWeek.id
+          );
+
+        if (!Number.isFinite(newWeekId)) {
+          throw new Error("Create week response did not contain a week ID.");
+        }
 
         const updatedWeeks: WeekTemplate[] =
           [

@@ -5,12 +5,30 @@ import { AssignedExercise } from "../../../types/workout-builder.types";
 interface AssignedExerciseListProps {
   exercises: AssignedExercise[];
   setIsModalOpen: (value: boolean) => void;
-  handleMoveExercise: (index: number, direction: 'up' | 'down') => void;
-  handleDragStart: (e: React.DragEvent, index: number) => void;
-  handleDragOver: (e: React.DragEvent) => void;
-  handleDrop: (e: React.DragEvent, dropIndex: number) => void;
-  handleRemoveExercise: (exerciseId: number) => void;
-  onEditExercise: (exercise: AssignedExercise, setsLen: number, repsVal: number, restVal: number) => void;
+  handleMoveExercise: (
+    index: number,
+    direction: "up" | "down"
+  ) => void;
+  handleDragStart: (
+    e: React.DragEvent,
+    index: number
+  ) => void;
+  handleDragOver: (
+    e: React.DragEvent
+  ) => void;
+  handleDrop: (
+    e: React.DragEvent,
+    dropIndex: number
+  ) => void;
+  handleRemoveExercise: (
+    exerciseId: number
+  ) => void;
+  onEditExercise: (
+    exercise: AssignedExercise,
+    setsLen: number,
+    repsVal: number,
+    restVal: number
+  ) => void;
 }
 
 export function AssignedExerciseList({
@@ -28,10 +46,10 @@ export function AssignedExerciseList({
       <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
         Assigned Exercises
       </h4>
-      
+
       {exercises.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center">
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="mb-4 text-sm text-muted-foreground">
             No exercises added to this workout session yet.
           </p>
 
@@ -63,52 +81,77 @@ export function AssignedExerciseList({
               ? exercise.sets[0].weight
               : 0;
 
+          const durationVal =
+            exercise.durationMinutes ?? 0;
+
           return (
-            <div 
-              key={exercise.id} 
+            <div
+              key={exercise.id}
               draggable
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={(e) => handleDragOver(e)}
-              onDrop={(e) => handleDrop(e, index)}
-              className="flex items-center justify-between p-4 rounded-lg border bg-background shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
+              onDragStart={(e) =>
+                handleDragStart(e, index)
+              }
+              onDragOver={(e) =>
+                handleDragOver(e)
+              }
+              onDrop={(e) =>
+                handleDrop(e, index)
+              }
+              className="flex items-center justify-between rounded-lg border bg-background p-4 shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
             >
               <div className="flex items-center gap-4">
                 <div className="flex flex-col gap-0.5">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
                     disabled={index === 0}
-                    onClick={() => handleMoveExercise(index, 'up')}
+                    onClick={() =>
+                      handleMoveExercise(
+                        index,
+                        "up"
+                      )
+                    }
                   >
                     ▲
                   </Button>
 
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                    disabled={index === exercises.length - 1}
-                    onClick={() => handleMoveExercise(index, 'down')}
+                    disabled={
+                      index === exercises.length - 1
+                    }
+                    onClick={() =>
+                      handleMoveExercise(
+                        index,
+                        "down"
+                      )
+                    }
                   >
                     ▼
                   </Button>
                 </div>
 
                 <div>
-                  <h5 className="font-semibold text-base">
+                  <h5 className="text-base font-semibold">
                     {exercise.name}
                   </h5>
 
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Sets: {setsLen} | Reps: {repsVal} | Rest: {restVal}s | Weight: {weightVal} kg
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Sets: {setsLen}{" "}
+                    | Reps: {repsVal}{" "}
+                    | Rest: {restVal}s{" "}
+                    | Weight: {weightVal} kg{" "}
+                    | Duration: {durationVal} min
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() =>
                     onEditExercise(
@@ -122,11 +165,13 @@ export function AssignedExerciseList({
                   Edit Reps
                 </Button>
 
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   size="sm"
                   onClick={() =>
-                    handleRemoveExercise(exercise.id)
+                    handleRemoveExercise(
+                      exercise.id
+                    )
                   }
                 >
                   Remove
@@ -139,4 +184,3 @@ export function AssignedExerciseList({
     </div>
   );
 }
-

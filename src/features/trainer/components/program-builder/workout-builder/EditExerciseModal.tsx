@@ -14,6 +14,8 @@ interface EditExerciseModalProps {
   setRestTime: (val: number | string) => void;
   weight: number | string;
   setWeight: (val: number | string) => void;
+  durationMinutes: number | string;
+  setDurationMinutes: (val: number | string) => void;
   handleSaveReps: () => void;
 }
 
@@ -28,6 +30,8 @@ export function EditExerciseModal({
   setRestTime,
   weight,
   setWeight,
+  durationMinutes,
+  setDurationMinutes,
   handleSaveReps,
 }: EditExerciseModalProps) {
   if (!editingExercise) return null;
@@ -36,96 +40,77 @@ export function EditExerciseModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm">
       <div className="w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl space-y-4">
         <div className="flex items-center justify-between border-b pb-3">
-          <h3 className="text-lg font-semibold">
-            Edit Exercise
-          </h3>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-          >
+          <h3 className="text-lg font-semibold">Edit Exercise</h3>
+          <Button variant="ghost" size="sm" onClick={onClose}>
             ✕
           </Button>
         </div>
 
         <div className="space-y-3">
-          {/* Sets */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground">
-              Sets
-            </label>
-
+            <label className="text-xs font-medium text-muted-foreground">Sets</label>
             <Input
               type="number"
               min="1"
               value={setsCount}
               onChange={(e) =>
-                setSetsCount(
-                  e.target.value === ""
-                    ? ""
-                    : Number(e.target.value)
-                )
+                setSetsCount(e.target.value === "" ? "" : Number(e.target.value))
               }
             />
           </div>
 
-          {/* Reps */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground">
-              Reps
-            </label>
-
+            <label className="text-xs font-medium text-muted-foreground">Reps</label>
             <Input
               type="number"
               min="1"
               value={repsCount}
               onChange={(e) =>
-                setRepsCount(
-                  e.target.value === ""
-                    ? ""
-                    : Number(e.target.value)
-                )
+                setRepsCount(e.target.value === "" ? "" : Number(e.target.value))
               }
             />
           </div>
 
-          {/* Rest */}
           <div>
             <label className="text-xs font-medium text-muted-foreground">
               Rest (seconds)
             </label>
-
             <Input
               type="number"
               min="0"
               value={restTime}
               onChange={(e) =>
-                setRestTime(
-                  e.target.value === ""
-                    ? ""
-                    : Number(e.target.value)
-                )
+                setRestTime(e.target.value === "" ? "" : Number(e.target.value))
               }
             />
           </div>
 
-          {/* Weight */}
           <div>
             <label className="text-xs font-medium text-muted-foreground">
               Weight (kg)
             </label>
-
             <Input
               type="number"
               min="0"
               step="0.5"
               value={weight}
               onChange={(e) =>
-                setWeight(
-                  e.target.value === ""
-                    ? ""
-                    : Number(e.target.value)
+                setWeight(e.target.value === "" ? "" : Number(e.target.value))
+              }
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-muted-foreground">
+              Duration (minutes)
+            </label>
+            <Input
+              type="number"
+              min="0"
+              value={durationMinutes}
+              onChange={(e) =>
+                setDurationMinutes(
+                  e.target.value === "" ? "" : Number(e.target.value)
                 )
               }
             />
@@ -133,16 +118,10 @@ export function EditExerciseModal({
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-          >
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-
-          <Button onClick={handleSaveReps}>
-            Save Changes
-          </Button>
+          <Button onClick={handleSaveReps}>Save Changes</Button>
         </div>
       </div>
     </div>

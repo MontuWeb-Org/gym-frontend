@@ -1,19 +1,4 @@
-import axios from "axios";
-import { tokenStorage } from "@/lib/storage";
-
-axios.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token =
-      tokenStorage.getAccessToken();
-
-    if (token) {
-      config.headers.Authorization =
-        `Bearer ${token}`;
-    }
-  }
-
-  return config;
-});
+import { authApi } from "@/lib/axios";
 
 export const programService = {
   // ---------------------------------------------------------------------------
@@ -24,7 +9,7 @@ export const programService = {
     page = 1,
     limit = 10
   ) =>
-    axios.get(
+    authApi.get(
       `/api/plans/templates?page=${page}&limit=${limit}`
     ),
 
@@ -32,7 +17,7 @@ export const programService = {
     name: string;
     description: string;
   }) =>
-    axios.post(
+    authApi.post(
       "/api/plans/templates",
       data
     ),
@@ -40,7 +25,7 @@ export const programService = {
   getTemplateDetail: (
     planId: number
   ) =>
-    axios.get(
+    authApi.get(
       `/api/plans/templates/${planId}`
     ),
 
@@ -52,7 +37,7 @@ export const programService = {
       status?: "DRAFT" | "ACTIVE";
     }
   ) =>
-    axios.put(
+    authApi.put(
       `/api/plans/templates/${planId}`,
       data
     ),
@@ -60,14 +45,14 @@ export const programService = {
   duplicateTemplate: (
     planId: number
   ) =>
-    axios.post(
+    authApi.post(
       `/api/plans/templates/${planId}/duplicate`
     ),
 
   deleteTemplate: (
     planId: number
   ) =>
-    axios.delete(
+    authApi.delete(
       `/api/plans/templates/${planId}`
     ),
 
@@ -79,7 +64,7 @@ export const programService = {
     sequenceNumber: number;
     planTemplateId: number;
   }) =>
-    axios.post(
+    authApi.post(
       "/api/plans/templates/weeks",
       data
     ),
@@ -87,21 +72,21 @@ export const programService = {
   getWeekDetail: (
     weekId: number
   ) =>
-    axios.get(
+    authApi.get(
       `/api/plans/templates/weeks/${weekId}`
     ),
 
   duplicateWeek: (
     weekId: number
   ) =>
-    axios.post(
+    authApi.post(
       `/api/plans/templates/weeks/${weekId}/duplicate`
     ),
 
   deleteWeek: (
     weekId: number
   ) =>
-    axios.delete(
+    authApi.delete(
       `/api/plans/templates/weeks/${weekId}`
     ),
 
@@ -114,7 +99,7 @@ export const programService = {
     sequenceNumber: number;
     weekTemplateId: number;
   }) =>
-    axios.post(
+    authApi.post(
       "/api/plans/templates/workouts",
       data
     ),
@@ -126,7 +111,7 @@ export const programService = {
       sequenceNumber?: number;
     }
   ) =>
-    axios.put(
+    authApi.put(
       `/api/plans/templates/workouts/${workoutId}`,
       data
     ),
@@ -134,21 +119,21 @@ export const programService = {
   getWorkoutDetail: (
     workoutId: number
   ) =>
-    axios.get(
+    authApi.get(
       `/api/plans/templates/workouts/${workoutId}`
     ),
 
   duplicateWorkout: (
     workoutId: number
   ) =>
-    axios.post(
+    authApi.post(
       `/api/plans/templates/workouts/${workoutId}/duplicate`
     ),
 
   deleteWorkout: (
     workoutId: number
   ) =>
-    axios.delete(
+    authApi.delete(
       `/api/plans/templates/workouts/${workoutId}`
     ),
 
@@ -160,10 +145,16 @@ export const programService = {
     page = 1,
     limit = 50
   ) =>
-    axios.get(
+    authApi.get(
       `/api/exercises?page=${page}&limit=${limit}`
     ),
 
+  /**
+   * Attach an existing library exercise to one workout/day.
+   *
+   * The real API returns only a success message (201); it does
+   * NOT return the newly-created ExerciseTemplate.
+   */
   addExerciseToWorkout: (data: {
     exerciseId: number;
     workoutTemplateId: number;
@@ -171,14 +162,20 @@ export const programService = {
     defaultReps: string;
     defaultSets: number;
     defaultRestTimeSeconds: number;
-    defaultDurationMinutes: number;
+    durationMinutes: number;
     defaultWeight: number;
   }) =>
-    axios.post(
+    authApi.post<{
+      message: string;
+    }>(
       "/api/plans/templates/exercises",
       data
     ),
 
+  /**
+   * Update the configuration of an existing exercise-template
+   * inside a workout/day.
+   */
   updateWorkoutExercise: (
     exerciseTemplateId: number,
     data: {
@@ -186,11 +183,13 @@ export const programService = {
       defaultReps?: string;
       defaultSets?: number;
       defaultRestTimeSeconds?: number;
-      defaultDurationMinutes?: number;
+      durationMinutes?: number;
       defaultWeight?: number;
     }
   ) =>
-    axios.put(
+    authApi.put<{
+      message: string;
+    }>(
       `/api/plans/templates/exercises/${exerciseTemplateId}`,
       data
     ),
@@ -198,15 +197,18 @@ export const programService = {
   deleteWorkoutExercise: (
     exerciseTemplateId: number
   ) =>
-    axios.delete(
+    authApi.delete(
       `/api/plans/templates/exercises/${exerciseTemplateId}`
     ),
 
   reorderExercises: (
     workoutId: number,
-    exercises: unknown[]
+    exercises: Array<{
+      id: number;
+      sequenceNumber: number;
+    }>
   ) =>
-    axios.put(
+    authApi.put(
       `/api/plans/templates/workouts/${workoutId}/exercises/reorder`,
       { exercises }
     ),
@@ -219,12 +221,12 @@ export const programService = {
     page = 1,
     limit = 10
   ) =>
-    axios.get(
+    authApi.get(
       `/api/users/trainer/trainees?page=${page}&limit=${limit}`
     ),
 
   getAssignments: () =>
-    axios.get(
+    authApi.get(
       "/api/plans/assignments"
     ),
 
@@ -234,7 +236,7 @@ export const programService = {
     createdAt: string;
     endedAt: string;
   }) =>
-    axios.post(
+    authApi.post(
       "/api/plans/assignments",
       data
     ),
@@ -246,7 +248,7 @@ export const programService = {
       endedAt?: string;
     }
   ) =>
-    axios.put(
+    authApi.put(
       `/api/plans/assignments/${assignmentId}`,
       data
     ),
@@ -254,7 +256,7 @@ export const programService = {
   deleteAssignment: (
     assignmentId: number
   ) =>
-    axios.delete(
+    authApi.delete(
       `/api/plans/assignments/${assignmentId}`
     ),
 
@@ -272,7 +274,7 @@ export const programService = {
   getWorkoutLogs: (
     traineeId: number
   ) =>
-    axios.get(
+    authApi.get(
       `/api/logs/workouts?traineeId=${traineeId}`
     ),
 
@@ -283,7 +285,7 @@ export const programService = {
   getWorkoutLogDetail: (
     workoutLogId: number
   ) =>
-    axios.get(
+    authApi.get(
       `/api/logs/workouts/${workoutLogId}`
     ),
 };

@@ -463,6 +463,72 @@ const updateWorkoutResolver =
     );
   };
 
+/**
+ * Convert the internal MSW exercise-template store into the documented
+ * API representation.
+ *
+ * The store may keep legacy/defaultDurationMinutes internally, but the
+ * API contract is durationMinutes and nests the existing library exercise
+ * under `exercise`.
+ */
+function toApiExerciseTemplate(
+  exercise: StoredExercise
+): Record<string, unknown> {
+  const exerciseId = Number(
+    exercise.exerciseId
+  );
+
+  const libraryExercise = (
+    exercisesData as Array<{
+      id: number;
+      [key: string]: unknown;
+    }>
+  ).find(
+    (item) =>
+      Number(item.id) ===
+      exerciseId
+  );
+
+  return {
+    id: Number(exercise.id),
+    exercise:
+      libraryExercise ?? {
+        id: exerciseId,
+        name: "Exercise",
+      },
+    workoutTemplateId:
+      Number(
+        exercise.workoutTemplateId
+      ),
+    sequenceNumber:
+      Number(
+        exercise.sequenceNumber
+      ),
+    defaultReps:
+      String(
+        exercise.defaultReps ?? "10"
+      ),
+    defaultSets:
+      Number(
+        exercise.defaultSets ?? 3
+      ),
+    defaultRestTimeSeconds:
+      Number(
+        exercise.defaultRestTimeSeconds ??
+          60
+      ),
+    durationMinutes:
+      Number(
+        exercise.defaultDurationMinutes ??
+          0
+      ),
+    defaultWeight:
+      Number(
+        exercise.defaultWeight ?? 0
+      ),
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /* GET WORKOUT DETAIL                                                         */
 /* -------------------------------------------------------------------------- */
@@ -525,7 +591,10 @@ const getWorkoutDetailResolver = ({
     {
       data: {
         ...result.workout,
-        exercises,
+        exercises:
+          exercises.map(
+            toApiExerciseTemplate
+          ),
       },
     },
     {
@@ -1033,9 +1102,33 @@ const addExerciseResolver =
         defaultReps: string;
         defaultSets: number;
         defaultRestTimeSeconds: number;
-        defaultDurationMinutes: number;
+        durationMinutes: number;
         defaultWeight: number;
       };
+
+    const libraryExercise =
+      (
+        exercisesData as Array<{
+          id: number;
+          [key: string]: unknown;
+        }>
+      ).find(
+        (item) =>
+          Number(item.id) ===
+          Number(body.exerciseId)
+      );
+
+    if (!libraryExercise) {
+      return HttpResponse.json(
+        {
+          message:
+            "Exercise not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
 
     const exercisesStore =
       getExercisesStore();
@@ -1054,21 +1147,37 @@ const addExerciseResolver =
       StoredExercise = {
       id: exerciseTemplateId,
       exerciseId:
-        body.exerciseId,
+        Number(
+          body.exerciseId
+        ),
       workoutTemplateId:
-        body.workoutTemplateId,
+        Number(
+          body.workoutTemplateId
+        ),
       sequenceNumber:
-        body.sequenceNumber,
+        Number(
+          body.sequenceNumber
+        ),
       defaultReps:
-        body.defaultReps,
+        String(
+          body.defaultReps
+        ),
       defaultSets:
-        body.defaultSets,
+        Number(
+          body.defaultSets
+        ),
       defaultRestTimeSeconds:
-        body.defaultRestTimeSeconds,
+        Number(
+          body.defaultRestTimeSeconds
+        ),
       defaultDurationMinutes:
-        body.defaultDurationMinutes,
+        Number(
+          body.durationMinutes
+        ),
       defaultWeight:
-        body.defaultWeight,
+        Number(
+          body.defaultWeight
+        ),
     };
 
     const workoutKey =
@@ -1089,12 +1198,18 @@ const addExerciseResolver =
       exercisesStore
     );
 
+    /*
+     * Match the real API:
+     * the create/attach endpoint returns only
+     * a success message, not the created object.
+     */
     return HttpResponse.json(
       {
-        data: newExercise,
+        message:
+          "Exercise added to workout template.",
       },
       {
-        status: 200,
+        status: 201,
       }
     );
   };
@@ -1135,9 +1250,14 @@ const updateExerciseResolver =
     }
 
     const body =
-      (await request.json()) as Partial<
-        StoredExercise
-      >;
+      (await request.json()) as {
+        sequenceNumber?: number;
+        defaultReps?: string;
+        defaultSets?: number;
+        defaultRestTimeSeconds?: number;
+        durationMinutes?: number;
+        defaultWeight?: number;
+      };
 
     const exercisesStore =
       getExercisesStore();
@@ -1162,10 +1282,65 @@ const updateExerciseResolver =
         continue;
       }
 
-      Object.assign(
-        exercise,
-        body
-      );
+      if (
+        body.sequenceNumber !==
+        undefined
+      ) {
+        exercise.sequenceNumber =
+          Number(
+            body.sequenceNumber
+          );
+      }
+
+      if (
+        body.defaultReps !==
+        undefined
+      ) {
+        exercise.defaultReps =
+          String(
+            body.defaultReps
+          );
+      }
+
+      if (
+        body.defaultSets !==
+        undefined
+      ) {
+        exercise.defaultSets =
+          Number(
+            body.defaultSets
+          );
+      }
+
+      if (
+        body.defaultRestTimeSeconds !==
+        undefined
+      ) {
+        exercise.defaultRestTimeSeconds =
+          Number(
+            body.defaultRestTimeSeconds
+          );
+      }
+
+      if (
+        body.durationMinutes !==
+        undefined
+      ) {
+        exercise.defaultDurationMinutes =
+          Number(
+            body.durationMinutes
+          );
+      }
+
+      if (
+        body.defaultWeight !==
+        undefined
+      ) {
+        exercise.defaultWeight =
+          Number(
+            body.defaultWeight
+          );
+      }
 
       updatedExercise =
         exercise;
@@ -1189,9 +1364,14 @@ const updateExerciseResolver =
       exercisesStore
     );
 
+    /*
+     * Match the documented API: update returns
+     * a success message rather than the resource.
+     */
     return HttpResponse.json(
       {
-        data: updatedExercise,
+        message:
+          "Exercise template updated successfully.",
       },
       {
         status: 200,
@@ -1333,15 +1513,83 @@ const reorderExercisesResolver =
 
     const body =
       (await request.json()) as {
-        exercises: StoredExercise[];
+        exercises?: Array<{
+          id: number;
+          sequenceNumber: number;
+        }>;
       };
+
+    const ordered =
+      body.exercises ?? [];
 
     const exercisesStore =
       getExercisesStore();
 
+    const workoutExercises =
+      getWorkoutExercisesFromStore(
+        {
+          id: workoutId,
+        } as StoredWorkout,
+        exercisesStore
+      );
+
+    if (
+      workoutExercises.length ===
+      0
+    ) {
+      return HttpResponse.json(
+        {
+          message:
+            "No exercises found for workout template.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    const sequenceById =
+      new Map(
+        ordered.map(
+          (item) => [
+            Number(item.id),
+            Number(
+              item.sequenceNumber
+            ),
+          ]
+        )
+      );
+
+    for (const exercise of
+      workoutExercises) {
+      const sequence =
+        sequenceById.get(
+          Number(exercise.id)
+        );
+
+      if (
+        sequence !==
+        undefined
+      ) {
+        exercise.sequenceNumber =
+          sequence;
+      }
+    }
+
+    const reordered =
+      [...workoutExercises].sort(
+        (a, b) =>
+          Number(
+            a.sequenceNumber
+          ) -
+          Number(
+            b.sequenceNumber
+          )
+      );
+
     exercisesStore[
       String(workoutId)
-    ] = body.exercises;
+    ] = reordered;
 
     saveExercisesStore(
       exercisesStore
@@ -1349,8 +1597,8 @@ const reorderExercisesResolver =
 
     return HttpResponse.json(
       {
-        data:
-          body.exercises,
+        message:
+          "Workout exercises reordered successfully.",
       },
       {
         status: 200,

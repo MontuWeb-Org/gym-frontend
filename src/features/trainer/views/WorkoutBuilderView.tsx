@@ -11,9 +11,7 @@ import { EditExerciseModal } from "../components/program-builder/workout-builder
 export default function WorkoutBuilderView() {
   const params = useParams();
 
-  const workoutId = Number(
-    params.workoutId
-  );
+  const workoutId = Number(params.workoutId);
 
   const {
     workout,
@@ -43,6 +41,9 @@ export default function WorkoutBuilderView() {
     weight,
     setWeight,
 
+    durationMinutes,
+    setDurationMinutes,
+
     isEditingWorkoutName,
     workoutNameInput,
     setWorkoutNameInput,
@@ -63,9 +64,7 @@ export default function WorkoutBuilderView() {
     handleSaveWorkoutName,
     handleEditExercise,
     handleSaveReps,
-  } = useWorkoutBuilder(
-    workoutId
-  );
+  } = useWorkoutBuilder(workoutId);
 
   if (loading) {
     return (
@@ -79,118 +78,54 @@ export default function WorkoutBuilderView() {
     <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
       <WorkoutHeader
         workout={workout}
-        isEditingWorkoutName={
-          isEditingWorkoutName
-        }
-        workoutNameInput={
-          workoutNameInput
-        }
-        setWorkoutNameInput={
-          setWorkoutNameInput
-        }
-        setIsEditingWorkoutName={
-          setIsEditingWorkoutName
-        }
-        handleSaveWorkoutName={
-          handleSaveWorkoutName
-        }
-        setIsModalOpen={
-          setIsModalOpen
-        }
+        isEditingWorkoutName={isEditingWorkoutName}
+        workoutNameInput={workoutNameInput}
+        setWorkoutNameInput={setWorkoutNameInput}
+        setIsEditingWorkoutName={setIsEditingWorkoutName}
+        handleSaveWorkoutName={handleSaveWorkoutName}
+        setIsModalOpen={setIsModalOpen}
       />
 
       <AssignedExerciseList
         exercises={exercises}
-        setIsModalOpen={
-          setIsModalOpen
-        }
-        handleMoveExercise={
-          handleMoveExercise
-        }
-        handleDragStart={
-          handleDragStart
-        }
-        handleDragOver={
-          handleDragOver
-        }
-        handleDrop={
-          handleDrop
-        }
-        handleRemoveExercise={
-          handleRemoveExercise
-        }
-        onEditExercise={
-          handleEditExercise
-        }
+        setIsModalOpen={setIsModalOpen}
+        handleMoveExercise={handleMoveExercise}
+        handleDragStart={handleDragStart}
+        handleDragOver={handleDragOver}
+        handleDrop={handleDrop}
+        handleRemoveExercise={handleRemoveExercise}
+        onEditExercise={handleEditExercise}
       />
 
       <AddExerciseModal
-        isOpen={
-          isModalOpen
-        }
+        isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setSearchQuery("");
         }}
-        searchQuery={
-          searchQuery
-        }
-        setSearchQuery={
-          setSearchQuery
-        }
-        filteredLibrary={
-          filteredLibrary
-        }
-        assignedExerciseIds={
-          assignedExerciseIds
-        }
-        selectedExerciseIds={
-          selectedExerciseIds
-        }
-        toggleSelectExercise={
-          toggleSelectExercise
-        }
-        handleAddSelectedExercises={
-          handleAddSelectedExercises
-        }
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filteredLibrary={filteredLibrary}
+        assignedExerciseIds={assignedExerciseIds}
+        selectedExerciseIds={selectedExerciseIds}
+        toggleSelectExercise={toggleSelectExercise}
+        handleAddSelectedExercises={handleAddSelectedExercises}
       />
 
       <EditExerciseModal
-        editingExercise={
-          editingExercise
-        }
-        onClose={() =>
-          setEditingExercise(
-            null
-          )
-        }
-        setsCount={
-          setsCount
-        }
-        setSetsCount={
-          setSetsCount
-        }
-        repsCount={
-          repsCount
-        }
-        setRepsCount={
-          setRepsCount
-        }
-        restTime={
-          restTime
-        }
-        setRestTime={
-          setRestTime
-        }
-        weight={
-          weight
-        }
-        setWeight={
-          setWeight
-        }
-        handleSaveReps={
-          handleSaveReps
-        }
+        editingExercise={editingExercise}
+        onClose={() => setEditingExercise(null)}
+        setsCount={setsCount}
+        setSetsCount={setSetsCount}
+        repsCount={repsCount}
+        setRepsCount={setRepsCount}
+        restTime={restTime}
+        setRestTime={setRestTime}
+        weight={weight}
+        setWeight={setWeight}
+        durationMinutes={durationMinutes}
+        setDurationMinutes={setDurationMinutes}
+        handleSaveReps={handleSaveReps}
       />
     </div>
   );
