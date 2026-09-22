@@ -59,7 +59,7 @@ export const trainerService = {
       await authApi.get<{
         data: TraineeDetailedInfo;
       }>(
-        `/users/trainer/trainees/${traineeId}`
+        `/users/trainer/trainees/${traineeId}/performance`
       );
 
     return response.data;
