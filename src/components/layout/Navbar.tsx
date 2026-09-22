@@ -1,3 +1,4 @@
+// src/components/layout/Navbar.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,11 @@ import { useRouter, Link } from "@/i18n/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logoutThunk } from "@/features/auth/store/auth.slice";
 import { selectCurrentUser } from "@/features/user/store/user.slice";
+import { ROUTES, getDashboardRoute } from "@/data/routes";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Dumbbell, Menu, X, LogOut, LogIn, LayoutDashboard } from "lucide-react";
 
 interface NavbarProps {
   brand?: {
@@ -30,7 +35,7 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const safeBrand = brand ?? { title: t("brandName"), href: "/" };
+  const safeBrand = brand ?? { title: t("brandName"), href: ROUTES.HOME };
   const safeLinks = publicLinks ?? [];
 
   const handleLogout = async () => {
@@ -42,30 +47,42 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
     } finally {
       setMobileMenuOpen(false);
       setIsLoggingOut(false);
-      router.push("/login");
+      router.push(ROUTES.LOGIN);
     }
   };
 
-  const formatRole = (role?: string) => {
-    if (!role) return "";
-    return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+  const getInitials = (name?: string) => {
+    if (!name) return "GY";
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
-    <header className="border-b border-border bg-background px-6 py-4">
-      <div className="flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+        
         {/* Brand / Logo */}
-        <Link href={safeBrand.href ?? "/"} className="font-bold text-lg">
-          {safeBrand.title}
+        <Link
+          href={safeBrand.href ?? ROUTES.HOME}
+          className="flex items-center gap-2 font-heading text-xl font-bold tracking-wider uppercase text-foreground hover:opacity-90 transition-opacity"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
+            <Dumbbell className="h-5 w-5" />
+          </div>
+          <span>{safeBrand.title}</span>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-8">
           {safeLinks.map((link) => (
             <Link
               key={`desktop-${link.href}`}
               href={link.href}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="font-heading text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors"
             >
               {link.label}
             </Link>
@@ -77,77 +94,122 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
           {languageSwitcher}
 
           {isAuthenticated && user ? (
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col text-right">
-                <span className="text-sm font-medium">{user.name}</span>
-                <span className="text-xs text-muted-foreground">{formatRole(user.role)}</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                disabled={isLoggingOut}
+            <div className="flex items-center gap-3 ps-3 border-s border-border/60">
+              <Link 
+                href={getDashboardRoute(user.role)}
+                className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-accent/60 transition-colors group"
+                title="Go to Dashboard"
               >
-                {isLoggingOut ? "..." : t("logout")}
-              </Button>
+                <Avatar className="h-9 w-9 border border-primary/20 group-hover:border-primary transition-colors">
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex flex-col text-start">
+                  <span className="text-xs font-bold leading-tight text-foreground group-hover:text-primary transition-colors">
+                    {user.name}
+                  </span>
+                  <Badge variant="secondary" className="w-fit text-[10px] px-1.5 py-0 uppercase tracking-widest font-semibold mt-0.5">
+                    {user.role}
+                  </Badge>
+                </div>
+              </Link>
+
+              <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="border-destructive/30 text-destructive hover:bg-destructive hover:text-background"
+                >
+                  <LogOut className="h-4 w-4 me-2 rtl:rotate-180" />
+                  {isLoggingOut ? "..." : t("logout")}
+                </Button>
             </div>
           ) : (
-            <Link href="/login">
-              <Button size="sm">{t("login")}</Button>
-            </Link>
+            <Button asChild size="lg" className="py-4 font-heading text-md tracking-wider">
+              <Link href={ROUTES.LOGIN}>
+                <LogIn className="me-1.5 h-4 w-4" />
+                {t("login")}
+              </Link>
+            </Button>
           )}
         </div>
 
         {/* Mobile Hamburger Button */}
-        <div className="flex md:hidden items-center gap-3">
+        <div className="flex md:hidden items-center gap-2">
           {languageSwitcher}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-foreground focus:outline-none"
             aria-label="Toggle Menu"
+            className="text-foreground"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
         </div>
       </div>
 
-      {/* Mobile Dropdown Menu */}
+      {/* Mobile Dropdown Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-4 pt-4 border-t border-border flex flex-col gap-4 pb-2">
-          {safeLinks.map((link) => (
-            <Link
-              key={`mobile-${link.href}`}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="pt-2 border-t border-border flex flex-col gap-2">
+        <div className="absolute top-full left-0 w-full md:hidden border-t border-border/60 bg-background/95 backdrop-blur-lg px-4 py-5 space-y-4 shadow-xl">
+          <nav className="flex flex-col space-y-3">
+            {safeLinks.map((link) => (
+              <Link
+                key={`mobile-${link.href}`}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="font-heading text-base font-semibold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors py-1"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="pt-4 border-t border-border/60">
             {isAuthenticated && user ? (
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">{user.name}</span>
-                <span className="text-xs text-muted-foreground">{formatRole(user.role)}</span>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href={getDashboardRoute(user.role)}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/60 hover:border-primary/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 border border-primary/20">
+                      <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col text-start">
+                      <span className="text-sm font-bold text-foreground">{user.name}</span>
+                      <Badge variant="outline" className="w-fit text-[10px] uppercase tracking-wider font-semibold">
+                        {user.role}
+                      </Badge>
+                    </div>
+                  </div>
+                  <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                </Link>
+
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   onClick={handleLogout}
                   disabled={isLoggingOut}
+                  className="w-full border-destructive/30 text-destructive hover:bg-destructive hover:text-background"
                 >
+                  <LogOut className="h-4 w-4 me-2 rtl:rotate-180" />
                   {isLoggingOut ? "..." : t("logout")}
                 </Button>
               </div>
             ) : (
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button size="sm" className="w-full">{t("login")}</Button>
-              </Link>
+              <Button asChild size="lg" className="w-full py-4 font-heading text-md tracking-wider">
+                <Link href={ROUTES.LOGIN} onClick={() => setMobileMenuOpen(false)}>
+                  <LogIn className="me-2 h-4 w-4" />
+                  {t("login")}
+                </Link>
+              </Button>
             )}
           </div>
         </div>
