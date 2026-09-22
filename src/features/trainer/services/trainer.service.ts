@@ -13,7 +13,7 @@ export const trainerService = {
   },
   async getTraineeDetailedInfo(traineeId: number): Promise<{ data: TraineeDetailedInfo }> {
     const response = await authApi.get<{ data: TraineeDetailedInfo }>(
-      `/users/trainer/trainees/${traineeId}`
+      `/users/trainer/trainees/${traineeId}/performance`
     );
     return response.data;
   },

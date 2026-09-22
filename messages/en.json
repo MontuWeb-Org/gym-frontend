@@ -4,11 +4,31 @@
     "description": "Comprehensive gym management platform"
   },
   "Home": {
+    "badge": "Next-Gen Fitness Management",
     "title": "Welcome to Gym Platform",
-    "description": "Manage your gym workouts, classes, and memberships easily."
+    "description": "Manage your gym workouts, classes, and memberships easily.",
+    "welcomeBack": "Welcome back, {name}",
+    "exploreAccount": "Explore Your Account",
+    "joinAsTrainer": "Join as Trainer",
+    "stats": {
+      "customWorkouts": "Custom Workouts",
+      "progressTracking": "Progress Tracking",
+      "fullLocalization": "Full Localization"
+    },
+    "widget": {
+      "title": "Live Activity",
+      "subtitle": "Gym Performance Dashboard",
+      "statusActive": "Active",
+      "todaysWorkout": "Today's Workout",
+      "workoutDesc": "Hypertrophy Chest & Triceps",
+      "workoutTime": "45 MIN",
+      "personalTrainer": "Personal Trainer",
+      "trainerDesc": "Assigned & Ready",
+      "statusConnected": "Connected"
+    }
   },
   "Login": {
-    "title": "Sign In",
+    "title": "Login",
     "description": "Enter your credentials to access your account.",
     "nameLabel": "Name",
     "emailLabel": "Email Address",
@@ -19,7 +39,7 @@
       "trainee": "Trainee"
     },
     "submitButton": "Sign In",
-    "backToHome": "Back to Welcome Page"
+    "backToHome": "Back to Home Page"
   },
   "Nav": {
     "brandName": "Gym Platform",
@@ -159,6 +179,7 @@
       "pendingInvite": "Not Started"
     },
     "columns": {
+      "avatar": "Avatar",
       "name": "Name",
       "program": "Program",
       "adherence": "Adherence",
@@ -238,6 +259,7 @@
     "loading": "Loading trainee details..."
   },
   "Profile": {
+    "title": "My Profile",
     "nameLabel": "Full Name",
     "namePlaceholder": "Enter your full name",
     "phoneNumberLabel": "Phone Number",

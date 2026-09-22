@@ -13,7 +13,7 @@ import {
 import { Trainee } from "../types/trainer.types";
 import { TraineeTableRow } from "./TraineeTableRow";
 import { FilterTab, TraineeTableFilters, FILTER_TAB_STATUS_MAP } from "./TraineeTableFilters";
-
+import { TraineeCard } from "./TraineeCard";
 
 interface TraineesTableProps {
   trainees: Trainee[];
@@ -40,31 +40,33 @@ export function TraineesTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
 
-  // Define table columns configuration
+  // Alignment is defined once per column and reused by both the header
+  // and the matching body cell in TraineeTableRow, so they can never drift.
   const columns = useMemo(
     () => [
-      { key: "name", label: t("columns.name"), className: "w-[280px]" },
-      { key: "program", label: t("columns.program") },
-      { key: "adherence", label: t("columns.adherence") },
-      { key: "lastActive", label: t("columns.lastActive") },
-      { key: "status", label: t("columns.status") },
-      { key: "action", label: t("columns.action"), className: "text-right rtl:text-left" },
+      { key: "avatar", label: t("columns.avatar"), className: "w-[80px] text-center" },
+      { key: "name", label: t("columns.name"), className: "w-[280px] text-center" },
+      { key: "program", label: t("columns.program"), className: "text-center" },
+      { key: "adherence", label: t("columns.adherence"), className: "text-center" },
+      { key: "lastActive", label: t("columns.lastActive"), className: "text-center" },
+      { key: "status", label: t("columns.status"), className: "text-center" },
+      { key: "action", label: t("columns.action"), className: "text-center" },
     ],
     [t]
   );
 
-const filteredTrainees = useMemo(() => {
-  return trainees.filter((trainee) => {
-    const matchesSearch = trainee.traineeName
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+  const filteredTrainees = useMemo(() => {
+    return trainees.filter((trainee) => {
+      const matchesSearch = trainee.traineeName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
-    if (!matchesSearch) return false;
-    if (activeTab === "ALL") return true;
+      if (!matchesSearch) return false;
+      if (activeTab === "ALL") return true;
 
-    return FILTER_TAB_STATUS_MAP[activeTab].includes(trainee.traineeStatus);
-  });
-}, [trainees, searchQuery, activeTab]);
+      return FILTER_TAB_STATUS_MAP[activeTab].includes(trainee.traineeStatus);
+    });
+  }, [trainees, searchQuery, activeTab]);
 
   return (
     <div className="w-full space-y-6">
@@ -74,17 +76,16 @@ const filteredTrainees = useMemo(() => {
         onSearchChange={setSearchQuery}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onInvite={onInvite}
       />
 
-      <div className="overflow-hidden rounded-md border border-border bg-card text-card-foreground shadow-xs">
+      <div className="hidden md:block overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm">
         <Table>
-          <TableHeader>
-            <TableRow className="border-b border-border hover:bg-transparent">
+          <TableHeader className="bg-muted/30">
+            <TableRow className="border-b border-border/60 hover:bg-transparent">
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
-                  className={`text-xs font-semibold uppercase text-muted-foreground ${
+                  className={`font-heading text-lg uppercase tracking-wider font-bold text-muted-foreground ${
                     col.className ?? ""
                   }`}
                 >
@@ -96,19 +97,19 @@ const filteredTrainees = useMemo(() => {
 
           <TableBody>
             {isLoading ? (
-              <TableRow className="border-b border-border">
+              <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-32 text-center text-muted-foreground"
+                  className="h-32 text-center text-muted-foreground font-medium"
                 >
                   {t("states.loading")}
                 </TableCell>
               </TableRow>
             ) : filteredTrainees.length === 0 ? (
-              <TableRow className="border-b border-border">
+              <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-32 text-center text-muted-foreground"
+                  className="h-32 text-center text-muted-foreground font-medium"
                 >
                   {t("states.empty")}
                 </TableCell>
@@ -127,6 +128,29 @@ const filteredTrainees = useMemo(() => {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        {isLoading ? (
+          <div className="p-8 text-center rounded-xl border border-border bg-card text-muted-foreground">
+            {t("states.loading")}
+          </div>
+        ) : filteredTrainees.length === 0 ? (
+          <div className="p-8 text-center rounded-xl border border-border bg-card text-muted-foreground">
+            {t("states.empty")}
+          </div>
+        ) : (
+          filteredTrainees.map((trainee) => (
+            <TraineeCard
+              key={trainee.traineeId}
+              trainee={trainee}
+              onOpen={onOpenTrainee}
+              onResend={onResendInvite}
+              onDelete={onDeleteTrainee}
+              isDeleting={deletingTraineeId === trainee.traineeId}
+            />
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { Trash2, Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Trash2, Loader2, RotateCw, ExternalLink } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
 import { Trainee } from "../types/trainer.types";
 import { TraineeStatusBadge } from "./TraineeStatusBadge";
 import { TraineePlansCell } from "./TraineePlansCell";
+import { getLastActiveLabel } from "./trainee-table.utils";
 
 interface TraineeTableRowProps {
   trainee: Trainee;
@@ -36,6 +37,7 @@ export function TraineeTableRow({
   isDeleting = false,
 }: TraineeTableRowProps) {
   const t = useTranslations("TraineesTable");
+  const locale = useLocale();
 
   const avgAdherence =
     trainee.plans?.length > 0
@@ -47,17 +49,6 @@ export function TraineeTableRow({
         )
       : null;
 
-  const lastSessionDates = trainee.plans
-    ?.map((p) => p.lastSession?.startedAt)
-    .filter(Boolean) as string[];
-
-  const latestSessionDate =
-    lastSessionDates.length > 0
-      ? new Date(
-          Math.max(...lastSessionDates.map((d) => new Date(d).getTime()))
-        ).toLocaleDateString()
-      : null;
-
   const initials = trainee.traineeName
     .split(" ")
     .map((n) => n[0])
@@ -65,17 +56,24 @@ export function TraineeTableRow({
     .toUpperCase()
     .slice(0, 2);
 
+  const lastActiveLabel = getLastActiveLabel(trainee, locale);
+
   return (
-    <TableRow className="border-b border-border transition-colors hover:bg-muted/40">
-      <TableCell className="font-medium">
-        <div className="flex items-center gap-3">
-          <Avatar className="size-9 border border-border bg-muted">
-            <AvatarFallback className="text-xs font-semibold text-muted-foreground">
+    <TableRow className="border-b border-border/60 transition-colors hover:bg-muted/30">
+      <TableCell>
+        <div className="flex items-center justify-center gap-3 text-center">
+          <Avatar className="h-9 w-9 border border-primary/20 bg-muted">
+            <AvatarFallback className="bg-primary/10 text-sm font-bold text-primary">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground">
+        </div>
+      </TableCell>
+
+      <TableCell>
+        <div className="flex items-center justify-center gap-3 text-center">
+          <div className="flex flex-col items-start text-start">
+            <span className="text-lg font-bold text-foreground">
               {trainee.traineeName}
             </span>
             {trainee.email && (
@@ -87,41 +85,39 @@ export function TraineeTableRow({
         </div>
       </TableCell>
 
+
       <TableCell>
         <TraineePlansCell plans={trainee.plans} />
       </TableCell>
 
-      <TableCell>
+      <TableCell className="text-center">
         {avgAdherence !== null ? (
-          <span className="text-sm font-medium text-foreground">
+          <span className="font-mono text-lg font-semibold text-foreground">
             {avgAdherence}%
           </span>
         ) : (
-          <span className="text-xs text-muted-foreground">—</span>
+          <span className="text-lg text-muted-foreground">—</span>
         )}
       </TableCell>
 
-      <TableCell>
-        {latestSessionDate ? (
-          <span className="text-sm text-foreground">{latestSessionDate}</span>
-        ) : (
-          <span className="text-xs text-muted-foreground">—</span>
-        )}
+      <TableCell className="text-center">
+        <span className="text-lg text-muted-foreground">{lastActiveLabel}</span>
       </TableCell>
 
-      <TableCell>
+      <TableCell className="text-center">
         <TraineeStatusBadge status={trainee.traineeStatus} />
       </TableCell>
 
-      <TableCell className="text-right rtl:text-left">
-        <div className="flex items-center justify-end gap-2 rtl:justify-start">
+      <TableCell className="justify-center text-center">
+        <div className="flex items-center justify-center gap-2">
           {trainee.traineeStatus === "NOT_STARTED" ? (
             <Button
               variant="outline"
               size="sm"
               onClick={() => onResend?.(trainee.traineeId)}
-              className="h-8 border-dashed border-border bg-card text-xs text-foreground hover:bg-muted"
+              className="h-8 font-heading uppercase text-md tracking-wider"
             >
+              <RotateCw className="me-1.5 h-3.5 w-3.5 text-muted-foreground" />
               {t("actions.resend")}
             </Button>
           ) : (
@@ -129,8 +125,9 @@ export function TraineeTableRow({
               variant="outline"
               size="sm"
               onClick={() => onOpen?.(trainee.traineeId)}
-              className="h-8 border-border bg-card text-xs text-foreground hover:bg-muted"
+              className="h-8 font-heading uppercase text-md tracking-wider"
             >
+              <ExternalLink className="me-1.5 h-3.5 w-3.5 text-muted-foreground" />
               {t("actions.open")}
             </Button>
           )}
@@ -139,20 +136,20 @@ export function TraineeTableRow({
             <AlertDialogTrigger asChild>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 disabled={isDeleting}
-                className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                aria-label={t("actions.delete")}
+                className="h-8 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               >
                 {isDeleting ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Trash2 className="size-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 )}
+                <span className="sr-only">{t("actions.delete")}</span>
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
-              <AlertDialogHeader>
+              <AlertDialogHeader className="text-start">
                 <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
                 <AlertDialogDescription>
                   {t("deleteDialog.description", {
@@ -160,7 +157,7 @@ export function TraineeTableRow({
                   })}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
+              <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
                 <AlertDialogCancel>{t("deleteDialog.cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => onDelete?.(trainee.traineeId)}

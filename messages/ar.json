@@ -4,22 +4,42 @@
     "description": "منصة متكاملة لإدارة الصالة الرياضية"
   },
   "Home": {
-    "title": "مرحبًا بك في منصة الجيم",
-    "description": "إدارة التدريبات والصفوف والاشتراكات بكل سهولة."
+    "badge": "إدارة لياقة بدنية متطورة",
+    "title": "مرحباً بك في منصة الجيم",
+    "description": "إدارة تمارينك، حصصك الرياضية، واشتراكاتك بكل سهولة.",
+    "welcomeBack": "مرحباً بعودتك، {name}",
+    "exploreAccount": "استكشاف الحساب",
+    "joinAsTrainer": "الانضمام كمدرب",
+    "stats": {
+      "customWorkouts": "تمارين مخصصة",
+      "progressTracking": "متابعة التقدم",
+      "fullLocalization": "دعم كامل للغة"
+    },
+    "widget": {
+      "title": "النشاط المباشر",
+      "subtitle": "لوحة أداء التمارين",
+      "statusActive": "نشط",
+      "todaysWorkout": "تمرين اليوم",
+      "workoutDesc": "ضخامة عضلية - الصدر والترايسبس",
+      "workoutTime": "45 دقيقة",
+      "personalTrainer": "المدرب الشخصي",
+      "trainerDesc": "معيّن وجاهز",
+      "statusConnected": "متصل"
+    }
   },
   "Login": {
     "title": "تسجيل الدخول",
-    "description": "أدخل بيانات اعتمادك للوصول إلى حسابك.",
+    "description": "أدخل بياناتك للوصول إلى حسابك.",
     "nameLabel": "الاسم",
     "emailLabel": "البريد الإلكتروني",
-    "roleLabel": "اختر الدور (للاختبار)",
+    "roleLabel": "اختر الدور (للتجربة)",
     "roles": {
-      "admin": "مدير",
+      "admin": "مدير النظام",
       "trainer": "مدرب",
       "trainee": "متدرب"
     },
     "submitButton": "تسجيل الدخول",
-    "backToHome": "العودة إلى الصفحة الرئيسية"
+    "backToHome": "العودة للرئيسية"
   },
   "Nav": {
     "brandName": "منصة الجيم",
@@ -158,6 +178,7 @@
       "pendingInvite": "لم يبدأ"
     },
     "columns": {
+      "avatar": "أفاتار",
       "name": "الاسم",
       "program": "البرنامج",
       "adherence": "الالتزام",
@@ -237,6 +258,7 @@
     "loading": "جاري تحميل تفاصيل المتدرب..."
   },
   "Profile": {
+    "title": "الملف الشخصي",
     "nameLabel": "الاسم الكامل",
     "namePlaceholder": "أدخل اسمك الكامل",
     "phoneNumberLabel": "رقم الهاتف",

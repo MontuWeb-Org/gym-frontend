@@ -1,11 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TraineeStatus } from "../types/trainer.types";
-
 
 export type FilterTab = "ALL" | "ACTIVE" | "FALLING_BEHIND" | "PENDING_INVITE";
 
@@ -21,16 +20,13 @@ interface TraineeTableFiltersProps {
   onSearchChange: (value: string) => void;
   activeTab: FilterTab;
   onTabChange: (tab: FilterTab) => void;
-  onInvite?: () => void;
 }
 
 export function TraineeTableFilters({
-  totalCount,
   searchQuery,
   onSearchChange,
   activeTab,
   onTabChange,
-  onInvite,
 }: TraineeTableFiltersProps) {
   const t = useTranslations("TraineesTable");
 
@@ -42,55 +38,34 @@ export function TraineeTableFilters({
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          {t("title")}{" "}
-          <span className="font-normal text-muted-foreground">
-            ({totalCount})
-          </span>
-        </h1>
-        <Button
-          onClick={onInvite}
-          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="size-4" /> {t("inviteTrainee")}
-        </Button>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Search Input */}
+      <div className="relative w-full sm:w-72">
+        <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder={t("searchPlaceholder")}
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="ps-9 text-md"
+        />
       </div>
 
-      {/* Search & Tabs */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-72">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground rtl:left-auto rtl:right-3" />
-          <Input
-            placeholder={t("searchPlaceholder")}
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="bg-card pl-9 text-card-foreground border-border focus-visible:ring-ring rtl:pl-3 rtl:pr-9"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <Button
-                key={tab.id}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTabChange(tab.id)}
-                className={`rounded-full px-4 text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "border-border bg-secondary/50 text-secondary-foreground hover:bg-secondary"
-                }`}
-              >
-                {tab.label}
-              </Button>
-            );
-          })}
-        </div>
+      {/* Responsive Scrollable Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <Button
+              key={tab.id}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
+              onClick={() => onTabChange(tab.id)}
+              className="rounded-full px-4 text-md font-heading uppercase tracking-wider whitespace-nowrap"
+            >
+              {tab.label}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );
