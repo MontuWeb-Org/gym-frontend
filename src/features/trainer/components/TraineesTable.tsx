@@ -40,8 +40,6 @@ export function TraineesTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
 
-  // Alignment is defined once per column and reused by both the header
-  // and the matching body cell in TraineeTableRow, so they can never drift.
   const columns = useMemo(
     () => [
       { key: "avatar", label: t("columns.avatar"), className: "w-[80px] text-center" },

@@ -68,47 +68,44 @@ export function TraineeCard({
         <p className="text-xs uppercase font-heading font-bold text-muted-foreground mb-1">
           {t("columns.program")}
         </p>
-        <TraineePlansCell plans={trainee.plans} align="start" />
+        <TraineePlansCell plans={trainee.plans} variant="card" />
       </div>
 
-      <div className="flex items-center justify-between border-t border-border/60 pt-3">
-        {trainee.traineeStatus === "NOT_STARTED" ? (
-          <Button
+      <div className="flex items-center justify-between border-t border-border/60 pt-3 gap-3">
+        <Button
             variant="outline"
             size="sm"
             onClick={() => onResend?.(trainee.traineeId)}
-            className="flex-1 me-2 font-heading uppercase text-xs tracking-wider"
+            className="flex-1 h-8 font-heading uppercase border-foreground/50 text-md tracking-wider hover:bg-foreground/80 hover:text-background transition-colors"
           >
-            <RotateCw className="me-1.5 h-3.5 w-3.5" />
-            {t("actions.resend")}
+            {trainee.traineeStatus === "NOT_STARTED" ? (
+              <>
+                <RotateCw className="me-1.5 h-3.5 w-3.5" />
+                {t("actions.resend")}
+              </>
+            ) : (
+              <>
+                <ExternalLink className="me-1.5 h-3.5 w-3.5" />
+                {t("actions.open")}
+              </>
+            )}
           </Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOpen?.(trainee.traineeId)}
-            className="flex-1 me-2 font-heading uppercase text-xs tracking-wider"
-          >
-            <ExternalLink className="me-1.5 h-3.5 w-3.5" />
-            {t("actions.open")}
-          </Button>
-        )}
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isDeleting}
-              className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-            >
-              {isDeleting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-            </Button>
-          </AlertDialogTrigger>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isDeleting}
+                className="flex-1 h-8 font-heading uppercase text-md tracking-wider border-destructive/30 text-destructive hover:bg-destructive hover:text-background">
+                {isDeleting ? (
+                  <Loader2 className="me-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="me-1.5 h-3.5 w-3.5" />
+                )}
+                {t("actions.delete")}
+              </Button>
+            </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader className="text-start">
               <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
