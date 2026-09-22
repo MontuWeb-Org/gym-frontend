@@ -121,7 +121,7 @@ export function Navbar({ brand, publicLinks, languageSwitcher }: NavbarProps) {
                   size="lg"
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="border-destructive/30 text-destructive hover:bg-destructive hover:text-background"
+                  className="font-heading uppercase text-md tracking-wider border-destructive/30 text-destructive hover:bg-destructive hover:text-background"
                 >
                   <LogOut className="h-4 w-4 me-2 rtl:rotate-180" />
                   {isLoggingOut ? "..." : t("logout")}

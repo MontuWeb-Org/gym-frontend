@@ -76,18 +76,17 @@ const handleDeleteTrainee = async (traineeId: number) => {
 };
 
   return (
-    <main className="container mx-auto space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      
+    <main>
       <PageHeader
         title={t("title")}
         count={pagination?.total ?? trainees.length}
         actions={
           <Button
             onClick={() => setIsInviteModalOpen(true)}
-            size="default"
-            className="font-heading text-sm uppercase tracking-wider shadow-md"
+            size="lg"
+            className="font-heading text-md uppercase tracking-wider shadow-md"
           >
-            <UserPlus className="me-2 h-4 w-4" />
+            <UserPlus className="me-2 size-5" />
             {t("inviteTrainee")}
           </Button>
         }
