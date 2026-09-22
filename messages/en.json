@@ -216,8 +216,8 @@
       "notes": "Notes"
     },
     "metrics": {
-    "personalRecords": "Personal Records",
-    "latestPr": "Latest PR"
+      "personalRecords": "Personal Records",
+      "latestPr": "Latest PR"
     },
     "personalRecords": {
       "title": "Personal Records",
@@ -258,5 +258,14 @@
     "bioPlaceholder": "Write a short bio about yourself...",
     "submitButton": "Save Changes",
     "saving": "Saving..."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications yet",
+    "loadMore": "Load more",
+    "planAssigned": "You were assigned the plan \"{planName}\"",
+    "personalRecord": "New personal record on {exerciseName}!",
+    "adherenceLow": "Your adherence to \"{planName}\" dropped to {percentage}%"
   }
 }
