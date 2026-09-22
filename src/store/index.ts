@@ -8,6 +8,7 @@ import programReducer from "@/features/trainer/store/program.slice";
 import dashboardReducer from "@/features/trainer/store/dashboard.slice";
 import notificationReducer from "@/features/trainee/store/notification.slice";
 
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
