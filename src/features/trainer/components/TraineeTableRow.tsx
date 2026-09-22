@@ -109,43 +109,38 @@ export function TraineeTableRow({
       </TableCell>
 
       <TableCell className="justify-center text-center">
-        <div className="flex items-center justify-center gap-2">
-          {trainee.traineeStatus === "NOT_STARTED" ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onResend?.(trainee.traineeId)}
-              className="h-8 font-heading uppercase text-md tracking-wider"
-            >
-              <RotateCw className="me-1.5 h-3.5 w-3.5 text-muted-foreground" />
-              {t("actions.resend")}
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onOpen?.(trainee.traineeId)}
-              className="h-8 font-heading uppercase text-md tracking-wider"
-            >
-              <ExternalLink className="me-1.5 h-3.5 w-3.5 text-muted-foreground" />
-              {t("actions.open")}
-            </Button>
-          )}
-
+        <div className="flex items-center justify-center gap-3 px-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onResend?.(trainee.traineeId)}
+            className="flex-1 h-8 font-heading border-foreground/50 text-md tracking-wider hover:bg-foreground/80 hover:text-background transition-colors"
+          >
+            {trainee.traineeStatus === "NOT_STARTED" ? (
+              <>
+                <RotateCw className="me-1.5 h-3.5 w-3.5" />
+                {t("actions.resend")}
+              </>
+            ) : (
+              <>
+                <ExternalLink className="me-1.5 h-3.5 w-3.5" />
+                {t("actions.open")}
+              </>
+            )}
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 disabled={isDeleting}
-                className="h-8 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              >
+                className="flex-1 h-8 font-heading uppercase text-md tracking-wider border-destructive/30 text-destructive hover:bg-destructive hover:text-background">
                 {isDeleting ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="me-1.5 h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="me-1.5 h-3.5 w-3.5" />
                 )}
-                <span className="sr-only">{t("actions.delete")}</span>
+                {t("actions.delete")}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

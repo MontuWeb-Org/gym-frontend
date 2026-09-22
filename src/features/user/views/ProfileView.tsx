@@ -57,7 +57,7 @@ export function ProfileView({ avatarUrl, onPhotoChange }: ProfileViewProps) {
 };
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="max-w-3xl">
       <PageHeader title={t("title")} />
       <ProfileAvatarSection avatarUrl={avatarUrl} fallbackName={user.name} onPhotoChange={onPhotoChange} />
       <ProfileForm role={user.role} initialData={initialData} onSubmit={handleSubmit} />
