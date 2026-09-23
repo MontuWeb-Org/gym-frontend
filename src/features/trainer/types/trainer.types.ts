@@ -7,40 +7,24 @@ export type TraineeStatus =
 
 export interface TraineePlan {
   planId: number;
+
   status: string;
+
   adherencePercentage: number;
+
   template: {
     templateName: string;
     templateId: number;
   };
+
   lastSession: {
     status: string;
     startedAt: string | null;
   } | null;
+
   planAdherenceStatus: TraineeStatus;
 }
 
-/**
- * Trainee shape used throughout the trainer frontend.
- *
- * The trainee-management components consume the API fields:
- * - traineeId
- * - traineeName
- * - traineeStatus
- * - plans
- * - email
- *
- * Other existing trainer functionality uses the normalized fields:
- * - id
- * - name
- * - adherence
- * - programName
- * - lastSessionDate
- * - status
- * - assignedPlanTemplateIds
- *
- * The Redux mapping preserves both representations.
- */
 export interface Trainee {
   // API / trainee-management fields
   traineeId: number;
@@ -76,6 +60,7 @@ export interface GetTraineesApiItem {
 
 export interface GetTraineesResponse {
   data: GetTraineesApiItem[];
+
   pagination: {
     page: number;
     limit: number;
@@ -86,9 +71,33 @@ export interface GetTraineesResponse {
   };
 }
 
+/**
+ * Supports both:
+ *
+ * Existing frontend usage:
+ *   { page: 1, limit: 10 }
+ *
+ * Backend-aligned usage:
+ *   { pageNumber: 1, pageSize: 10 }
+ *
+ * The service translates these into the backend query format.
+ */
 export interface GetTraineesQueryParams {
+  status?: TraineeStatus;
+
+  search?: string;
+
+  // Existing frontend names
   page?: number;
   limit?: number;
+
+  // Backend API names
+  pageNumber?: number;
+  pageSize?: number;
+
+  sortBy?: "createdAt" | "totalAmount";
+
+  sortOrder?: "asc" | "desc";
 }
 
 export interface TraineeSessionRecord {
@@ -134,26 +143,40 @@ export interface TraineeProfile {
 
 export interface PersonalRecord {
   exercise: ExerciseRef;
+
   heaviestWeight: number;
+
   heaviestWeightSet: SetLog;
+
   estimatedOneRm: number;
+
   estimatedOneRmSet: SetLog;
+
   updatedAt: string;
 }
 
 export interface ProgressionEntry {
   id: number;
+
   exercise: ExerciseRef;
+
   heaviestWeight: number;
+
   estimatedOneRm: number;
+
   isWeightPr: boolean;
+
   isOneRmPr: boolean;
+
   achievedAt: string;
+
   setLog: SetLog;
 }
 
 export interface TraineeDetailedInfo {
   traineeProfile: TraineeProfile;
+
   personalRecords: PersonalRecord[];
+
   progression: ProgressionEntry[];
 }
