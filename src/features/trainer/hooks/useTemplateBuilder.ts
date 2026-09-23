@@ -3,259 +3,460 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+
+import { useAppDispatch } from "@/store/hooks";
+
+import {
+  upsertTemplate,
+  PlanTemplate,
+  WeekTemplate,
+} from "../store/program.slice";
+
 import { programService } from "../services/program.service";
-import type { ProgramHistoryRow } from "../components/programs/ProgramHistoryTable";
 
-interface Template {
-  id: number;
-  name: string;
-  trainerId: number;
-  durationWeekTemplates: number;
-}
+export function useTemplateBuilder() {
+  const params = useParams();
 
-interface Assignment {
-  id: number;
-  status: "IDLE" | "ACTIVE" | "COMPLETED";
-  startedAt: string | null;
-  endedAt: string | null;
-  currentWeekIdx: number;
-  currentWorkoutIdx: number;
-  adherencePercentage: string | number;
-  planTemplateId: number;
-}
+  const router = useRouter();
 
-interface Trainee {
-  traineeId: number;
-  traineeName: string;
-}
+  const dispatch = useAppDispatch();
 
-export function useProgramsHistory() {
-  const [rows, setRows] =
-    useState<ProgramHistoryRow[]>([]);
+  const templateId =
+    Number(params.templateId);
 
-  const [templates, setTemplates] =
-    useState<Template[]>([]);
+  const weekId =
+    params.weekId
+      ? Number(params.weekId)
+      : null;
 
-  const [isLoading, setIsLoading] =
+  const [template, setTemplate] =
+    useState<PlanTemplate | null>(
+      null
+    );
+
+  const [weeks, setWeeks] =
+    useState<WeekTemplate[]>([]);
+
+  const [loading, setLoading] =
     useState(true);
 
-  const [error, setError] =
-    useState<string | null>(null);
+  const [
+    isPublishModalOpen,
+    setIsPublishModalOpen,
+  ] = useState(false);
 
-  const loadData = useCallback(
-    async () => {
-      setIsLoading(true);
-      setError(null);
+  // ---------------------------------------------------------------------------
+  // Load template from backend
+  // ---------------------------------------------------------------------------
+
+  const loadTemplate =
+    useCallback(async () => {
+      if (!templateId) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const [
-          templatesResponse,
-          traineesResponse,
-          assignmentsResponse,
-        ] = await Promise.all([
-          programService.getTemplates(
-            1,
-            100
-          ),
-          programService.getTrainees(
-            1,
-            100
-          ),
-          programService.getAssignments(),
-        ]);
+        setLoading(true);
 
-        const planTemplates: Template[] =
-          templatesResponse.data?.data
-            ?.plans ?? [];
+        const res =
+          await programService.getTemplateDetail(
+            templateId
+          );
 
-        const trainees: Trainee[] =
-          traineesResponse.data?.data ??
-          [];
+        const fetchedTemplate =
+          res?.data?.data ??
+          res?.data ??
+          {};
 
-        const assignments: Assignment[] =
-          assignmentsResponse.data?.data ??
-          [];
+        const fetchedWeeks =
+          Array.isArray(
+            fetchedTemplate.weeks
+          )
+            ? fetchedTemplate.weeks
+            : [];
 
-        setTemplates(planTemplates);
+        setTemplate({
+          ...fetchedTemplate,
 
-        const templateMap = new Map<
-          number,
-          Template
-        >();
+          // Always keep this field synchronized
+          // with the actual detail response.
+          durationWeekTemplates:
+            fetchedWeeks.length,
+        });
 
-        planTemplates.forEach(
-          (template) => {
-            templateMap.set(
-              Number(template.id),
-              template
-            );
-          }
+        setWeeks(
+          fetchedWeeks
+        );
+      } catch (err) {
+        console.error(
+          "Failed to load template layout",
+          err
+        );
+      } finally {
+        setLoading(false);
+      }
+    }, [templateId]);
+
+  useEffect(() => {
+    void loadTemplate();
+  }, [loadTemplate]);
+
+  // ---------------------------------------------------------------------------
+  // Display data
+  // ---------------------------------------------------------------------------
+
+  const displayTitle =
+    template?.name ||
+    "Untitled Template";
+
+  const displayDesc =
+    template?.description ||
+    "No description provided.";
+
+  // ---------------------------------------------------------------------------
+  // Save Draft
+  // ---------------------------------------------------------------------------
+
+  const handleSaveDraft =
+    async () => {
+      if (!templateId) {
+        return;
+      }
+
+      try {
+        /*
+         * The backend already owns the weeks.
+         *
+         * Refresh once more before leaving so the local
+         * representation is based on the real backend state.
+         */
+        const res =
+          await programService.getTemplateDetail(
+            templateId
+          );
+
+        const freshTemplate =
+          res?.data?.data ??
+          res?.data ??
+          {};
+
+        const freshWeeks =
+          Array.isArray(
+            freshTemplate.weeks
+          )
+            ? freshTemplate.weeks
+            : [];
+
+        dispatch(
+          upsertTemplate({
+            id: templateId,
+
+            name:
+              freshTemplate.name ??
+              displayTitle,
+
+            description:
+              freshTemplate.description ??
+              displayDesc,
+
+            status:
+              freshTemplate.status ??
+              "DRAFT",
+
+            durationWeekTemplates:
+              freshWeeks.length,
+
+            isFav:
+              freshTemplate.isFav ??
+              template?.isFav ??
+              false,
+
+            weeks:
+              freshWeeks,
+          })
+        );
+
+        router.push(
+          `/trainer/templates`
+        );
+      } catch (err) {
+        console.error(
+          "Failed to refresh template before leaving",
+          err
         );
 
         /*
-         * The current /api/plans/assignments response does not
-         * contain traineeId.
-         *
-         * Therefore we cannot reliably associate an assignment
-         * with a trainee from this endpoint alone.
-         *
-         * For now, use the trainee roster's plans information
-         * to determine which trainee owns each assignment.
+         * Keep the existing local state as a fallback.
          */
+        dispatch(
+          upsertTemplate({
+            id: templateId,
 
-        const assignmentToTrainee =
-          new Map<
-            number,
-            Trainee
-          >();
+            name:
+              displayTitle,
 
-        trainees.forEach(
-          (trainee) => {
-            /*
-             * The trainee endpoint returns a `plans` array.
-             * Each plan contains `planId`.
-             */
-            const traineeWithPlans =
-              trainee as Trainee & {
-                plans?: Array<{
-                  planId: number;
-                }>;
-              };
+            description:
+              displayDesc,
 
-            traineeWithPlans.plans?.forEach(
-              (plan) => {
-                assignmentToTrainee.set(
-                  Number(plan.planId),
-                  trainee
-                );
-              }
-            );
-          }
-        );
+            status:
+              "DRAFT",
 
-        const historyRows:
-          ProgramHistoryRow[] =
-          assignments
-            .map((assignment) => {
-              const trainee =
-                assignmentToTrainee.get(
-                  Number(assignment.id)
-                );
+            durationWeekTemplates:
+              weeks.length,
 
-              const template =
-                templateMap.get(
-                  Number(
-                    assignment.planTemplateId
-                  )
-                );
+            isFav:
+              template?.isFav ??
+              false,
 
-              /*
-               * If the assignment cannot be associated with
-               * a trainee, don't create a fake row.
-               */
-              if (!trainee) {
-                console.warn(
-                  `No trainee found for assignment ${assignment.id}`
-                );
-
-                return null;
-              }
-
-              return {
-                id: Number(
-                  assignment.id
-                ),
-                traineeId: Number(
-                  trainee.traineeId
-                ),
-                traineeName:
-                  trainee.traineeName,
-                templateId: Number(
-                  assignment.planTemplateId
-                ),
-                templateName:
-                  template?.name ??
-                  `Plan ${assignment.planTemplateId}`,
-                durationWeeks:
-                  template?.durationWeekTemplates ??
-                  0,
-                startedAt:
-                  assignment.startedAt,
-                endedAt:
-                  assignment.endedAt,
-              };
-            })
-            .filter(
-              (
-                row
-              ): row is ProgramHistoryRow =>
-                row !== null
-            );
-
-        historyRows.sort(
-          (a, b) => {
-            const aTime = a.startedAt
-              ? new Date(
-                  a.startedAt
-                ).getTime()
-              : 0;
-
-            const bTime = b.startedAt
-              ? new Date(
-                  b.startedAt
-                ).getTime()
-              : 0;
-
-            return bTime - aTime;
-          }
-        );
-
-        setRows(historyRows);
-      } catch (loadError) {
-        console.error(
-          "Failed to load programs history:",
-          loadError
-        );
-
-        setError(
-          "Failed to load programs history."
-        );
-
-        setRows([]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    // Data fetching intentionally updates local loading/data state.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadData();
-  }, [loadData]);
-
-  const templateOptions =
-    useMemo(
-      () =>
-        templates.map(
-          (template) => ({
-            id: template.id,
-            name: template.name,
+            weeks,
           })
-        ),
-      [templates]
-    );
+        );
+
+        router.push(
+          `/trainer/templates`
+        );
+      }
+    };
+
+  // ---------------------------------------------------------------------------
+  // Add Week
+  // ---------------------------------------------------------------------------
+
+  const handleAddWeek =
+    async () => {
+      if (!templateId) {
+        return;
+      }
+
+      try {
+        /*
+         * Backend sequence numbers are 1-based.
+         */
+        const sequenceNumber =
+          weeks.length + 1;
+
+        const res =
+          await programService.createWeek(
+            {
+              sequenceNumber,
+
+              planTemplateId:
+                templateId,
+            }
+          );
+
+        const newWeek =
+          res?.data?.data ??
+          res?.data ??
+          {};
+
+        const newWeekId =
+          Number(
+            newWeek.weekId ??
+              newWeek.id
+          );
+
+        if (
+          !Number.isFinite(
+            newWeekId
+          ) ||
+          newWeekId <= 0
+        ) {
+          throw new Error(
+            "Create week response did not contain a valid week ID."
+          );
+        }
+
+        /*
+         * Do not manufacture a local week object.
+         *
+         * Re-fetch the template so both the week list and
+         * durationWeekTemplates come from the backend.
+         */
+        const refreshed =
+          await programService.getTemplateDetail(
+            templateId
+          );
+
+        const refreshedTemplate =
+          refreshed?.data?.data ??
+          refreshed?.data ??
+          {};
+
+        const refreshedWeeks =
+          Array.isArray(
+            refreshedTemplate.weeks
+          )
+            ? refreshedTemplate.weeks
+            : [];
+
+        setTemplate({
+          ...refreshedTemplate,
+
+          durationWeekTemplates:
+            refreshedWeeks.length,
+        });
+
+        setWeeks(
+          refreshedWeeks
+        );
+
+        router.push(
+          `/trainer/template/${templateId}/${newWeekId}`
+        );
+      } catch (err) {
+        console.error(
+          "Failed to create week",
+          err
+        );
+      }
+    };
+
+  // ---------------------------------------------------------------------------
+  // Duplicate Week
+  // ---------------------------------------------------------------------------
+
+  const handleDuplicateWeek =
+    async (
+      weekIdToDuplicate: number
+    ) => {
+      try {
+        await programService.duplicateWeek(
+          weekIdToDuplicate
+        );
+
+        await loadTemplate();
+      } catch (err) {
+        console.error(
+          "Failed to duplicate week",
+          err
+        );
+      }
+    };
+
+  // ---------------------------------------------------------------------------
+  // Delete Week
+  // ---------------------------------------------------------------------------
+
+  const handleDeleteWeek =
+    async (
+      weekIdToDelete: number
+    ) => {
+      const weekIndex =
+        weeks.findIndex(
+          (week) =>
+            Number(week.id) ===
+            Number(
+              weekIdToDelete
+            )
+        );
+
+      if (
+        !window.confirm(
+          `Delete Week ${
+            weekIndex + 1
+          }? This will also delete all workout days inside it.`
+        )
+      ) {
+        return;
+      }
+
+      try {
+        await programService.deleteWeek(
+          weekIdToDelete
+        );
+
+        /*
+         * Refresh from backend rather than only removing the
+         * week from local state. This guarantees the count
+         * matches the actual database.
+         */
+        await loadTemplate();
+
+        if (
+          weekId ===
+          weekIdToDelete
+        ) {
+          router.push(
+            `/trainer/template/${templateId}`
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Failed to delete week",
+          err
+        );
+      }
+    };
+
+  // ---------------------------------------------------------------------------
+  // Publish modal
+  // ---------------------------------------------------------------------------
+
+  const openPublishModal =
+    () => {
+      setIsPublishModalOpen(
+        true
+      );
+    };
+
+  const closePublishModal =
+    () => {
+      setIsPublishModalOpen(
+        false
+      );
+    };
+
+  const handlePublishSuccess =
+    () => {
+      router.push(
+        `/trainer/templates`
+      );
+    };
+
+  // ---------------------------------------------------------------------------
+  // Return
+  // ---------------------------------------------------------------------------
 
   return {
-    rows,
-    templateOptions,
-    isLoading,
-    error,
-    refresh: loadData,
+    templateId,
+
+    weekId,
+
+    template,
+
+    weeks,
+
+    loading,
+
+    displayTitle,
+
+    displayDesc,
+
+    isPublishModalOpen,
+
+    setIsPublishModalOpen,
+
+    openPublishModal,
+
+    closePublishModal,
+
+    handleSaveDraft,
+
+    handleAddWeek,
+
+    handleDuplicateWeek,
+
+    handleDeleteWeek,
+
+    handlePublishSuccess,
+
+    router,
   };
 }
