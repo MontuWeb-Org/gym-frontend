@@ -334,9 +334,11 @@ export function useWorkoutBuilder(
       workoutId,
     ]);
 
-  useEffect(() => {
-    void loadWorkoutData();
-  }, [loadWorkoutData]);
+ useEffect(() => {
+  // Data fetching intentionally updates local state after the request resolves.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  void loadWorkoutData();
+}, [loadWorkoutData]);
 
   // ---------------------------------------------------------------------------
   // Exercise library selection

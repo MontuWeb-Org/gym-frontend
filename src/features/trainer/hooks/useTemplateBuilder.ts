@@ -103,9 +103,11 @@ export function useTemplateBuilder() {
       }
     }, [templateId]);
 
-  useEffect(() => {
-    void loadTemplate();
-  }, [loadTemplate]);
+ useEffect(() => {
+  // Data fetching intentionally updates local state after the request resolves.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  void loadTemplate();
+}, [loadTemplate]);
 
   // ---------------------------------------------------------------------------
   // Display data
