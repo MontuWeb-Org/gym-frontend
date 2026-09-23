@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { programService } from "../services/program.service";
 import type { ProgramHistoryRow } from "../components/programs/ProgramHistoryTable";
 
-interface Trainee {
+interface Template {
   id: number;
   name: string;
+  trainerId: number;
+  durationWeekTemplates: number;
 }
 
 interface Assignment {
@@ -20,263 +23,177 @@ interface Assignment {
   planTemplateId: number;
 }
 
-interface Template {
-  id: number;
-  planId?: number;
-  name: string;
-  trainerId: number;
+interface Trainee {
+  traineeId: number;
+  traineeName: string;
 }
 
 export function useProgramsHistory() {
   const [rows, setRows] = useState<ProgramHistoryRow[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [refreshKey, setRefreshKey] = useState(0);
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-  const refresh = () => {
-    setRefreshKey((value) => value + 1);
-  };
+    try {
+      const [
+        templatesResponse,
+        traineesResponse,
+        assignmentsResponse,
+      ] = await Promise.all([
+        programService.getTemplates(1, 100),
+        programService.getTrainees(1, 100),
+        programService.getAssignments(),
+      ]);
+
+      const planTemplates: Template[] =
+        templatesResponse.data?.data?.plans ?? [];
+
+      const trainees: Trainee[] =
+        traineesResponse.data?.data ?? [];
+
+      const assignments: Assignment[] =
+        assignmentsResponse.data?.data ?? [];
+
+      setTemplates(planTemplates);
+
+      const templateMap = new Map<number, Template>();
+
+      planTemplates.forEach((template) => {
+        templateMap.set(Number(template.id), template);
+      });
+
+      /*
+       * The current /api/plans/assignments response does not
+       * contain traineeId.
+       *
+       * Therefore we cannot reliably associate an assignment
+       * with a trainee from this endpoint alone.
+       *
+       * For now, use the trainee roster's plans information
+       * to determine which trainee owns each assignment.
+       */
+
+      const assignmentToTrainee = new Map<
+        number,
+        Trainee
+      >();
+
+      trainees.forEach((trainee) => {
+        /*
+         * The trainee endpoint returns a `plans` array.
+         * Each plan contains `planId`.
+         */
+        const traineeWithPlans = trainee as Trainee & {
+          plans?: Array<{
+            planId: number;
+          }>;
+        };
+
+        traineeWithPlans.plans?.forEach((plan) => {
+          assignmentToTrainee.set(
+            Number(plan.planId),
+            trainee
+          );
+        });
+      });
+
+      const historyRows: ProgramHistoryRow[] =
+        assignments
+          .map((assignment) => {
+            const trainee = assignmentToTrainee.get(
+              Number(assignment.id)
+            );
+
+            const template = templateMap.get(
+              Number(assignment.planTemplateId)
+            );
+
+            /*
+             * If the assignment cannot be associated with
+             * a trainee, don't create a fake row.
+             */
+            if (!trainee) {
+              console.warn(
+                `No trainee found for assignment ${assignment.id}`
+              );
+
+              return null;
+            }
+
+            return {
+              id: Number(assignment.id),
+              traineeId: Number(trainee.traineeId),
+              traineeName: trainee.traineeName,
+              templateId: Number(
+                assignment.planTemplateId
+              ),
+              templateName:
+                template?.name ??
+                `Plan ${assignment.planTemplateId}`,
+              durationWeeks:
+                template?.durationWeekTemplates ?? 0,
+              startedAt: assignment.startedAt,
+              endedAt: assignment.endedAt,
+            };
+          })
+          .filter(
+            (
+              row
+            ): row is ProgramHistoryRow =>
+              row !== null
+          );
+
+      historyRows.sort((a, b) => {
+        const aTime = a.startedAt
+          ? new Date(a.startedAt).getTime()
+          : 0;
+
+        const bTime = b.startedAt
+          ? new Date(b.startedAt).getTime()
+          : 0;
+
+        return bTime - aTime;
+      });
+
+      setRows(historyRows);
+    } catch (loadError) {
+      console.error(
+        "Failed to load programs history:",
+        loadError
+      );
+
+      setError(
+        "Failed to load programs history."
+      );
+
+      setRows([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
+    void loadData();
+  }, [loadData]);
 
-    const loadPrograms = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        /*
-         * The assignments endpoint does not include traineeId
-         * in each assignment.
-         *
-         * Therefore we first load the trainer's trainees and
-         * then request assignments for each trainee separately.
-         */
-        const traineesResponse =
-  await programService.getTrainees(1, 100);
-
-console.log(
-  "[Programs] trainees:",
-  traineesResponse.data
-);
-
-const templatesResponse =
-  await programService.getTemplates(1, 100);
-
-console.log(
-  "[Programs] templates:",
-  templatesResponse.data
-);
-
-        if (!isMounted) {
-          return;
-        }
-
-        /*
-         * /api/users/trainer/trainees returns:
-         *
-         * {
-         *   data: [
-         *     {
-         *       traineeId,
-         *       traineeName,
-         *       ...
-         *     }
-         *   ],
-         *   pagination: ...
-         * }
-         */
-        const trainees: Trainee[] = (
-          traineesResponse.data?.data ?? []
-        ).map((trainee: any) => ({
-          id: Number(trainee.traineeId),
-          name: trainee.traineeName,
-        }));
-
-        /*
-         * /api/plans/templates returns the trainer's plan templates.
-         */
-        const templates: Template[] =
-          templatesResponse.data?.data?.plans ?? [];
-
-        const templateMap = new Map<number, string>();
-
-        templates.forEach((template) => {
-          templateMap.set(
-            Number(template.id),
-            template.name
-          );
-
-          /*
-           * Keep support for APIs that expose the template
-           * identifier under planId as well.
-           */
-          if (template.planId !== undefined) {
-            templateMap.set(
-              Number(template.planId),
-              template.name
-            );
-          }
-        });
-
-        /*
-         * Fetch assignments per trainee.
-         *
-         * The backend assignment response does not contain
-         * traineeId, so the trainee currently being queried
-         * provides that relationship.
-         */
-        const traineeAssignments =
-          await Promise.all(
-            trainees.map(async (trainee) => {
-              try {
-                const response =
-                  await programService.getAssignments({
-                    traineeId: trainee.id,
-                    pageNumber: 1,
-                    pageSize: 100,
-                    sortBy: "createdAt",
-                    sortOrder: "desc",
-                  });
-
-                const assignments: Assignment[] =
-                  response.data?.data ?? [];
-
-                return {
-                  trainee,
-                  assignments,
-                };
-              } catch (error) {
-                console.error(
-                  `Failed to load assignments for trainee ${trainee.id}:`,
-                  error
-                );
-
-                return {
-                  trainee,
-                  assignments: [],
-                };
-              }
-            })
-          );
-
-        if (!isMounted) {
-          return;
-        }
-
-        const historyRows: ProgramHistoryRow[] = [];
-
-        traineeAssignments.forEach(
-          ({ trainee, assignments }) => {
-            assignments.forEach((assignment) => {
-              const templateName =
-                templateMap.get(
-                  Number(assignment.planTemplateId)
-                );
-
-              /*
-               * We cannot show a real assignment creation date
-               * because the backend assignment response does not
-               * expose createdAt.
-               *
-               * startedAt is the closest available date.
-               * For IDLE assignments it will be null.
-               */
-              const createdAt =
-                assignment.startedAt ?? "";
-
-              const endedAt =
-                assignment.endedAt ?? "";
-
-              historyRows.push({
-                id: Number(assignment.id),
-
-                traineeId: trainee.id,
-                traineeName: trainee.name,
-
-                templateId: Number(
-                  assignment.planTemplateId
-                ),
-                templateName:
-                  templateName ??
-                  `Plan ${assignment.planTemplateId}`,
-
-                createdAt,
-                endedAt,
-              });
-            });
-          }
-        );
-
-        /*
-         * Put newest started assignments first.
-         *
-         * IDLE assignments have no startedAt, so they naturally
-         * go after assignments that have actually started.
-         */
-        historyRows.sort((a, b) => {
-          const aTime = a.createdAt
-            ? new Date(a.createdAt).getTime()
-            : 0;
-
-          const bTime = b.createdAt
-            ? new Date(b.createdAt).getTime()
-            : 0;
-
-          return bTime - aTime;
-        });
-
-        setRows(historyRows);
-      } catch (err) {
-        console.error(
-          "Failed to load program history",
-          err
-        );
-
-        if (isMounted) {
-          setError(
-            "Failed to load program history."
-          );
-          setRows([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadPrograms();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [refreshKey]);
-
-  const templateOptions = useMemo(() => {
-    const uniqueTemplates = new Map<number, string>();
-
-    rows.forEach((row) => {
-      uniqueTemplates.set(
-        row.templateId,
-        row.templateName
-      );
-    });
-
-    return Array.from(
-      uniqueTemplates.entries()
-    ).map(([id, name]) => ({
-      id,
-      name,
-    }));
-  }, [rows]);
+  const templateOptions = useMemo(
+    () =>
+      templates.map((template) => ({
+        id: template.id,
+        name: template.name,
+      })),
+    [templates]
+  );
 
   return {
     rows,
     templateOptions,
     isLoading,
     error,
-    refresh,
+    refresh: loadData,
   };
 }

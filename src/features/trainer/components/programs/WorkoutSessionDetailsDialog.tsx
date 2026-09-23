@@ -1,29 +1,28 @@
+"use client";
+
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-import { Button } from "@/components/ui/button";
 
 import type { WorkoutLogDetail } from "../../types/workoutLog.types";
 
 interface WorkoutSessionDetailsDialogProps {
   open: boolean;
   selectedWorkoutLog: WorkoutLogDetail | null;
-  isLoadingLogDetail: boolean;
-  logDetailError: string | null;
+  isLoading: boolean;
+  error: string | null;
   onClose: () => void;
 }
 
 export default function WorkoutSessionDetailsDialog({
   open,
   selectedWorkoutLog,
-  isLoadingLogDetail,
-  logDetailError,
+  isLoading,
+  error,
   onClose,
 }: WorkoutSessionDetailsDialogProps) {
   return (
@@ -35,34 +34,38 @@ export default function WorkoutSessionDetailsDialog({
         }
       }}
     >
-      <DialogContent className="max-h-[90vh] w-[95vw] max-w-5xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            Workout Session Details
+            {selectedWorkoutLog?.workoutTemplateName ??
+              "Workout Session"}
           </DialogTitle>
 
           <DialogDescription>
-            Details of the selected workout session.
+            Workout session details
           </DialogDescription>
         </DialogHeader>
 
-        {isLoadingLogDetail && (
-          <p className="text-sm text-muted-foreground">
-            Loading workout session details...
-          </p>
+        {isLoading && (
+          <div className="flex min-h-[220px] items-center justify-center">
+            <p className="text-sm text-muted-foreground">
+              Loading workout session...
+            </p>
+          </div>
         )}
 
-        {logDetailError && (
-          <p className="text-sm text-destructive">
-            {logDetailError}
-          </p>
+        {!isLoading && error && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+            <p className="text-sm text-destructive">
+              {error}
+            </p>
+          </div>
         )}
 
-        {!isLoadingLogDetail &&
-          !logDetailError &&
+        {!isLoading &&
+          !error &&
           selectedWorkoutLog && (
             <div className="space-y-6">
-              {/* Session Summary */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-lg border p-4">
                   <p className="text-sm font-medium">
@@ -88,128 +91,153 @@ export default function WorkoutSessionDetailsDialog({
                 </div>
 
                 {selectedWorkoutLog.notes && (
-  <div className="rounded-lg border p-4 sm:col-span-2 min-h-[100px]">
-    <p className="text-sm font-medium">
-      Notes
-    </p>
+                  <div className="min-h-[100px] rounded-lg border p-4 sm:col-span-2">
+                    <p className="text-sm font-medium">
+                      Notes
+                    </p>
 
-    <p className="mt-2 text-sm text-muted-foreground">
-      {selectedWorkoutLog.notes}
-    </p>
-  </div>
-)}
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {selectedWorkoutLog.notes}
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* Exercises */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">
-                  Exercises
-                </h3>
+              <div>
+                <div className="mb-3">
+                  <h3 className="text-base font-semibold">
+                    Exercises
+                  </h3>
+
+                  <p className="text-sm text-muted-foreground">
+                    Exercise performance for this workout
+                    session.
+                  </p>
+                </div>
 
                 {selectedWorkoutLog.exerciseLogs.length ===
                 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No exercise logs found.
-                  </p>
+                  <div className="rounded-lg border p-6 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      No exercise logs recorded for this
+                      session.
+                    </p>
+                  </div>
                 ) : (
-                  selectedWorkoutLog.exerciseLogs.map(
-                    (exercise) => (
-                      <div
-                        key={exercise.id}
-                        className="rounded-lg border p-4"
-                      >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <h4 className="font-medium">
-                              {exercise.exerciseName}
-                            </h4>
+                  <div className="space-y-4">
+                    {selectedWorkoutLog.exerciseLogs.map(
+                      (exercise) => (
+                        <div
+                          key={exercise.id}
+                          className="rounded-lg border p-4"
+                        >
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <p className="font-medium">
+                                {exercise.exerciseName}
+                              </p>
+
+                              <p className="text-sm text-muted-foreground">
+                                {exercise.expectedReps} reps
+
+                                {exercise.expectedWeight >
+                                  0 && (
+                                  <>
+                                    {" × "}
+                                    {
+                                      exercise.expectedWeight
+                                    }{" "}
+                                    kg
+                                  </>
+                                )}
+                              </p>
+                            </div>
 
                             <p className="text-sm text-muted-foreground">
-                              Expected:{" "}
-                              {exercise.expectedSets} sets ×{" "}
-                              {exercise.expectedReps} reps
-                              {exercise.expectedWeight > 0 &&
-                                ` × ${exercise.expectedWeight} kg`}
+                              {exercise.setLogs.length}{" "}
+                              {exercise.setLogs.length ===
+                              1
+                                ? "set"
+                                : "sets"}
                             </p>
                           </div>
 
-                          <p className="text-sm text-muted-foreground">
-                            Duration:{" "}
-                            {Math.round(
-                              exercise.durationSeconds / 60
-                            )}{" "}
-                            min
-                          </p>
-                        </div>
+                          {exercise.setLogs.length > 0 && (
+                            <div className="mt-4 overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b text-left">
+                                    <th className="px-3 py-2 font-medium">
+                                      Set
+                                    </th>
 
-                        {/* Set Logs */}
-                        <div className="mt-4 overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="border-b text-left">
-                                <th className="px-3 py-2 font-medium">
-                                  Set
-                                </th>
+                                    <th className="px-3 py-2 font-medium">
+                                      Reps
+                                    </th>
 
-                                <th className="px-3 py-2 font-medium">
-                                  Reps
-                                </th>
+                                    <th className="px-3 py-2 font-medium">
+                                      Weight
+                                    </th>
 
-                                <th className="px-3 py-2 font-medium">
-                                  Weight
-                                </th>
+                                    <th className="px-3 py-2 font-medium">
+                                      Duration
+                                    </th>
 
-                                <th className="px-3 py-2 font-medium">
-                                  Rest
-                                </th>
-                              </tr>
-                            </thead>
-
-                            <tbody>
-                              {exercise.setLogs.map(
-                                (setLog) => (
-                                  <tr
-                                    key={setLog.id}
-                                    className="border-b last:border-0"
-                                  >
-                                    <td className="px-3 py-2">
-                                      {setLog.sequenceNumber}
-                                    </td>
-
-                                    <td className="px-3 py-2">
-                                      {setLog.reps}
-                                    </td>
-
-                                    <td className="px-3 py-2">
-                                      {setLog.weight} kg
-                                    </td>
-
-                                    <td className="px-3 py-2">
-                                      {setLog.restTimeSeconds} sec
-                                    </td>
+                                    <th className="px-3 py-2 font-medium">
+                                      Rest
+                                    </th>
                                   </tr>
-                                )
-                              )}
-                            </tbody>
-                          </table>
+                                </thead>
+
+                                <tbody>
+                                  {exercise.setLogs.map(
+                                    (set) => (
+                                      <tr
+                                        key={set.id}
+                                        className="border-b last:border-0"
+                                      >
+                                        <td className="px-3 py-2">
+                                          {
+                                            set.sequenceNumber
+                                          }
+                                        </td>
+
+                                        <td className="px-3 py-2">
+                                          {set.reps}
+                                        </td>
+
+                                        <td className="px-3 py-2">
+                                          {set.weight} kg
+                                        </td>
+
+                                        <td className="px-3 py-2">
+                                          {
+                                            set.durationSeconds
+                                          }{" "}
+                                          sec
+                                        </td>
+
+                                        <td className="px-3 py-2">
+                                          {
+                                            set.restTimeSeconds
+                                          }{" "}
+                                          sec
+                                        </td>
+                                      </tr>
+                                    )
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    )
-                  )
+                      )
+                    )}
+                  </div>
                 )}
               </div>
             </div>
           )}
-
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-          >
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

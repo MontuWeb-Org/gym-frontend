@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 export interface ProgramHistoryRow {
   id: number;
@@ -17,141 +18,171 @@ export interface ProgramHistoryRow {
   traineeName: string;
   templateId: number;
   templateName: string;
-  createdAt: string;
-  endedAt: string;
+  durationWeeks: number;
+  startedAt: string | null;
+  endedAt: string | null;
 }
 
 interface ProgramsHistoryTableProps {
   rows: ProgramHistoryRow[];
-  isLoading?: boolean;
-  onRowClick?: (row: ProgramHistoryRow) => void;
-  onRemove?: (row: ProgramHistoryRow) => void;
+  isLoading: boolean;
+  onRowClick: (
+    row: ProgramHistoryRow
+  ) => void;
+  onRemove: (
+    row: ProgramHistoryRow
+  ) => void;
 }
 
-export default function ProgramsHistoryTable({
-  rows,
-  isLoading = false,
-  onRowClick,
-  onRemove,
-}: ProgramsHistoryTableProps) {
-  const formatDate = (date: string) => {
-    if (!date) return "-";
+const formatDate = (
+  date: string | null
+) => {
+  if (!date) {
+    return "-";
+  }
 
-    return new Date(date).toLocaleDateString("en-US", {
+  const value = new Date(date);
+
+  if (
+    Number.isNaN(
+      value.getTime()
+    )
+  ) {
+    return "-";
+  }
+
+  return value.toLocaleDateString(
+    "en-US",
+    {
       year: "numeric",
       month: "short",
       day: "numeric",
-    });
-  };
+    }
+  );
+};
 
-  const getDuration = (
-    createdAt: string,
-    endedAt: string
-  ) => {
-    const start = new Date(createdAt).getTime();
-    const end = new Date(endedAt).getTime();
+const formatDuration = (
+  weeks: number
+) => {
+  if (!weeks || weeks <= 0) {
+    return "-";
+  }
 
-    if (!start || !end || end <= start) return "-";
+  return `${weeks} ${
+    weeks === 1
+      ? "week"
+      : "weeks"
+  }`;
+};
 
-    const weeks = Math.round(
-      (end - start) / (7 * 24 * 60 * 60 * 1000)
+export default function ProgramsHistoryTable({
+  rows,
+  isLoading,
+  onRowClick,
+  onRemove,
+}: ProgramsHistoryTableProps) {
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[220px] items-center justify-center">
+        <p className="text-sm text-muted-foreground">
+          Loading programs...
+        </p>
+      </div>
     );
+  }
 
-    return `${weeks} ${
-      weeks === 1 ? "week" : "weeks"
-    }`;
-  };
+  if (rows.length === 0) {
+    return (
+      <div className="flex min-h-[220px] items-center justify-center rounded-lg border">
+        <p className="text-sm text-muted-foreground">
+          No program assignments found.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-xl border bg-card">
+    <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Trainee</TableHead>
-            <TableHead>Plan</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Duration</TableHead>
-            <TableHead className="text-right">
+            <TableHead>
+              Trainee
+            </TableHead>
+
+            <TableHead>
+              Program
+            </TableHead>
+
+            <TableHead>
+              Duration
+            </TableHead>
+
+            <TableHead>
+              Start Date
+            </TableHead>
+
+            <TableHead>
+              End Date
+            </TableHead>
+
+            <TableHead className="w-[80px] text-right">
               Actions
             </TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell
-                colSpan={6}
-                className="h-24 text-center text-muted-foreground"
-              >
-                Loading programs...
+          {rows.map((row) => (
+            <TableRow
+              key={row.id}
+              className="cursor-pointer"
+              onClick={() =>
+                onRowClick(row)
+              }
+            >
+              <TableCell className="font-medium">
+                {row.traineeName}
+              </TableCell>
+
+              <TableCell>
+                {row.templateName}
+              </TableCell>
+
+              <TableCell>
+                {formatDuration(
+                  row.durationWeeks
+                )}
+              </TableCell>
+
+              <TableCell>
+                {formatDate(
+                  row.startedAt
+                )}
+              </TableCell>
+
+              <TableCell>
+                {formatDate(
+                  row.endedAt
+                )}
+              </TableCell>
+
+              <TableCell className="text-right">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onRemove(row);
+                  }}
+                  aria-label={`Remove ${row.templateName} from ${row.traineeName}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
-          ) : rows.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={6}
-                className="h-24 text-center text-muted-foreground"
-              >
-                No program assignments found.
-              </TableCell>
-            </TableRow>
-          ) : (
-            rows.map((row) => (
-              <TableRow
-                key={row.id}
-                className={
-                  onRowClick
-                    ? "cursor-pointer hover:bg-muted/50"
-                    : ""
-                }
-                onClick={() => onRowClick?.(row)}
-              >
-                <TableCell className="font-medium">
-                  {row.traineeName}
-                </TableCell>
-
-                <TableCell>
-                  {row.templateName}
-                </TableCell>
-
-                <TableCell>
-                  {formatDate(row.createdAt)}
-                </TableCell>
-
-                <TableCell>
-                  {formatDate(row.endedAt)}
-                </TableCell>
-
-                <TableCell>
-                  {getDuration(
-                    row.createdAt,
-                    row.endedAt
-                  )}
-                </TableCell>
-
-                <TableCell>
-                  <div
-                    className="flex justify-end gap-2"
-                    onClick={(event) =>
-                      event.stopPropagation()
-                    }
-                  >
-                    {onRemove && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => onRemove(row)}
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

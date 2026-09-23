@@ -92,42 +92,6 @@ export default function ProgramsView() {
     );
   }, [rows, selectedTemplate]);
 
-  const formatDateTime = (date: string) => {
-    if (!date) {
-      return "Not started";
-    }
-
-    const value = new Date(date);
-
-    if (Number.isNaN(value.getTime())) {
-      return date;
-    }
-
-    return value.toLocaleString();
-  };
-
-  const getWorkoutDuration = (
-    startedAt: string,
-    endedAt: string
-  ) => {
-    const start = new Date(startedAt).getTime();
-    const end = new Date(endedAt).getTime();
-
-    if (
-      Number.isNaN(start) ||
-      Number.isNaN(end) ||
-      end <= start
-    ) {
-      return "0 min";
-    }
-
-    const minutes = Math.round(
-      (end - start) / (1000 * 60)
-    );
-
-    return `${minutes} min`;
-  };
-
   const handleRowClick = async (
     row: ProgramHistoryRow
   ) => {
@@ -135,6 +99,8 @@ export default function ProgramsView() {
     setWorkoutLogs([]);
     setWorkoutNames({});
     setLogsError(null);
+    setSelectedWorkoutLog(null);
+    setLogDetailError(null);
     setIsLoadingLogs(true);
 
     try {
@@ -143,23 +109,25 @@ export default function ProgramsView() {
           row.traineeId
         );
 
-   console.log(
-  "WORKOUT LOG API RESPONSE:",
-  response.data
-);
+      console.log(
+        "WORKOUT LOG API RESPONSE:",
+        response.data
+      );
 
-const logs: WorkoutLog[] =
-  response.data?.data ?? [];
+      const logs: WorkoutLog[] =
+        response.data?.data ?? [];
 
-console.log(
-  "WORKOUT LOGS:",
-  logs
-);
+      console.log(
+        "WORKOUT LOGS:",
+        logs
+      );
 
-console.log(
-  "WORKOUT LOG IDS:",
-  logs.map((log) => log.workoutLogId)
-);
+      console.log(
+        "WORKOUT LOG IDS:",
+        logs.map(
+          (log) => log.workoutLogId
+        )
+      );
 
       const assignmentLogs = logs.filter(
         (log) =>
@@ -170,47 +138,60 @@ console.log(
       const uniqueWorkoutIds = [
         ...new Set(
           assignmentLogs.map(
-            (log) => log.workoutTemplateId
+            (log) =>
+              log.workoutTemplateId
           )
         ),
       ];
 
       const workoutDetails =
         await Promise.all(
-          uniqueWorkoutIds.map(async (workoutId) => {
-            try {
-              const workoutResponse =
-                await programService.getWorkoutDetail(
-                  workoutId
+          uniqueWorkoutIds.map(
+            async (workoutId) => {
+              try {
+                const workoutResponse =
+                  await programService.getWorkoutDetail(
+                    workoutId
+                  );
+
+                return {
+                  id: workoutId,
+                  name:
+                    workoutResponse.data?.data
+                      ?.name ??
+                    `Workout ${workoutId}`,
+                };
+              } catch (error) {
+                console.error(
+                  `Failed to fetch workout ${workoutId}:`,
+                  error
                 );
 
-              return {
-                id: workoutId,
-                name:
-                  workoutResponse.data?.data?.name ??
-                  `Workout ${workoutId}`,
-              };
-            } catch (error) {
-              console.error(
-                `Failed to fetch workout ${workoutId}:`,
-                error
-              );
-
-              return {
-                id: workoutId,
-                name: `Workout ${workoutId}`,
-              };
+                return {
+                  id: workoutId,
+                  name: `Workout ${workoutId}`,
+                };
+              }
             }
-          })
+          )
         );
 
-      const names: Record<number, string> = {};
+      const names: Record<
+        number,
+        string
+      > = {};
 
-      workoutDetails.forEach((workout) => {
-        names[workout.id] = workout.name;
-      });
+      workoutDetails.forEach(
+        (workout) => {
+          names[workout.id] =
+            workout.name;
+        }
+      );
 
-      setWorkoutLogs(assignmentLogs);
+      setWorkoutLogs(
+        assignmentLogs
+      );
+
       setWorkoutNames(names);
     } catch (error) {
       console.error(
@@ -226,70 +207,79 @@ console.log(
     }
   };
 
-
-const handleWorkoutLogClick = async (
-  log: WorkoutLog
-) => {
-  console.log("CLICKED WORKOUT LOG:", log);
-  console.log("CLICKED WORKOUT LOG ID:", log.workoutLogId);
-
-  setSelectedWorkoutLog(null);
-  setLogDetailError(null);
-  setIsLoadingLogDetail(true);
-
-  try {
-    const response =
-      await programService.getWorkoutLogDetail(
-        log.workoutLogId
-      );
-
-    const detail: WorkoutLogDetail =
-      response.data?.data;
-
-    setSelectedWorkoutLog(detail);
-  } catch (error) {
-    console.error(
-      "Failed to fetch workout log details:",
-      error
+  const handleWorkoutLogClick = async (
+    log: WorkoutLog
+  ) => {
+    console.log(
+      "CLICKED WORKOUT LOG:",
+      log
     );
 
-    setLogDetailError(
-      "Failed to load workout session details."
+    console.log(
+      "CLICKED WORKOUT LOG ID:",
+      log.workoutLogId
     );
-  } finally {
-    setIsLoadingLogDetail(false);
-  }
-};
 
-
-  const handleRemoveAssignment = async () => {
-    if (!rowToRemove) {
-      return;
-    }
-
-    setIsRemoving(true);
-    setActionError(null);
+    setSelectedWorkoutLog(null);
+    setLogDetailError(null);
+    setIsLoadingLogDetail(true);
 
     try {
-      await programService.deleteAssignment(
-        rowToRemove.id
-      );
+      const response =
+        await programService.getWorkoutLogDetail(
+          log.workoutLogId
+        );
 
-      setRowToRemove(null);
-      await refresh();
+      const detail: WorkoutLogDetail =
+        response.data?.data;
+
+      setSelectedWorkoutLog(
+        detail
+      );
     } catch (error) {
       console.error(
-        "Failed to remove program assignment:",
+        "Failed to fetch workout log details:",
         error
       );
 
-      setActionError(
-        "Failed to remove program assignment."
+      setLogDetailError(
+        "Failed to load workout session details."
       );
     } finally {
-      setIsRemoving(false);
+      setIsLoadingLogDetail(false);
     }
   };
+
+  const handleRemoveAssignment =
+    async () => {
+      if (!rowToRemove) {
+        return;
+      }
+
+      setIsRemoving(true);
+      setActionError(null);
+
+      try {
+        await programService.deleteAssignment(
+          rowToRemove.id
+        );
+
+        setRowToRemove(null);
+
+        await refresh();
+      } catch (error) {
+        console.error(
+          "Failed to remove program assignment:",
+          error
+        );
+
+        setActionError(
+          "Failed to remove program assignment."
+        );
+      } finally {
+        setIsRemoving(false);
+      }
+    };
 
   return (
     <div className="space-y-6">
@@ -299,7 +289,9 @@ const handleWorkoutLogClick = async (
 
         <Select
           value={selectedTemplate}
-          onValueChange={setSelectedTemplate}
+          onValueChange={
+            setSelectedTemplate
+          }
         >
           <SelectTrigger className="w-[240px]">
             <SelectValue placeholder="Filter by template" />
@@ -310,14 +302,18 @@ const handleWorkoutLogClick = async (
               All Templates
             </SelectItem>
 
-            {templateOptions.map((template) => (
-              <SelectItem
-                key={template.id}
-                value={String(template.id)}
-              >
-                {template.name}
-              </SelectItem>
-            ))}
+            {templateOptions.map(
+              (template) => (
+                <SelectItem
+                  key={template.id}
+                  value={String(
+                    template.id
+                  )}
+                >
+                  {template.name}
+                </SelectItem>
+              )
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -329,7 +325,7 @@ const handleWorkoutLogClick = async (
         </p>
       )}
 
-      {/* Table */}
+      {/* Program History */}
       <ProgramsHistoryTable
         rows={filteredRows}
         isLoading={isLoading}
@@ -342,9 +338,14 @@ const handleWorkoutLogClick = async (
 
       {/* Remove Assignment Dialog */}
       <Dialog
-        open={rowToRemove !== null}
+        open={
+          rowToRemove !== null
+        }
         onOpenChange={(open) => {
-          if (!open && !isRemoving) {
+          if (
+            !open &&
+            !isRemoving
+          ) {
             setRowToRemove(null);
             setActionError(null);
           }
@@ -357,8 +358,9 @@ const handleWorkoutLogClick = async (
             </DialogTitle>
 
             <DialogDescription>
-              Are you sure you want to remove this
-              program assignment?
+              Are you sure you want to
+              remove this program
+              assignment?
             </DialogDescription>
           </DialogHeader>
 
@@ -401,7 +403,9 @@ const handleWorkoutLogClick = async (
               type="button"
               variant="destructive"
               disabled={isRemoving}
-              onClick={handleRemoveAssignment}
+              onClick={
+                handleRemoveAssignment
+              }
             >
               {isRemoving
                 ? "Removing..."
@@ -413,32 +417,59 @@ const handleWorkoutLogClick = async (
 
       {/* Workout History */}
       <WorkoutHistoryDialog
-        open={selectedProgram !== null}
-        selectedProgram={selectedProgram}
-        workoutLogs={workoutLogs}
-        workoutNames={workoutNames}
-        isLoadingLogs={isLoadingLogs}
-        logsError={logsError}
+        open={
+          selectedProgram !== null
+        }
+        selectedProgram={
+          selectedProgram
+        }
+        workoutLogs={
+          workoutLogs
+        }
+        workoutNames={
+          workoutNames
+        }
+        isLoadingLogs={
+          isLoadingLogs
+        }
+        logsError={
+          logsError
+        }
         onClose={() => {
-          setSelectedProgram(null);
+          setSelectedProgram(
+            null
+          );
           setWorkoutLogs([]);
           setWorkoutNames({});
           setLogsError(null);
         }}
-        onWorkoutLogClick={handleWorkoutLogClick}
-        formatDateTime={formatDateTime}
-        getWorkoutDuration={getWorkoutDuration}
+        onWorkoutLogClick={
+          handleWorkoutLogClick
+        }
       />
 
       {/* Workout Session Details */}
       <WorkoutSessionDetailsDialog
-        open={selectedWorkoutLog !== null}
-        selectedWorkoutLog={selectedWorkoutLog}
-        isLoadingLogDetail={isLoadingLogDetail}
-        logDetailError={logDetailError}
+        open={
+          selectedWorkoutLog !==
+          null
+        }
+        selectedWorkoutLog={
+          selectedWorkoutLog
+        }
+        isLoading={
+          isLoadingLogDetail
+        }
+        error={
+          logDetailError
+        }
         onClose={() => {
-          setSelectedWorkoutLog(null);
-          setLogDetailError(null);
+          setSelectedWorkoutLog(
+            null
+          );
+          setLogDetailError(
+            null
+          );
         }}
       />
     </div>
