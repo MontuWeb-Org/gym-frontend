@@ -65,7 +65,11 @@
     "adminHub": "Admin Hub",
     "workouts": "Workouts",
     "members": "Members",
-    "classes": "Classes"
+    "classes": "Classes",
+    "current-plans": "Current Plans",
+    "todays-workout": "Today's Workout",
+    "progress": "Progress",
+    "notifications": "Notifications"
   },
   "Trainer": {
     "panelTitle": "Trainer Panel",
@@ -297,5 +301,52 @@
     "planAssigned": "You were assigned the plan \"{planName}\"",
     "personalRecord": "New personal record on {exerciseName}!",
     "adherenceLow": "Your adherence to \"{planName}\" dropped to {percentage}%"
+  },
+  "PlanTimeline": {
+    "loading": "Loading plan timeline...",
+    "back": "Back",
+    "backToTrainee": "Back to Trainee",
+    "noActivePlans": "No Active Plans",
+    "noActivePlansDesc": "You do not have any active training plans assigned at the moment.",
+    "week": "Week {number}",
+    "legend": {
+      "title": "Legend"
+    },
+    "statuses": {
+      "completed": "Completed",
+      "in_progress": "In Progress",
+      "skipped": "Skipped",
+      "not_started": "Not Started",
+      "current": "Current"
+    },
+    "statusLabels": {
+      "active": "Active",
+      "completed": "Completed",
+      "paused": "Paused",
+      "cancelled": "Cancelled"
+    },
+    "info": {
+      "startedAt": "Started",
+      "weeks": "Weeks",
+      "completed": "Done",
+      "currentPosition": "Position",
+      "weekWorkout": "W{week} · #W{workout}"
+    },
+    "log": {
+      "minutes": "min",
+      "viewLog": "View Log"
+    },
+    "actions": {
+      "start": "Start",
+      "resume": "Resume",
+      "startAgain": "Start Again",
+      "skip": "Skip"
+    },
+    "toasts": {
+      "startSuccess": "Workout started!",
+      "startError": "Failed to start workout.",
+      "skipSuccess": "Workout skipped.",
+      "skipError": "Failed to skip workout."
+    }
   }
 }
