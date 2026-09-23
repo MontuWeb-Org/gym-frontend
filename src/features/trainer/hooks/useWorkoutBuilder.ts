@@ -1,262 +1,62 @@
 "use client";
 
-import type { DragEvent } from "react";
 import {
   useCallback,
   useEffect,
   useState,
 } from "react";
 
-import { programService } from "../services/program.service";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+
+import { useAppDispatch } from "@/store/hooks";
 
 import {
-  AssignedExercise,
-  ExerciseTemplate,
-  LibraryExercise,
-  WorkoutDetail,
-} from "../types/workout-builder.types";
+  upsertTemplate,
+  PlanTemplate,
+  WeekTemplate,
+} from "../store/program.slice";
 
-interface ApiExerciseTemplate
-  extends Omit<ExerciseTemplate, "exercise"> {
-  exercise?: LibraryExercise;
+import { programService } from "../services/program.service";
 
-  exerciseId?: number;
+export function useTemplateBuilder() {
+  const params = useParams();
 
-  name?: string;
-  difficulty?: string;
-  equipment?: string[];
-  instructions?: string;
-  illustrations?: string[];
-  muscles?: string[];
+  const router = useRouter();
 
-  defaultDurationMinutes?: number;
-}
+  const dispatch = useAppDispatch();
 
-interface ApiWorkoutDetail
-  extends Omit<WorkoutDetail, "exercises"> {
-  exercises?: ApiExerciseTemplate[];
-}
+  const templateId =
+    Number(params.templateId);
 
-export function useWorkoutBuilder(
-  workoutId: number
-) {
-  const [workout, setWorkout] =
-    useState<WorkoutDetail | null>(null);
+  const weekId =
+    params.weekId
+      ? Number(params.weekId)
+      : null;
 
-  const [exercises, setExercises] =
-    useState<AssignedExercise[]>([]);
+  const [template, setTemplate] =
+    useState<PlanTemplate | null>(
+      null
+    );
 
-  const [libraryExercises, setLibraryExercises] =
-    useState<LibraryExercise[]>([]);
+  const [weeks, setWeeks] =
+    useState<WeekTemplate[]>([]);
 
   const [loading, setLoading] =
     useState(true);
 
-  const [isModalOpen, setIsModalOpen] =
-    useState(false);
-
   const [
-    selectedExerciseIds,
-    setSelectedExerciseIds,
-  ] = useState<number[]>([]);
-
-  const [searchQuery, setSearchQuery] =
-    useState("");
-
-  const [
-    editingExercise,
-    setEditingExercise,
-  ] = useState<AssignedExercise | null>(
-    null
-  );
-
-  const [setsCount, setSetsCount] =
-    useState<number | string>(3);
-
-  const [repsCount, setRepsCount] =
-    useState<number | string>(10);
-
-  const [restTime, setRestTime] =
-    useState<number | string>(60);
-
-  const [weight, setWeight] =
-    useState<number | string>(0);
-
-  const [
-    durationMinutes,
-    setDurationMinutes,
-  ] = useState<number | string>(1);
-
-  const [
-    isEditingWorkoutName,
-    setIsEditingWorkoutName,
+    isPublishModalOpen,
+    setIsPublishModalOpen,
   ] = useState(false);
 
-  const [
-    workoutNameInput,
-    setWorkoutNameInput,
-  ] = useState("");
-
-  const [draggedIndex, setDraggedIndex] =
-    useState<number | null>(null);
-
-  const getNumber = (
-    value: unknown,
-    fallback: number
-  ) => {
-    const numberValue = Number(value);
-
-    return Number.isFinite(numberValue)
-      ? numberValue
-      : fallback;
-  };
-
   // ---------------------------------------------------------------------------
-  // Normalize backend ExerciseTemplate
+  // Load template from backend
   // ---------------------------------------------------------------------------
 
-  const normalizeExercise = useCallback(
-    (
-      raw: ApiExerciseTemplate,
-      library: LibraryExercise[]
-    ): AssignedExercise => {
-      const libraryExercise =
-        raw.exercise ??
-        library.find(
-          (item) =>
-            item.id ===
-            Number(raw.exerciseId)
-        );
-
-      const exerciseId = Number(
-        libraryExercise?.id ??
-          raw.exerciseId
-      );
-
-      const setsCountValue =
-        Math.max(
-          1,
-          getNumber(
-            raw.defaultSets,
-            3
-          )
-        );
-
-      const repsValue =
-        raw.defaultReps ?? "10";
-
-      const restValue =
-        Math.max(
-          0,
-          getNumber(
-            raw.defaultRestTimeSeconds,
-            60
-          )
-        );
-
-      const weightValue =
-        Math.max(
-          0,
-          getNumber(
-            raw.defaultWeight,
-            0
-          )
-        );
-
-      const durationValue =
-        Math.max(
-          1,
-          getNumber(
-            raw.durationMinutes ??
-              raw.defaultDurationMinutes,
-            1
-          )
-        );
-
-      const sets = Array.from(
-        {
-          length: setsCountValue,
-        },
-        (_, index) => ({
-          setNumber: index + 1,
-          reps: getNumber(
-            repsValue,
-            10
-          ),
-          weight: weightValue,
-        })
-      );
-
-      return {
-        id: Number(raw.id),
-
-        exerciseId,
-
-        name:
-          libraryExercise?.name ??
-          raw.name ??
-          "Exercise",
-
-        difficulty:
-          libraryExercise?.difficulty ??
-          raw.difficulty,
-
-        equipment:
-          libraryExercise?.equipment ??
-          raw.equipment,
-
-        instructions:
-          libraryExercise?.instructions ??
-          raw.instructions,
-
-        illustrations:
-          libraryExercise?.illustrations ??
-          raw.illustrations,
-
-        muscles:
-          libraryExercise?.muscles ??
-          raw.muscles,
-
-        sequenceNumber:
-          Number(raw.sequenceNumber),
-
-        defaultSets:
-          setsCountValue,
-
-        defaultReps:
-          String(repsValue),
-
-        defaultRestTimeSeconds:
-          restValue,
-
-        durationMinutes:
-          durationValue,
-
-        defaultWeight:
-          weightValue,
-
-        sets,
-
-        reps:
-          getNumber(
-            repsValue,
-            10
-          ),
-
-        rest:
-          restValue,
-      };
-    },
-    []
-  );
-
-  // ---------------------------------------------------------------------------
-  // Load workout
-  // ---------------------------------------------------------------------------
-
-  const loadWorkoutData =
+  const loadTemplate =
     useCallback(async () => {
-      if (!workoutId) {
+      if (!templateId) {
         setLoading(false);
         return;
       }
@@ -264,627 +64,401 @@ export function useWorkoutBuilder(
       try {
         setLoading(true);
 
-        const [
-          workoutRes,
-          exercisesRes,
-        ] = await Promise.all([
-          programService.getWorkoutDetail(
-            workoutId
-          ),
-          programService.getExercises(),
-        ]);
+        const res =
+          await programService.getTemplateDetail(
+            templateId
+          );
 
-        const fetchedWorkout =
-          workoutRes.data.data as ApiWorkoutDetail;
+        const fetchedTemplate =
+          res?.data?.data ??
+          res?.data ??
+          {};
 
-        const fetchedLibrary =
-          exercisesRes.data.data
-            ?.exercises ??
-          exercisesRes.data.data ??
-          [];
-
-        const normalizedLibrary =
-          fetchedLibrary as LibraryExercise[];
-
-        const normalizedExercises =
-          (
-            fetchedWorkout.exercises ??
-            []
+        const fetchedWeeks =
+          Array.isArray(
+            fetchedTemplate.weeks
           )
-            .map((exercise) =>
-              normalizeExercise(
-                exercise,
-                normalizedLibrary
-              )
-            )
-            .sort(
-              (a, b) =>
-                a.sequenceNumber -
-                b.sequenceNumber
-            );
+            ? fetchedTemplate.weeks
+            : [];
 
-        setWorkout({
-          ...fetchedWorkout,
-          exercises:
-            normalizedExercises,
+        setTemplate({
+          ...fetchedTemplate,
+
+          // Always keep this field synchronized
+          // with the actual detail response.
+          durationWeekTemplates:
+            fetchedWeeks.length,
         });
 
-        setWorkoutNameInput(
-          fetchedWorkout.name ??
-            "Workout Session"
-        );
-
-        setLibraryExercises(
-          normalizedLibrary
-        );
-
-        setExercises(
-          normalizedExercises
+        setWeeks(
+          fetchedWeeks
         );
       } catch (err) {
         console.error(
-          "Failed to load workout details",
+          "Failed to load template layout",
           err
         );
       } finally {
         setLoading(false);
       }
-    }, [
-      normalizeExercise,
-      workoutId,
-    ]);
+    }, [templateId]);
 
   useEffect(() => {
-    void loadWorkoutData();
-  }, [loadWorkoutData]);
+    // Initial template loading intentionally updates hook state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadTemplate();
+  }, [loadTemplate]);
 
   // ---------------------------------------------------------------------------
-  // Exercise library selection
+  // Display data
   // ---------------------------------------------------------------------------
 
-  const toggleSelectExercise = (
-    id: number
-  ) => {
-    setSelectedExerciseIds(
-      (current) =>
-        current.includes(id)
-          ? current.filter(
-              (item) => item !== id
-            )
-          : [...current, id]
-    );
-  };
+  const displayTitle =
+    template?.name ||
+    "Untitled Template";
+
+  const displayDesc =
+    template?.description ||
+    "No description provided.";
 
   // ---------------------------------------------------------------------------
-  // Add exercises
+  // Save Draft
   // ---------------------------------------------------------------------------
 
-  const handleAddSelectedExercises =
+  const handleSaveDraft =
     async () => {
-      if (
-        selectedExerciseIds.length ===
-        0
-      ) {
+      if (!templateId) {
         return;
       }
 
       try {
-        let nextSequence =
-          exercises.length + 1;
-
-        for (const exerciseId of
-          selectedExerciseIds) {
-          const alreadyAssigned =
-            exercises.some(
-              (exercise) =>
-                exercise.exerciseId ===
-                exerciseId
-            );
-
-          if (alreadyAssigned) {
-            continue;
-          }
-
-          await programService.addExerciseToWorkout(
-            {
-              workoutTemplateId:
-                workoutId,
-
-              exerciseId,
-
-              sequenceNumber:
-                nextSequence,
-
-              defaultSets: 3,
-
-              defaultReps: "10",
-
-              defaultRestTimeSeconds:
-                60,
-
-              defaultDurationMinutes:
-                1,
-
-              defaultWeight: 0,
-            }
+        /*
+         * The backend already owns the weeks.
+         *
+         * Refresh once more before leaving so the local
+         * representation is based on the real backend state.
+         */
+        const res =
+          await programService.getTemplateDetail(
+            templateId
           );
 
-          nextSequence += 1;
-        }
+        const freshTemplate =
+          res?.data?.data ??
+          res?.data ??
+          {};
 
-        await loadWorkoutData();
+        const freshWeeks =
+          Array.isArray(
+            freshTemplate.weeks
+          )
+            ? freshTemplate.weeks
+            : [];
 
-        setSelectedExerciseIds([]);
-        setSearchQuery("");
-        setIsModalOpen(false);
-      } catch (err) {
-        console.error(
-          "Failed to add exercises",
-          err
-        );
-      }
-    };
+        dispatch(
+          upsertTemplate({
+            id: templateId,
 
-  // ---------------------------------------------------------------------------
-  // Remove exercise
-  // ---------------------------------------------------------------------------
+            name:
+              freshTemplate.name ??
+              displayTitle,
 
-  const handleRemoveExercise =
-    async (
-      exerciseTemplateId: number
-    ) => {
-      try {
-        await programService.deleteWorkoutExercise(
-          exerciseTemplateId
-        );
+            description:
+              freshTemplate.description ??
+              displayDesc,
 
-        await loadWorkoutData();
-      } catch (err) {
-        console.error(
-          "Failed to remove exercise",
-          err
-        );
-      }
-    };
+            status:
+              freshTemplate.status ??
+              "DRAFT",
 
-  // ---------------------------------------------------------------------------
-  // Persist exercise order
-  // ---------------------------------------------------------------------------
+            durationWeekTemplates:
+              freshWeeks.length,
 
-  const persistExerciseOrder =
-    async (
-      updatedExercises: AssignedExercise[]
-    ) => {
-      const ordered =
-        updatedExercises.map(
-          (exercise, index) => ({
-            id: exercise.id,
+            isFav:
+              freshTemplate.isFav ??
+              template?.isFav ??
+              false,
 
-            sequenceNumber:
-              index + 1,
+            weeks:
+              freshWeeks,
           })
         );
 
-      try {
-        await programService.reorderExercises(
-          workoutId,
-          ordered
+        router.push(
+          `/trainer/templates`
         );
-
-        await loadWorkoutData();
       } catch (err) {
         console.error(
-          "Failed to save exercise reordering",
+          "Failed to refresh template before leaving",
           err
         );
 
-        // Reload the real backend state so a failed
-        // reorder does not leave the UI showing a
-        // state that was never persisted.
-        await loadWorkoutData();
+        /*
+         * Keep the existing local state as a fallback.
+         */
+        dispatch(
+          upsertTemplate({
+            id: templateId,
+
+            name:
+              displayTitle,
+
+            description:
+              displayDesc,
+
+            status:
+              "DRAFT",
+
+            durationWeekTemplates:
+              weeks.length,
+
+            isFav:
+              template?.isFav ??
+              false,
+
+            weeks,
+          })
+        );
+
+        router.push(
+          `/trainer/templates`
+        );
       }
     };
 
   // ---------------------------------------------------------------------------
-  // Move exercise up/down
+  // Add Week
   // ---------------------------------------------------------------------------
 
-  const handleMoveExercise = (
-    index: number,
-    direction: "up" | "down"
-  ) => {
-    const newIndex =
-      direction === "up"
-        ? index - 1
-        : index + 1;
-
-    if (
-      newIndex < 0 ||
-      newIndex >= exercises.length
-    ) {
-      return;
-    }
-
-    const updated = [
-      ...exercises,
-    ];
-
-    const temp =
-      updated[index];
-
-    updated[index] =
-      updated[newIndex];
-
-    updated[newIndex] =
-      temp;
-
-    setExercises(
-      updated
-    );
-
-    void persistExerciseOrder(
-      updated
-    );
-  };
-
-  // ---------------------------------------------------------------------------
-  // Drag/drop
-  // ---------------------------------------------------------------------------
-
-  const handleDragStart = (
-    e: DragEvent,
-    index: number
-  ) => {
-    setDraggedIndex(index);
-
-    e.dataTransfer.effectAllowed =
-      "move";
-  };
-
-  const handleDragOver = (
-    e: DragEvent
-  ) => {
-    e.preventDefault();
-
-    e.dataTransfer.dropEffect =
-      "move";
-  };
-
-  const handleDrop = (
-    e: DragEvent,
-    dropIndex: number
-  ) => {
-    e.preventDefault();
-
-    if (
-      draggedIndex === null ||
-      draggedIndex === dropIndex
-    ) {
-      return;
-    }
-
-    const updated = [
-      ...exercises,
-    ];
-
-    const [
-      movedItem,
-    ] = updated.splice(
-      draggedIndex,
-      1
-    );
-
-    if (!movedItem) {
-      setDraggedIndex(null);
-      return;
-    }
-
-    updated.splice(
-      dropIndex,
-      0,
-      movedItem
-    );
-
-    setExercises(
-      updated
-    );
-
-    void persistExerciseOrder(
-      updated
-    );
-
-    setDraggedIndex(null);
-  };
-
-  // ---------------------------------------------------------------------------
-  // Workout name
-  // ---------------------------------------------------------------------------
-
-  const handleSaveWorkoutName =
+  const handleAddWeek =
     async () => {
+      if (!templateId) {
+        return;
+      }
+
+      try {
+        /*
+         * Backend sequence numbers are 1-based.
+         */
+        const sequenceNumber =
+          weeks.length + 1;
+
+        const res =
+          await programService.createWeek(
+            {
+              sequenceNumber,
+
+              planTemplateId:
+                templateId,
+            }
+          );
+
+        const newWeek =
+          res?.data?.data ??
+          res?.data ??
+          {};
+
+        const newWeekId =
+          Number(
+            newWeek.weekId ??
+              newWeek.id
+          );
+
+        if (
+          !Number.isFinite(
+            newWeekId
+          ) ||
+          newWeekId <= 0
+        ) {
+          throw new Error(
+            "Create week response did not contain a valid week ID."
+          );
+        }
+
+        /*
+         * Do not manufacture a local week object.
+         *
+         * Re-fetch the template so both the week list and
+         * durationWeekTemplates come from the backend.
+         */
+        const refreshed =
+          await programService.getTemplateDetail(
+            templateId
+          );
+
+        const refreshedTemplate =
+          refreshed?.data?.data ??
+          refreshed?.data ??
+          {};
+
+        const refreshedWeeks =
+          Array.isArray(
+            refreshedTemplate.weeks
+          )
+            ? refreshedTemplate.weeks
+            : [];
+
+        setTemplate({
+          ...refreshedTemplate,
+
+          durationWeekTemplates:
+            refreshedWeeks.length,
+        });
+
+        setWeeks(
+          refreshedWeeks
+        );
+
+        router.push(
+          `/trainer/template/${templateId}/${newWeekId}`
+        );
+      } catch (err) {
+        console.error(
+          "Failed to create week",
+          err
+        );
+      }
+    };
+
+  // ---------------------------------------------------------------------------
+  // Duplicate Week
+  // ---------------------------------------------------------------------------
+
+  const handleDuplicateWeek =
+    async (
+      weekIdToDuplicate: number
+    ) => {
+      try {
+        await programService.duplicateWeek(
+          weekIdToDuplicate
+        );
+
+        await loadTemplate();
+      } catch (err) {
+        console.error(
+          "Failed to duplicate week",
+          err
+        );
+      }
+    };
+
+  // ---------------------------------------------------------------------------
+  // Delete Week
+  // ---------------------------------------------------------------------------
+
+  const handleDeleteWeek =
+    async (
+      weekIdToDelete: number
+    ) => {
+      const weekIndex =
+        weeks.findIndex(
+          (week) =>
+            Number(week.id) ===
+            Number(
+              weekIdToDelete
+            )
+        );
+
       if (
-        !workoutNameInput.trim() ||
-        !workout
+        !window.confirm(
+          `Delete Week ${
+            weekIndex + 1
+          }? This will also delete all workout days inside it.`
+        )
       ) {
         return;
       }
 
       try {
-        const updatedName =
-          workoutNameInput.trim();
-
-        await programService.updateWorkout(
-          workoutId,
-          {
-            name: updatedName,
-          }
+        await programService.deleteWeek(
+          weekIdToDelete
         );
 
-        setWorkout({
-          ...workout,
-          name: updatedName,
-        });
+        /*
+         * Refresh from backend rather than only removing the
+         * week from local state. This guarantees the count
+         * matches the actual database.
+         */
+        await loadTemplate();
 
-        window.dispatchEvent(
-          new CustomEvent(
-            "workoutNameUpdated",
-            {
-              detail: {
-                workoutId,
-                name: updatedName,
-              },
-            }
-          )
-        );
-
-        setIsEditingWorkoutName(
-          false
-        );
+        if (
+          weekId ===
+          weekIdToDelete
+        ) {
+          router.push(
+            `/trainer/template/${templateId}`
+          );
+        }
       } catch (err) {
         console.error(
-          "Failed to update workout name",
+          "Failed to delete week",
           err
         );
       }
     };
 
   // ---------------------------------------------------------------------------
-  // Edit exercise
+  // Publish modal
   // ---------------------------------------------------------------------------
 
-  const handleEditExercise = (
-    exercise: AssignedExercise,
-    setsLen: number,
-    repsVal: number,
-    restVal: number,
-    durationVal?: number
-  ) => {
-    setEditingExercise(
-      exercise
-    );
-
-    setSetsCount(
-      Math.max(1, setsLen)
-    );
-
-    setRepsCount(
-      repsVal
-    );
-
-    setRestTime(
-      Math.max(0, restVal)
-    );
-
-    setWeight(
-      exercise.defaultWeight ??
-        (Array.isArray(
-          exercise.sets
-        )
-          ? exercise.sets[0]?.weight
-          : 0) ??
-        0
-    );
-
-    setDurationMinutes(
-      Math.max(
-        1,
-        durationVal ??
-          exercise.durationMinutes ??
-          1
-      )
-    );
-  };
-
-  // ---------------------------------------------------------------------------
-  // Save exercise configuration
-  // ---------------------------------------------------------------------------
-
-  const handleSaveReps =
-    async () => {
-      if (!editingExercise) {
-        return;
-      }
-
-      const finalSetsCount =
-        Math.max(
-          1,
-          Math.floor(
-            setsCount === ""
-              ? 3
-              : getNumber(
-                  setsCount,
-                  3
-                )
-          )
-        );
-
-      const finalRepsValue =
-        repsCount === ""
-          ? "10"
-          : String(
-              repsCount
-            );
-
-      const finalRestTime =
-        Math.max(
-          0,
-          Math.floor(
-            restTime === ""
-              ? 60
-              : getNumber(
-                  restTime,
-                  60
-                )
-          )
-        );
-
-      const finalWeight =
-        Math.max(
-          0,
-          weight === ""
-            ? 0
-            : getNumber(
-                weight,
-                0
-              )
-        );
-
-      const finalDurationMinutes =
-        Math.max(
-          1,
-          Math.floor(
-            durationMinutes ===
-              ""
-              ? 1
-              : getNumber(
-                  durationMinutes,
-                  1
-                )
-          )
-        );
-
-      try {
-        await programService.updateWorkoutExercise(
-          editingExercise.id,
-          {
-            defaultSets:
-              finalSetsCount,
-
-            defaultReps:
-              finalRepsValue,
-
-            defaultRestTimeSeconds:
-              finalRestTime,
-
-            defaultDurationMinutes:
-              finalDurationMinutes,
-
-            defaultWeight:
-              finalWeight,
-          }
-        );
-
-        await loadWorkoutData();
-
-        setEditingExercise(
-          null
-        );
-      } catch (err) {
-        console.error(
-          "Failed to update exercise parameters",
-          err
-        );
-      }
+  const openPublishModal =
+    () => {
+      setIsPublishModalOpen(
+        true
+      );
     };
 
-  // ---------------------------------------------------------------------------
-  // Derived data
-  // ---------------------------------------------------------------------------
+  const closePublishModal =
+    () => {
+      setIsPublishModalOpen(
+        false
+      );
+    };
 
-  const assignedExerciseIds =
-    exercises.map(
-      (exercise) =>
-        exercise.exerciseId
-    );
-
-  const filteredLibrary =
-    libraryExercises.filter(
-      (libraryExercise) =>
-        libraryExercise.name
-          .toLowerCase()
-          .includes(
-            searchQuery.toLowerCase()
-          )
-    );
+  const handlePublishSuccess =
+    () => {
+      router.push(
+        `/trainer/templates`
+      );
+    };
 
   // ---------------------------------------------------------------------------
   // Return
   // ---------------------------------------------------------------------------
 
   return {
-    workout,
+    templateId,
 
-    exercises,
+    weekId,
 
-    libraryExercises,
+    template,
+
+    weeks,
 
     loading,
 
-    isModalOpen,
-    setIsModalOpen,
+    displayTitle,
 
-    selectedExerciseIds,
+    displayDesc,
 
-    searchQuery,
-    setSearchQuery,
+    isPublishModalOpen,
 
-    editingExercise,
-    setEditingExercise,
+    setIsPublishModalOpen,
 
-    setsCount,
-    setSetsCount,
+    openPublishModal,
 
-    repsCount,
-    setRepsCount,
+    closePublishModal,
 
-    restTime,
-    setRestTime,
+    handleSaveDraft,
 
-    weight,
-    setWeight,
+    handleAddWeek,
 
-    durationMinutes,
-    setDurationMinutes,
+    handleDuplicateWeek,
 
-    isEditingWorkoutName,
+    handleDeleteWeek,
 
-    workoutNameInput,
-    setWorkoutNameInput,
+    handlePublishSuccess,
 
-    setIsEditingWorkoutName,
-
-    assignedExerciseIds,
-
-    filteredLibrary,
-
-    toggleSelectExercise,
-
-    handleAddSelectedExercises,
-
-    handleRemoveExercise,
-
-    handleMoveExercise,
-
-    handleDragStart,
-
-    handleDragOver,
-
-    handleDrop,
-
-    handleSaveWorkoutName,
-
-    handleEditExercise,
-
-    handleSaveReps,
+    router,
   };
 }
