@@ -5,13 +5,58 @@ export type TraineeStatus =
   | "FALLING_BEHIND"
   | "NEEDS_PLAN";
 
+export interface TraineePlan {
+  planId: number;
+  status: string;
+  adherencePercentage: number;
+  template: {
+    templateName: string;
+    templateId: number;
+  };
+  lastSession: {
+    status: string;
+    startedAt: string | null;
+  } | null;
+  planAdherenceStatus: TraineeStatus;
+}
+
+/**
+ * Trainee shape used throughout the trainer frontend.
+ *
+ * The trainee-management components consume the API fields:
+ * - traineeId
+ * - traineeName
+ * - traineeStatus
+ * - plans
+ * - email
+ *
+ * Other existing trainer functionality uses the normalized fields:
+ * - id
+ * - name
+ * - adherence
+ * - programName
+ * - lastSessionDate
+ * - status
+ * - assignedPlanTemplateIds
+ *
+ * The Redux mapping preserves both representations.
+ */
 export interface Trainee {
+  // API / trainee-management fields
+  traineeId: number;
+  traineeName: string;
+  traineeStatus: TraineeStatus;
+  plans: TraineePlan[];
+  email?: string;
+
+  // Existing normalized trainer fields
   id: number;
   name: string;
   adherence: number;
   programName: string;
   lastSessionDate: string | null;
   status: TraineeStatus;
+  assignedPlanTemplateIds: number[];
 }
 
 export interface OffsetPagination {
@@ -25,20 +70,8 @@ export interface GetTraineesApiItem {
   traineeId: number;
   traineeName: string;
   traineeStatus: TraineeStatus;
-  plans: Array<{
-    planId: number;
-    status: string;
-    adherencePercentage: number;
-    template: {
-      templateName: string;
-      templateId: number;
-    };
-    lastSession: {
-      status: string;
-      startedAt: string | null;
-    } | null;
-    planAdherenceStatus: TraineeStatus;
-  }>;
+  plans: TraineePlan[];
+  email?: string;
 }
 
 export interface GetTraineesResponse {
@@ -123,14 +156,4 @@ export interface TraineeDetailedInfo {
   traineeProfile: TraineeProfile;
   personalRecords: PersonalRecord[];
   progression: ProgressionEntry[];
-}
-
-export interface Trainee {
-  id: number;
-  name: string;
-  adherence: number;
-  programName: string;
-  lastSessionDate: string | null;
-  status: TraineeStatus;
-  assignedPlanTemplateIds: number[];
 }

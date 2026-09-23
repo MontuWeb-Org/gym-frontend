@@ -142,40 +142,55 @@ const traineesSlice = createSlice({
            *   }
            * ]
            *
-           * The rest of the frontend expects the
-           * normalized Trainee shape, so map it here.
+           * Keep both:
+           * 1. The original API fields used directly by the
+           *    trainee-management components.
+           * 2. The existing normalized fields used elsewhere
+           *    in the trainer feature.
            */
-         state.trainees = action.payload.data.map(
-  (trainee) => {
-    const activePlan = trainee.plans?.[0];
+          state.trainees = action.payload.data.map(
+            (trainee) => {
+              const activePlan = trainee.plans?.[0];
 
-    return {
-      id: trainee.traineeId,
-      name: trainee.traineeName,
-      status: trainee.traineeStatus,
-      adherence:
-        activePlan?.adherencePercentage ?? 0,
-      programName:
-        activePlan?.template?.templateName ?? "",
-      lastSessionDate:
-        activePlan?.lastSession?.startedAt ?? null,
+              return {
+                // API fields
+                traineeId: trainee.traineeId,
+                traineeName: trainee.traineeName,
+                traineeStatus: trainee.traineeStatus,
+                plans: trainee.plans ?? [],
+                email: trainee.email,
 
-      assignedPlanTemplateIds:
-        trainee.plans?.map(
-          (plan) => plan.template.templateId
-        ) ?? [],
-    };
-  }
-);
+                // Existing normalized fields
+                id: trainee.traineeId,
+                name: trainee.traineeName,
+                status: trainee.traineeStatus,
+                adherence:
+                  activePlan?.adherencePercentage ?? 0,
+                programName:
+                  activePlan?.template?.templateName ?? "",
+                lastSessionDate:
+                  activePlan?.lastSession?.startedAt ?? null,
+
+                assignedPlanTemplateIds:
+                  trainee.plans?.map(
+                    (plan) =>
+                      plan.template.templateId
+                  ) ?? [],
+              };
+            }
+          );
 
           /*
            * Backend uses `totalItems`.
            * Frontend state uses `total`.
            */
           state.pagination = {
-            total: action.payload.pagination.totalItems,
-            page: action.payload.pagination.page,
-            limit: action.payload.pagination.limit,
+            total:
+              action.payload.pagination.totalItems,
+            page:
+              action.payload.pagination.page,
+            limit:
+              action.payload.pagination.limit,
             totalPages:
               action.payload.pagination.totalPages,
           };
