@@ -1,19 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
+
 import { useAppDispatch } from "@/store/hooks";
+
 import {
   upsertTemplate,
   PlanTemplate,
   WeekTemplate,
 } from "../store/program.slice";
+
 import { programService } from "../services/program.service";
 
 export function useTemplateBuilder() {
   const params = useParams();
+
   const router = useRouter();
+
   const dispatch = useAppDispatch();
 
   const templateId =
@@ -41,11 +51,11 @@ export function useTemplateBuilder() {
   ] = useState(false);
 
   // ---------------------------------------------------------------------------
-  // Load Template
+  // Load template from backend
   // ---------------------------------------------------------------------------
 
-  useEffect(() => {
-    async function loadTemplate() {
+  const loadTemplate =
+    useCallback(async () => {
       if (!templateId) {
         setLoading(false);
         return;
@@ -60,17 +70,28 @@ export function useTemplateBuilder() {
           );
 
         const fetchedTemplate =
-          res?.data?.data ||
-          res?.data ||
+          res?.data?.data ??
+          res?.data ??
           {};
 
-        setTemplate(
-          fetchedTemplate
-        );
+        const fetchedWeeks =
+          Array.isArray(
+            fetchedTemplate.weeks
+          )
+            ? fetchedTemplate.weeks
+            : [];
+
+        setTemplate({
+          ...fetchedTemplate,
+
+          // Always keep this field synchronized
+          // with the actual detail response.
+          durationWeekTemplates:
+            fetchedWeeks.length,
+        });
 
         setWeeks(
-          fetchedTemplate.weeks ||
-            []
+          fetchedWeeks
         );
       } catch (err) {
         console.error(
@@ -80,13 +101,14 @@ export function useTemplateBuilder() {
       } finally {
         setLoading(false);
       }
-    }
+    }, [templateId]);
 
-    loadTemplate();
-  }, [templateId]);
+  useEffect(() => {
+    void loadTemplate();
+  }, [loadTemplate]);
 
   // ---------------------------------------------------------------------------
-  // Display Data
+  // Display data
   // ---------------------------------------------------------------------------
 
   const displayTitle =
@@ -101,28 +123,106 @@ export function useTemplateBuilder() {
   // Save Draft
   // ---------------------------------------------------------------------------
 
-  const handleSaveDraft = () => {
-    if (templateId) {
-      dispatch(
-        upsertTemplate({
-          id: templateId,
-          name: displayTitle,
-          description: displayDesc,
-          status: "DRAFT",
-          durationWeekTemplates:
-            weeks.length,
-          isFav:
-            template?.isFav ??
-            false,
-          weeks,
-        })
-      );
-    }
+  const handleSaveDraft =
+    async () => {
+      if (!templateId) {
+        return;
+      }
 
-    router.push(
-      `/trainer/templates`
-    );
-  };
+      try {
+        /*
+         * The backend already owns the weeks.
+         *
+         * Refresh once more before leaving so the local
+         * representation is based on the real backend state.
+         */
+        const res =
+          await programService.getTemplateDetail(
+            templateId
+          );
+
+        const freshTemplate =
+          res?.data?.data ??
+          res?.data ??
+          {};
+
+        const freshWeeks =
+          Array.isArray(
+            freshTemplate.weeks
+          )
+            ? freshTemplate.weeks
+            : [];
+
+        dispatch(
+          upsertTemplate({
+            id: templateId,
+
+            name:
+              freshTemplate.name ??
+              displayTitle,
+
+            description:
+              freshTemplate.description ??
+              displayDesc,
+
+            status:
+              freshTemplate.status ??
+              "DRAFT",
+
+            durationWeekTemplates:
+              freshWeeks.length,
+
+            isFav:
+              freshTemplate.isFav ??
+              template?.isFav ??
+              false,
+
+            weeks:
+              freshWeeks,
+          })
+        );
+
+        router.push(
+          `/trainer/templates`
+        );
+      } catch (err) {
+        console.error(
+          "Failed to refresh template before leaving",
+          err
+        );
+
+        /*
+         * Keep the existing local state as a fallback.
+         */
+        dispatch(
+          upsertTemplate({
+            id: templateId,
+
+            name:
+              displayTitle,
+
+            description:
+              displayDesc,
+
+            status:
+              "DRAFT",
+
+            durationWeekTemplates:
+              weeks.length,
+
+            isFav:
+              template?.isFav ??
+              false,
+
+            weeks,
+          })
+        );
+
+        router.push(
+          `/trainer/templates`
+        );
+      }
+    };
 
   // ---------------------------------------------------------------------------
   // Add Week
@@ -130,22 +230,30 @@ export function useTemplateBuilder() {
 
   const handleAddWeek =
     async () => {
+      if (!templateId) {
+        return;
+      }
+
       try {
+        /*
+         * Backend sequence numbers are 1-based.
+         */
         const sequenceNumber =
-          weeks.length;
+          weeks.length + 1;
 
         const res =
           await programService.createWeek(
             {
               sequenceNumber,
+
               planTemplateId:
                 templateId,
             }
           );
 
         const newWeek =
-          res?.data?.data ||
-          res?.data ||
+          res?.data?.data ??
+          res?.data ??
           {};
 
         const newWeekId =
@@ -154,35 +262,49 @@ export function useTemplateBuilder() {
               newWeek.id
           );
 
-        if (!Number.isFinite(newWeekId)) {
-          throw new Error("Create week response did not contain a week ID.");
+        if (
+          !Number.isFinite(
+            newWeekId
+          ) ||
+          newWeekId <= 0
+        ) {
+          throw new Error(
+            "Create week response did not contain a valid week ID."
+          );
         }
 
-        const updatedWeeks: WeekTemplate[] =
-          [
-            ...weeks,
-            {
-              id: newWeekId,
-              name:
-                newWeek.name ||
-                `Week ${
-                  weeks.length + 1
-                }`,
-              sequenceNumber,
-              durationMinutes:
-                newWeek.durationMinutes ||
-                0,
-              workoutTemplateCount:
-                newWeek.workoutTemplateCount ||
-                0,
-              workouts:
-                newWeek.workouts ||
-                [],
-            },
-          ];
+        /*
+         * Do not manufacture a local week object.
+         *
+         * Re-fetch the template so both the week list and
+         * durationWeekTemplates come from the backend.
+         */
+        const refreshed =
+          await programService.getTemplateDetail(
+            templateId
+          );
+
+        const refreshedTemplate =
+          refreshed?.data?.data ??
+          refreshed?.data ??
+          {};
+
+        const refreshedWeeks =
+          Array.isArray(
+            refreshedTemplate.weeks
+          )
+            ? refreshedTemplate.weeks
+            : [];
+
+        setTemplate({
+          ...refreshedTemplate,
+
+          durationWeekTemplates:
+            refreshedWeeks.length,
+        });
 
         setWeeks(
-          updatedWeeks
+          refreshedWeeks
         );
 
         router.push(
@@ -209,24 +331,7 @@ export function useTemplateBuilder() {
           weekIdToDuplicate
         );
 
-        const res =
-          await programService.getTemplateDetail(
-            templateId
-          );
-
-        const fetchedTemplate =
-          res?.data?.data ||
-          res?.data ||
-          {};
-
-        setTemplate(
-          fetchedTemplate
-        );
-
-        setWeeks(
-          fetchedTemplate.weeks ||
-            []
-        );
+        await loadTemplate();
       } catch (err) {
         console.error(
           "Failed to duplicate week",
@@ -246,8 +351,10 @@ export function useTemplateBuilder() {
       const weekIndex =
         weeks.findIndex(
           (week) =>
-            week.id ===
-            weekIdToDelete
+            Number(week.id) ===
+            Number(
+              weekIdToDelete
+            )
         );
 
       if (
@@ -265,16 +372,12 @@ export function useTemplateBuilder() {
           weekIdToDelete
         );
 
-        const updatedWeeks =
-          weeks.filter(
-            (week) =>
-              week.id !==
-              weekIdToDelete
-          );
-
-        setWeeks(
-          updatedWeeks
-        );
+        /*
+         * Refresh from backend rather than only removing the
+         * week from local state. This guarantees the count
+         * matches the actual database.
+         */
+        await loadTemplate();
 
         if (
           weekId ===
@@ -293,7 +396,7 @@ export function useTemplateBuilder() {
     };
 
   // ---------------------------------------------------------------------------
-  // Publish Modal
+  // Publish modal
   // ---------------------------------------------------------------------------
 
   const openPublishModal =
@@ -317,27 +420,41 @@ export function useTemplateBuilder() {
       );
     };
 
+  // ---------------------------------------------------------------------------
+  // Return
+  // ---------------------------------------------------------------------------
+
   return {
     templateId,
+
     weekId,
 
     template,
+
     weeks,
+
     loading,
 
     displayTitle,
+
     displayDesc,
 
     isPublishModalOpen,
 
     setIsPublishModalOpen,
+
     openPublishModal,
+
     closePublishModal,
 
     handleSaveDraft,
+
     handleAddWeek,
+
     handleDuplicateWeek,
+
     handleDeleteWeek,
+
     handlePublishSuccess,
 
     router,

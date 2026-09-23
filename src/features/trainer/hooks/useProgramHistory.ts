@@ -11,10 +11,13 @@ interface Trainee {
 
 interface Assignment {
   id: number;
+  status: "IDLE" | "ACTIVE" | "COMPLETED";
+  startedAt: string | null;
+  endedAt: string | null;
+  currentWeekIdx: number;
+  currentWorkoutIdx: number;
+  adherencePercentage: string | number;
   planTemplateId: number;
-  traineeId: number;
-  createdAt: string;
-  endedAt: string;
 }
 
 interface Template {
@@ -43,35 +46,59 @@ export function useProgramsHistory() {
         setIsLoading(true);
         setError(null);
 
-        const [
-          traineesResponse,
-          assignmentsResponse,
-          templatesResponse,
-        ] = await Promise.all([
-          programService.getTrainees(1, 100),
-          programService.getAssignments(),
-          programService.getTemplates(1, 100),
-        ]);
+        /*
+         * The assignments endpoint does not include traineeId
+         * in each assignment.
+         *
+         * Therefore we first load the trainer's trainees and
+         * then request assignments for each trainee separately.
+         */
+        const traineesResponse =
+  await programService.getTrainees(1, 100);
 
-        if (!isMounted) return;
+console.log(
+  "[Programs] trainees:",
+  traineesResponse.data
+);
 
-        const trainees: Trainee[] =
-          traineesResponse.data?.data?.trainees ?? [];
+const templatesResponse =
+  await programService.getTemplates(1, 100);
 
-        const assignments: Assignment[] =
-          assignmentsResponse.data?.data ?? [];
+console.log(
+  "[Programs] templates:",
+  templatesResponse.data
+);
 
+        if (!isMounted) {
+          return;
+        }
+
+        /*
+         * /api/users/trainer/trainees returns:
+         *
+         * {
+         *   data: [
+         *     {
+         *       traineeId,
+         *       traineeName,
+         *       ...
+         *     }
+         *   ],
+         *   pagination: ...
+         * }
+         */
+        const trainees: Trainee[] = (
+          traineesResponse.data?.data ?? []
+        ).map((trainee: any) => ({
+          id: Number(trainee.traineeId),
+          name: trainee.traineeName,
+        }));
+
+        /*
+         * /api/plans/templates returns the trainer's plan templates.
+         */
         const templates: Template[] =
           templatesResponse.data?.data?.plans ?? [];
-
-        const traineeMap = new Map<number, string>();
-
-        trainees.forEach((trainee) => {
-          traineeMap.set(
-            Number(trainee.id),
-            trainee.name
-          );
-        });
 
         const templateMap = new Map<number, string>();
 
@@ -81,6 +108,10 @@ export function useProgramsHistory() {
             template.name
           );
 
+          /*
+           * Keep support for APIs that expose the template
+           * identifier under planId as well.
+           */
           if (template.planId !== undefined) {
             templateMap.set(
               Number(template.planId),
@@ -89,42 +120,112 @@ export function useProgramsHistory() {
           }
         });
 
-        const historyRows: ProgramHistoryRow[] = assignments
-          .map((assignment) => {
-            const traineeName = traineeMap.get(
-              Number(assignment.traineeId)
-            );
+        /*
+         * Fetch assignments per trainee.
+         *
+         * The backend assignment response does not contain
+         * traineeId, so the trainee currently being queried
+         * provides that relationship.
+         */
+        const traineeAssignments =
+          await Promise.all(
+            trainees.map(async (trainee) => {
+              try {
+                const response =
+                  await programService.getAssignments({
+                    traineeId: trainee.id,
+                    pageNumber: 1,
+                    pageSize: 100,
+                    sortBy: "createdAt",
+                    sortOrder: "desc",
+                  });
 
-            const templateName = templateMap.get(
-              Number(assignment.planTemplateId)
-            );
+                const assignments: Assignment[] =
+                  response.data?.data ?? [];
 
-            if (!traineeName || !templateName) {
-              return null;
-            }
+                return {
+                  trainee,
+                  assignments,
+                };
+              } catch (error) {
+                console.error(
+                  `Failed to load assignments for trainee ${trainee.id}:`,
+                  error
+                );
 
-            return {
-              id: Number(assignment.id),
-              traineeId: Number(assignment.traineeId),
-              traineeName,
-              templateId: Number(
-                assignment.planTemplateId
-              ),
-              templateName,
-              createdAt: assignment.createdAt,
-              endedAt: assignment.endedAt,
-            };
-          })
-          .filter(
-            (row): row is ProgramHistoryRow =>
-              row !== null
+                return {
+                  trainee,
+                  assignments: [],
+                };
+              }
+            })
           );
 
-        historyRows.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() -
-            new Date(a.createdAt).getTime()
+        if (!isMounted) {
+          return;
+        }
+
+        const historyRows: ProgramHistoryRow[] = [];
+
+        traineeAssignments.forEach(
+          ({ trainee, assignments }) => {
+            assignments.forEach((assignment) => {
+              const templateName =
+                templateMap.get(
+                  Number(assignment.planTemplateId)
+                );
+
+              /*
+               * We cannot show a real assignment creation date
+               * because the backend assignment response does not
+               * expose createdAt.
+               *
+               * startedAt is the closest available date.
+               * For IDLE assignments it will be null.
+               */
+              const createdAt =
+                assignment.startedAt ?? "";
+
+              const endedAt =
+                assignment.endedAt ?? "";
+
+              historyRows.push({
+                id: Number(assignment.id),
+
+                traineeId: trainee.id,
+                traineeName: trainee.name,
+
+                templateId: Number(
+                  assignment.planTemplateId
+                ),
+                templateName:
+                  templateName ??
+                  `Plan ${assignment.planTemplateId}`,
+
+                createdAt,
+                endedAt,
+              });
+            });
+          }
         );
+
+        /*
+         * Put newest started assignments first.
+         *
+         * IDLE assignments have no startedAt, so they naturally
+         * go after assignments that have actually started.
+         */
+        historyRows.sort((a, b) => {
+          const aTime = a.createdAt
+            ? new Date(a.createdAt).getTime()
+            : 0;
+
+          const bTime = b.createdAt
+            ? new Date(b.createdAt).getTime()
+            : 0;
+
+          return bTime - aTime;
+        });
 
         setRows(historyRows);
       } catch (err) {
@@ -134,7 +235,10 @@ export function useProgramsHistory() {
         );
 
         if (isMounted) {
-          setError("Failed to load program history.");
+          setError(
+            "Failed to load program history."
+          );
+          setRows([]);
         }
       } finally {
         if (isMounted) {
@@ -160,12 +264,12 @@ export function useProgramsHistory() {
       );
     });
 
-    return Array.from(uniqueTemplates.entries()).map(
-      ([id, name]) => ({
-        id,
-        name,
-      })
-    );
+    return Array.from(
+      uniqueTemplates.entries()
+    ).map(([id, name]) => ({
+      id,
+      name,
+    }));
   }, [rows]);
 
   return {

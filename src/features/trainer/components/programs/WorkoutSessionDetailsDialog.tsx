@@ -63,7 +63,7 @@ export default function WorkoutSessionDetailsDialog({
           selectedWorkoutLog && (
             <div className="space-y-6">
               {/* Session Summary */}
-              <div className="grid gap-4 sm:grid-cols-[1fr_1fr_2fr]">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-lg border p-4">
                   <p className="text-sm font-medium">
                     Status
@@ -80,32 +80,24 @@ export default function WorkoutSessionDetailsDialog({
                   </p>
 
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {selectedWorkoutLog.durationMinutes}{" "}
+                    {Math.round(
+                      selectedWorkoutLog.durationMinutes
+                    )}{" "}
                     min
                   </p>
                 </div>
 
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm font-medium">
-                    Session ID
-                  </p>
-
-                  <p className="mt-1 break-all text-sm text-muted-foreground">
-                    {selectedWorkoutLog.id}
-                  </p>
-                </div>
-
                 {selectedWorkoutLog.notes && (
-                  <div className="rounded-lg border p-4 sm:col-span-3">
-                    <p className="text-sm font-medium">
-                      Notes
-                    </p>
+  <div className="rounded-lg border p-4 sm:col-span-2 min-h-[100px]">
+    <p className="text-sm font-medium">
+      Notes
+    </p>
 
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {selectedWorkoutLog.notes}
-                    </p>
-                  </div>
-                )}
+    <p className="mt-2 text-sm text-muted-foreground">
+      {selectedWorkoutLog.notes}
+    </p>
+  </div>
+)}
               </div>
 
               {/* Exercises */}
@@ -114,8 +106,8 @@ export default function WorkoutSessionDetailsDialog({
                   Exercises
                 </h3>
 
-                {selectedWorkoutLog.exerciseLogs
-                  .length === 0 ? (
+                {selectedWorkoutLog.exerciseLogs.length ===
+                0 ? (
                   <p className="text-sm text-muted-foreground">
                     No exercise logs found.
                   </p>
@@ -134,12 +126,9 @@ export default function WorkoutSessionDetailsDialog({
 
                             <p className="text-sm text-muted-foreground">
                               Expected:{" "}
-                              {exercise.expectedSets}{" "}
-                              sets ×{" "}
-                              {exercise.expectedReps}{" "}
-                              reps
-                              {exercise.expectedWeight >
-                                0 &&
+                              {exercise.expectedSets} sets ×{" "}
+                              {exercise.expectedReps} reps
+                              {exercise.expectedWeight > 0 &&
                                 ` × ${exercise.expectedWeight} kg`}
                             </p>
                           </div>
@@ -147,8 +136,7 @@ export default function WorkoutSessionDetailsDialog({
                           <p className="text-sm text-muted-foreground">
                             Duration:{" "}
                             {Math.round(
-                              exercise.durationSeconds /
-                                60
+                              exercise.durationSeconds / 60
                             )}{" "}
                             min
                           </p>
@@ -185,9 +173,7 @@ export default function WorkoutSessionDetailsDialog({
                                     className="border-b last:border-0"
                                   >
                                     <td className="px-3 py-2">
-                                      {
-                                        setLog.sequenceNumber
-                                      }
+                                      {setLog.sequenceNumber}
                                     </td>
 
                                     <td className="px-3 py-2">
@@ -199,10 +185,7 @@ export default function WorkoutSessionDetailsDialog({
                                     </td>
 
                                     <td className="px-3 py-2">
-                                      {
-                                        setLog.restTimeSeconds
-                                      }{" "}
-                                      sec
+                                      {setLog.restTimeSeconds} sec
                                     </td>
                                   </tr>
                                 )

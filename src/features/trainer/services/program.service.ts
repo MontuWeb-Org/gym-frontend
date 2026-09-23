@@ -66,7 +66,13 @@ export const programService = {
   }) =>
     authApi.post(
       "/api/plans/templates/weeks",
-      data
+      {
+        ...data,
+        sequenceNumber: Math.max(
+          1,
+          Math.floor(data.sequenceNumber)
+        ),
+      }
     ),
 
   getWeekDetail: (
@@ -101,7 +107,13 @@ export const programService = {
   }) =>
     authApi.post(
       "/api/plans/templates/workouts",
-      data
+      {
+        ...data,
+        sequenceNumber: Math.max(
+          1,
+          Math.floor(data.sequenceNumber)
+        ),
+      }
     ),
 
   updateWorkout: (
@@ -113,7 +125,17 @@ export const programService = {
   ) =>
     authApi.put(
       `/api/plans/templates/workouts/${workoutId}`,
-      data
+      {
+        ...data,
+        ...(data.sequenceNumber !== undefined
+          ? {
+              sequenceNumber: Math.max(
+                1,
+                Math.floor(data.sequenceNumber)
+              ),
+            }
+          : {}),
+      }
     ),
 
   getWorkoutDetail: (
@@ -137,8 +159,8 @@ export const programService = {
       `/api/plans/templates/workouts/${workoutId}`
     ),
 
-   // ---------------------------------------------------------------------------
-  // Exercise Library & Workout Exercises
+  // ---------------------------------------------------------------------------
+  // Exercise Library
   // ---------------------------------------------------------------------------
 
   getExercises: (
@@ -149,12 +171,10 @@ export const programService = {
       `/api/exercises?page=${page}&limit=${limit}`
     ),
 
-  /**
-   * Attach an existing library exercise to one workout/day.
-   *
-   * The real API returns only a success message (201); it does
-   * NOT return the newly-created ExerciseTemplate.
-   */
+  // ---------------------------------------------------------------------------
+  // Workout Exercises
+  // ---------------------------------------------------------------------------
+
   addExerciseToWorkout: (data: {
     exerciseId: number;
     workoutTemplateId: number;
@@ -162,20 +182,47 @@ export const programService = {
     defaultReps: string;
     defaultSets: number;
     defaultRestTimeSeconds: number;
-    durationMinutes: number;
+    defaultDurationMinutes: number;
     defaultWeight: number;
   }) =>
     authApi.post<{
       message: string;
     }>(
       "/api/plans/templates/exercises",
-      data
+      {
+        exerciseId: data.exerciseId,
+        workoutTemplateId:
+          data.workoutTemplateId,
+        sequenceNumber: Math.max(
+          1,
+          Math.floor(data.sequenceNumber)
+        ),
+        defaultReps: String(
+          data.defaultReps
+        ),
+        defaultSets: Math.max(
+          1,
+          Math.floor(data.defaultSets)
+        ),
+        defaultRestTimeSeconds: Math.max(
+          0,
+          Math.floor(
+            data.defaultRestTimeSeconds
+          )
+        ),
+        defaultDurationMinutes: Math.max(
+          1,
+          Math.floor(
+            data.defaultDurationMinutes
+          )
+        ),
+        defaultWeight: Math.max(
+          0,
+          Number(data.defaultWeight)
+        ),
+      }
     ),
 
-  /**
-   * Update the configuration of an existing exercise-template
-   * inside a workout/day.
-   */
   updateWorkoutExercise: (
     exerciseTemplateId: number,
     data: {
@@ -183,7 +230,7 @@ export const programService = {
       defaultReps?: string;
       defaultSets?: number;
       defaultRestTimeSeconds?: number;
-      durationMinutes?: number;
+      defaultDurationMinutes?: number;
       defaultWeight?: number;
     }
   ) =>
@@ -191,7 +238,72 @@ export const programService = {
       message: string;
     }>(
       `/api/plans/templates/exercises/${exerciseTemplateId}`,
-      data
+      {
+        ...(data.sequenceNumber !== undefined
+          ? {
+              sequenceNumber: Math.max(
+                1,
+                Math.floor(
+                  data.sequenceNumber
+                )
+              ),
+            }
+          : {}),
+
+        ...(data.defaultReps !== undefined
+          ? {
+              defaultReps: String(
+                data.defaultReps
+              ),
+            }
+          : {}),
+
+        ...(data.defaultSets !== undefined
+          ? {
+              defaultSets: Math.max(
+                1,
+                Math.floor(
+                  data.defaultSets
+                )
+              ),
+            }
+          : {}),
+
+        ...(data.defaultRestTimeSeconds !==
+        undefined
+          ? {
+              defaultRestTimeSeconds:
+                Math.max(
+                  0,
+                  Math.floor(
+                    data.defaultRestTimeSeconds
+                  )
+                ),
+            }
+          : {}),
+
+        ...(data.defaultDurationMinutes !==
+        undefined
+          ? {
+              defaultDurationMinutes:
+                Math.max(
+                  1,
+                  Math.floor(
+                    data.defaultDurationMinutes
+                  )
+                ),
+            }
+          : {}),
+
+        ...(data.defaultWeight !== undefined
+          ? {
+              defaultWeight: Math.max(
+                0,
+                Number(data.defaultWeight)
+              ),
+            }
+          : {}),
+      }
     ),
 
   deleteWorkoutExercise: (
@@ -201,20 +313,74 @@ export const programService = {
       `/api/plans/templates/exercises/${exerciseTemplateId}`
     ),
 
-  reorderExercises: (
+  reorderExercises: async (
     workoutId: number,
     exercises: Array<{
       id: number;
       sequenceNumber: number;
     }>
-  ) =>
-    authApi.put(
-      `/api/plans/templates/workouts/${workoutId}/exercises/reorder`,
-      { exercises }
-    ),
+  ) => {
+    void workoutId;
+
+    const normalized = exercises.map(
+      (exercise, index) => ({
+        id: Number(exercise.id),
+        sequenceNumber: index + 1,
+      })
+    );
+
+    for (const exercise of normalized) {
+      if (
+        !Number.isInteger(exercise.id) ||
+        exercise.id <= 0
+      ) {
+        throw new Error(
+          `Invalid ExerciseTemplate id: ${exercise.id}`
+        );
+      }
+    }
+
+    for (
+      let index = 0;
+      index < normalized.length;
+      index += 1
+    ) {
+      const exercise =
+        normalized[index];
+
+      await authApi.put<{
+        message: string;
+      }>(
+        `/api/plans/templates/exercises/${exercise.id}`,
+        {
+          sequenceNumber:
+            1000000 + index + 1,
+        }
+      );
+    }
+
+    for (const exercise of normalized) {
+      await authApi.put<{
+        message: string;
+      }>(
+        `/api/plans/templates/exercises/${exercise.id}`,
+        {
+          sequenceNumber:
+            exercise.sequenceNumber,
+        }
+      );
+    }
+
+    return {
+      data: {
+        message:
+          "Exercise order updated successfully",
+      },
+    };
+  },
 
   // ---------------------------------------------------------------------------
-  // Trainees & Plan Assignments
+  // Trainees
   // ---------------------------------------------------------------------------
 
   getTrainees: (
@@ -222,37 +388,110 @@ export const programService = {
     limit = 10
   ) =>
     authApi.get(
-      `/api/users/trainer/trainees?page=${page}&limit=${limit}`
+      "/api/users/trainer/trainees",
+      {
+        params: {
+          page,
+          limit,
+        },
+      }
     ),
 
-  getAssignments: () =>
+  // ---------------------------------------------------------------------------
+  // Plan Assignments
+  // ---------------------------------------------------------------------------
+
+  getAssignments: (params?: {
+    status?: "IDLE" | "ACTIVE" | "COMPLETED";
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: "createdAt" | "totalAmount";
+    sortOrder?: "asc" | "desc";
+    traineeId?: number;
+  }) =>
     authApi.get(
-      "/api/plans/assignments"
+      "/api/plans/assignments",
+      {
+        params: {
+          ...(params?.status !== undefined
+            ? { status: params.status }
+            : {}),
+
+          pageNumber:
+            params?.pageNumber ?? 1,
+
+          pageSize:
+            params?.pageSize ?? 10,
+
+          sortBy:
+            params?.sortBy ?? "createdAt",
+
+          sortOrder:
+            params?.sortOrder ?? "desc",
+
+          ...(params?.traineeId !== undefined
+            ? {
+                traineeId:
+                  params.traineeId,
+              }
+            : {}),
+        },
+      }
     ),
 
+  /**
+   * Assign an existing plan template to a trainee.
+   *
+   * Backend request body:
+   * {
+   *   planTemplateId: number;
+   *   traineeId: number;
+   * }
+   *
+   * The backend creates the assignment dates/status.
+   */
   assignPlan: (data: {
     planTemplateId: number;
     traineeId: number;
-    createdAt: string;
-    endedAt: string;
   }) =>
-    authApi.post(
+    authApi.post<{
+      data: {
+        planAssignmentId: number;
+      };
+    }>(
       "/api/plans/assignments",
       data
     ),
 
-  updateAssignment: (
-    assignmentId: number,
-    data: {
-      createdAt?: string;
-      endedAt?: string;
-    }
+  /**
+   * End an active plan assignment.
+   *
+   * Backend endpoint:
+   * PATCH /api/plans/assignments/:assignmentId/end
+   */
+  endAssignment: (
+    assignmentId: number
   ) =>
-    authApi.put(
-      `/api/plans/assignments/${assignmentId}`,
-      data
+    authApi.patch(
+      `/api/plans/assignments/${assignmentId}/end`
     ),
 
+  /**
+   * Start an IDLE plan assignment.
+   *
+   * Backend endpoint:
+   * PATCH /api/plans/assignments/:assignmentId/start
+   */
+  startAssignment: (
+    assignmentId: number
+  ) =>
+    authApi.patch(
+      `/api/plans/assignments/${assignmentId}/start`
+    ),
+
+  /**
+   * Delete a plan assignment.
+   */
   deleteAssignment: (
     assignmentId: number
   ) =>
@@ -266,10 +505,6 @@ export const programService = {
 
   /**
    * Get all workout session logs for a trainee.
-   *
-   * The returned logs contain planAssignmentId,
-   * so the caller can filter them to a specific
-   * program assignment.
    */
   getWorkoutLogs: (
     traineeId: number
@@ -280,7 +515,7 @@ export const programService = {
 
   /**
    * Get the complete details of one workout session,
-   * including its exercise logs and sets.
+   * including exercise logs and sets.
    */
   getWorkoutLogDetail: (
     workoutLogId: number

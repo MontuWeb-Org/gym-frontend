@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
 import { trainerService } from "../services/trainer.service";
+
 import {
   Trainee,
   TraineeDetailedInfo,
@@ -25,13 +27,24 @@ const initialState: TraineesState = {
 
 export const fetchTrainerTrainees = createAsyncThunk(
   "trainees/fetchTrainerTrainees",
-  async (params: GetTraineesQueryParams | undefined, { rejectWithValue }) => {
+  async (
+    params: GetTraineesQueryParams | undefined,
+    { rejectWithValue }
+  ) => {
     try {
       return await trainerService.getTrainerTrainees(params);
     } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+      const error = err as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+      };
+
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch trainees list"
+        error.response?.data?.message ||
+          "Failed to fetch trainees list"
       );
     }
   }
@@ -39,13 +52,26 @@ export const fetchTrainerTrainees = createAsyncThunk(
 
 export const fetchTraineeDetails = createAsyncThunk(
   "trainees/fetchTraineeDetails",
-  async (traineeId: number, { rejectWithValue }) => {
+  async (
+    traineeId: number,
+    { rejectWithValue }
+  ) => {
     try {
-      return await trainerService.getTraineeDetailedInfo(traineeId);
+      return await trainerService.getTraineeDetailedInfo(
+        traineeId
+      );
     } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+      const error = err as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+      };
+
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch trainee details"
+        error.response?.data?.message ||
+          "Failed to fetch trainee details"
       );
     }
   }
@@ -53,13 +79,26 @@ export const fetchTraineeDetails = createAsyncThunk(
 
 export const deleteTrainee = createAsyncThunk(
   "trainees/deleteTrainee",
-  async (traineeId: number, { rejectWithValue }) => {
+  async (
+    traineeId: number,
+    { rejectWithValue }
+  ) => {
     try {
       await trainerService.DeleteTrainee(traineeId);
+
+      return traineeId;
     } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+      const error = err as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+      };
+
       return rejectWithValue(
-        error.response?.data?.message || "Failed to delete trainee"
+        error.response?.data?.message ||
+          "Failed to delete trainee"
       );
     }
   }
@@ -68,60 +107,156 @@ export const deleteTrainee = createAsyncThunk(
 const traineesSlice = createSlice({
   name: "trainees",
   initialState,
+
   reducers: {
     clearSelectedTrainee: (state) => {
       state.selectedTrainee = null;
     },
   },
+
   extraReducers: (builder) => {
     builder
-      // Fetch List
-      .addCase(fetchTrainerTrainees.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchTrainerTrainees.fulfilled, (state, action) => {
-        state.isLoading = false;
-        // Adjusted to match API structure (data is Trainee[])
-        state.trainees = action.payload.data;
-        state.pagination = action.payload.pagination;
-      })
-      .addCase(fetchTrainerTrainees.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = (action.payload as string) || "An error occurred";
-      })
 
-      // Fetch Details
-      .addCase(fetchTraineeDetails.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchTraineeDetails.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.selectedTrainee = action.payload.data;
-      })
-      .addCase(fetchTraineeDetails.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = (action.payload as string) || "An error occurred";
-      })
+      .addCase(
+        fetchTrainerTrainees.pending,
+        (state) => {
+          state.isLoading = true;
+          state.error = null;
+        }
+      )
 
-      // Delete Trainee
-      .addCase(deleteTrainee.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(deleteTrainee.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.trainees = state.trainees.filter(
-          (trainee) => trainee.traineeId !== action.meta.arg
-        );
-      })
-      .addCase(deleteTrainee.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = (action.payload as string) || "An error occurred";
-      });
+      .addCase(
+        fetchTrainerTrainees.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+
+          /*
+           * Backend response:
+           *
+           * data: [
+           *   {
+           *     traineeId,
+           *     traineeName,
+           *     traineeStatus,
+           *     plans: [...]
+           *   }
+           * ]
+           *
+           * The rest of the frontend expects the
+           * normalized Trainee shape, so map it here.
+           */
+         state.trainees = action.payload.data.map(
+  (trainee) => {
+    const activePlan = trainee.plans?.[0];
+
+    return {
+      id: trainee.traineeId,
+      name: trainee.traineeName,
+      status: trainee.traineeStatus,
+      adherence:
+        activePlan?.adherencePercentage ?? 0,
+      programName:
+        activePlan?.template?.templateName ?? "",
+      lastSessionDate:
+        activePlan?.lastSession?.startedAt ?? null,
+
+      assignedPlanTemplateIds:
+        trainee.plans?.map(
+          (plan) => plan.template.templateId
+        ) ?? [],
+    };
+  }
+);
+
+          /*
+           * Backend uses `totalItems`.
+           * Frontend state uses `total`.
+           */
+          state.pagination = {
+            total: action.payload.pagination.totalItems,
+            page: action.payload.pagination.page,
+            limit: action.payload.pagination.limit,
+            totalPages:
+              action.payload.pagination.totalPages,
+          };
+        }
+      )
+
+      .addCase(
+        fetchTrainerTrainees.rejected,
+        (state, action) => {
+          state.isLoading = false;
+
+          state.error =
+            (action.payload as string) ||
+            "An error occurred";
+        }
+      )
+
+      .addCase(
+        fetchTraineeDetails.pending,
+        (state) => {
+          state.isLoading = true;
+          state.error = null;
+        }
+      )
+
+      .addCase(
+        fetchTraineeDetails.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.selectedTrainee =
+            action.payload.data;
+        }
+      )
+
+      .addCase(
+        fetchTraineeDetails.rejected,
+        (state, action) => {
+          state.isLoading = false;
+
+          state.error =
+            (action.payload as string) ||
+            "An error occurred";
+        }
+      )
+
+      .addCase(
+        deleteTrainee.pending,
+        (state) => {
+          state.isLoading = true;
+          state.error = null;
+        }
+      )
+
+      .addCase(
+        deleteTrainee.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+
+          state.trainees =
+            state.trainees.filter(
+              (trainee) =>
+                trainee.id !== action.meta.arg
+            );
+        }
+      )
+
+      .addCase(
+        deleteTrainee.rejected,
+        (state, action) => {
+          state.isLoading = false;
+
+          state.error =
+            (action.payload as string) ||
+            "An error occurred";
+        }
+      );
   },
 });
 
-export const { clearSelectedTrainee } = traineesSlice.actions;
+export const {
+  clearSelectedTrainee,
+} = traineesSlice.actions;
+
 export default traineesSlice.reducer;

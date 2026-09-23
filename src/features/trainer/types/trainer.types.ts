@@ -4,30 +4,14 @@ export type TraineeStatus =
   | "NOT_STARTED"
   | "FALLING_BEHIND"
   | "NEEDS_PLAN";
-export interface TraineePlanTemplate {
-  templateName: string;
-  templateId: number;
-}
-
-export interface TraineePlanLastSession {
-  status: string;
-  startedAt: string;
-}
-
-export interface TraineePlan {
-  adherencePercentage: number;
-  template: TraineePlanTemplate;
-  lastSession?: TraineePlanLastSession | null;
-  status: string;
-  planAdherenceStatus: string;
-}
 
 export interface Trainee {
-  traineeId: number;
-  traineeName: string;
-  traineeStatus: TraineeStatus;
-  plans: TraineePlan[];
-  email?: string;
+  id: number;
+  name: string;
+  adherence: number;
+  programName: string;
+  lastSessionDate: string | null;
+  status: TraineeStatus;
 }
 
 export interface OffsetPagination {
@@ -37,9 +21,36 @@ export interface OffsetPagination {
   totalPages: number;
 }
 
+export interface GetTraineesApiItem {
+  traineeId: number;
+  traineeName: string;
+  traineeStatus: TraineeStatus;
+  plans: Array<{
+    planId: number;
+    status: string;
+    adherencePercentage: number;
+    template: {
+      templateName: string;
+      templateId: number;
+    };
+    lastSession: {
+      status: string;
+      startedAt: string | null;
+    } | null;
+    planAdherenceStatus: TraineeStatus;
+  }>;
+}
+
 export interface GetTraineesResponse {
-  data: Trainee[];
-  pagination: OffsetPagination;
+  data: GetTraineesApiItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
 
 export interface GetTraineesQueryParams {
@@ -112,4 +123,14 @@ export interface TraineeDetailedInfo {
   traineeProfile: TraineeProfile;
   personalRecords: PersonalRecord[];
   progression: ProgressionEntry[];
+}
+
+export interface Trainee {
+  id: number;
+  name: string;
+  adherence: number;
+  programName: string;
+  lastSessionDate: string | null;
+  status: TraineeStatus;
+  assignedPlanTemplateIds: number[];
 }

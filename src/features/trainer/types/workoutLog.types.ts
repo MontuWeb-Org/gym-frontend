@@ -1,34 +1,43 @@
 export interface WorkoutLog {
-  id: number;
-  notes?: string;
+  workoutLogId: number;
+  notes?: string | null;
+
   status:
     | "IN_PROGRESS"
     | "COMPLETED"
     | "SKIPPED";
-  workoutTemplateId: number;
+
   planAssignmentId: number;
-  traineeUserId: number;
-  startedAt: string;
-  endedAt: string;
-  createdAt: string;
-  updatedAt: string;
+  workoutTemplateId: number;
+  workoutTemplateName: string;
+
+  exerciseTemplateCount: number;
+  exerciseLogsCount: number;
+
+  durationMinutes: number;
 }
 
 export interface WorkoutLogDetail {
-  id: number;
+  workoutLogId: number;
   planAssignmentId: number;
   workoutTemplateId: number;
   durationMinutes: number;
+
+  workoutTemplateName: string;
+  exerciseTemplateCount: number;
+
   status:
     | "IN_PROGRESS"
     | "COMPLETED"
     | "SKIPPED";
-  notes?: string;
+
+  notes?: string | null;
 
   exerciseLogs: Array<{
     id: number;
     exerciseName: string;
     workoutExerciseTemplateId: number;
+
     expectedSets: number;
     expectedReps: string;
     expectedWeight: number;
@@ -48,3 +57,4 @@ export interface WorkoutLogDetail {
     sequenceNumber: number;
   }>;
 }
+

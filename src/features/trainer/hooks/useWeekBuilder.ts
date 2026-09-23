@@ -16,32 +16,21 @@ export function useWeekBuilder() {
   const params = useParams();
   const router = useRouter();
 
-  const templateId =
-    Number(params.templateId);
+  const templateId = Number(params.templateId);
 
-  const weekId =
-    Number(params.weekId);
+  const weekId = Number(params.weekId);
 
-  const workoutId =
-    params.workoutId
-      ? Number(params.workoutId)
-      : null;
+  const workoutId = params.workoutId
+    ? Number(params.workoutId)
+    : null;
 
-  const [workouts, setWorkouts] =
-    useState<WorkoutItem[]>([]);
+  const [workouts, setWorkouts] = useState<WorkoutItem[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [
-    isModalOpen,
-    setIsModalOpen,
-  ] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [
-    workoutName,
-    setWorkoutName,
-  ] = useState("");
+  const [workoutName, setWorkoutName] = useState("");
 
   /*
    * Load all workouts belonging
@@ -57,22 +46,15 @@ export function useWeekBuilder() {
       try {
         setLoading(true);
 
-        const res =
-          await programService.getWeekDetail(
-            weekId
-          );
+        const res = await programService.getWeekDetail(weekId);
 
         setWorkouts(
-          res?.data?.data
-            ?.workouts ||
+          res?.data?.data?.workouts ||
             res?.data?.workouts ||
             []
         );
       } catch (err) {
-        console.error(
-          "Failed to load week details",
-          err
-        );
+        console.error("Failed to load week details", err);
       } finally {
         setLoading(false);
       }
@@ -86,32 +68,26 @@ export function useWeekBuilder() {
    * WorkoutBuilderView changes a workout name.
    */
   useEffect(() => {
-    const handleWorkoutNameUpdated = (
-      event: Event
-    ) => {
-      const customEvent =
-        event as CustomEvent<{
-          workoutId: number;
-          name: string;
-        }>;
+    const handleWorkoutNameUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        workoutId: number;
+        name: string;
+      }>;
 
       const {
         workoutId: updatedWorkoutId,
         name,
       } = customEvent.detail;
 
-      setWorkouts(
-        (currentWorkouts) =>
-          currentWorkouts.map(
-            (workout) =>
-              workout.id ===
-              updatedWorkoutId
-                ? {
-                    ...workout,
-                    name,
-                  }
-                : workout
-          )
+      setWorkouts((currentWorkouts) =>
+        currentWorkouts.map((workout) =>
+          workout.id === updatedWorkoutId
+            ? {
+                ...workout,
+                name,
+              }
+            : workout
+        )
       );
     };
 
@@ -130,196 +106,141 @@ export function useWeekBuilder() {
 
   /*
    * Create a new workout day.
+   *
+   * The backend requires sequenceNumber > 0,
+   * so workout sequence numbers are 1-based.
    */
-  const handleAddWorkout =
-    async () => {
-      if (
-        !workoutName ||
-        !workoutName.trim()
-      ) {
-        return;
-      }
+  const handleAddWorkout = async () => {
+    if (!workoutName || !workoutName.trim()) {
+      return;
+    }
 
-      try {
-        const res =
-          await programService.createWorkout(
-            {
-              name:
-                workoutName.trim(),
+    try {
+      const sequenceNumber = workouts.length + 1;
 
-              sequenceNumber:
-                workouts.length,
+      const res = await programService.createWorkout({
+        name: workoutName.trim(),
+        sequenceNumber,
+        weekTemplateId: weekId,
+      });
 
-              weekTemplateId:
-                weekId,
-            }
-          );
+      const newWorkout = res?.data?.data || res?.data || {};
 
-        const newWorkout =
-          res?.data?.data ||
-          res?.data ||
-          {};
+      const newWorkoutId = Number(
+        newWorkout.workoutTemplateId ?? newWorkout.id
+      );
 
-        const newWorkoutId =
-          Number(
-            newWorkout.workoutTemplateId ??
-              newWorkout.id
-          );
-
-        if (!Number.isFinite(newWorkoutId)) {
-          throw new Error("Create workout response did not contain a workout ID.");
-        }
-
-        setWorkouts([
-          ...workouts,
-          {
-            id: newWorkoutId,
-
-            name:
-              workoutName.trim(),
-
-            sequenceNumber:
-              workouts.length,
-          },
-        ]);
-
-        setIsModalOpen(
-          false
-        );
-
-        setWorkoutName("");
-
-        router.push(
-          `/trainer/template/${templateId}/${weekId}/${newWorkoutId}`
-        );
-      } catch (err) {
-        console.error(
-          "Failed to create workout",
-          err
+      if (!Number.isFinite(newWorkoutId)) {
+        throw new Error(
+          "Create workout response did not contain a workout ID."
         );
       }
-    };
+
+      setWorkouts([
+        ...workouts,
+        {
+          id: newWorkoutId,
+          name: workoutName.trim(),
+          sequenceNumber,
+        },
+      ]);
+
+      setIsModalOpen(false);
+
+      setWorkoutName("");
+
+      router.push(
+        `/trainer/template/${templateId}/${weekId}/${newWorkoutId}`
+      );
+    } catch (err) {
+      console.error("Failed to create workout", err);
+    }
+  };
 
   /*
    * Duplicate an existing workout day.
    */
-  const handleDuplicateWorkout =
-    async (
-      workoutIdToDuplicate: number
-    ) => {
-      try {
-        await programService.duplicateWorkout(
-          workoutIdToDuplicate
-        );
+  const handleDuplicateWorkout = async (
+    workoutIdToDuplicate: number
+  ) => {
+    try {
+      await programService.duplicateWorkout(
+        workoutIdToDuplicate
+      );
 
-        const res =
-          await programService.getWeekDetail(
-            weekId
-          );
+      const res = await programService.getWeekDetail(weekId);
 
-        setWorkouts(
-          res?.data?.data
-            ?.workouts ||
-            res?.data?.workouts ||
-            []
-        );
-      } catch (err) {
-        console.error(
-          "Failed to duplicate workout",
-          err
-        );
-      }
-    };
+      setWorkouts(
+        res?.data?.data?.workouts ||
+          res?.data?.workouts ||
+          []
+      );
+    } catch (err) {
+      console.error("Failed to duplicate workout", err);
+    }
+  };
 
   /*
    * Delete an existing workout day.
    */
-  const handleDeleteWorkout =
-    async (
-      workoutIdToDelete: number
-    ) => {
-      const workout =
-        workouts.find(
-          (item) =>
-            item.id ===
-            workoutIdToDelete
-        );
+  const handleDeleteWorkout = async (
+    workoutIdToDelete: number
+  ) => {
+    const workout = workouts.find(
+      (item) => item.id === workoutIdToDelete
+    );
 
-      if (
-        !window.confirm(
-          `Delete ${
-            workout?.name ||
-            "this workout day"
-          }? This will also delete all exercises inside it.`
+    if (
+      !window.confirm(
+        `Delete ${
+          workout?.name || "this workout day"
+        }? This will also delete all exercises inside it.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await programService.deleteWorkout(
+        workoutIdToDelete
+      );
+
+      const updatedWorkouts = workouts
+        .filter(
+          (workout) => workout.id !== workoutIdToDelete
         )
-      ) {
-        return;
-      }
+        .map((workout, index) => ({
+          ...workout,
+          // Backend requires sequenceNumber > 0.
+          sequenceNumber: index + 1,
+        }));
 
-      try {
-        await programService.deleteWorkout(
-          workoutIdToDelete
-        );
+      setWorkouts(updatedWorkouts);
 
-        const updatedWorkouts =
-          workouts
-            .filter(
-              (workout) =>
-                workout.id !==
-                workoutIdToDelete
-            )
-            .map(
-              (
-                workout,
-                index
-              ) => ({
-                ...workout,
-                sequenceNumber:
-                  index,
-              })
-            );
-
-        setWorkouts(
-          updatedWorkouts
-        );
-
-        /*
-         * If the deleted workout is the
-         * one currently open, return to
-         * the week page.
-         */
-        if (
-          workoutId ===
-          workoutIdToDelete
-        ) {
-          router.push(
-            `/trainer/template/${templateId}/${weekId}`
-          );
-        }
-      } catch (err) {
-        console.error(
-          "Failed to delete workout",
-          err
+      /*
+       * If the deleted workout is the
+       * one currently open, return to
+       * the week page.
+       */
+      if (workoutId === workoutIdToDelete) {
+        router.push(
+          `/trainer/template/${templateId}/${weekId}`
         );
       }
-    };
+    } catch (err) {
+      console.error("Failed to delete workout", err);
+    }
+  };
 
   /*
    * Open the create-workout modal
    * with the next day name.
    */
-  const openCreateModal =
-    () => {
-      setWorkoutName(
-        `Day ${
-          workouts.length + 1
-        }`
-      );
+  const openCreateModal = () => {
+    setWorkoutName(`Day ${workouts.length + 1}`);
 
-      setIsModalOpen(
-        true
-      );
-    };
+    setIsModalOpen(true);
+  };
 
   return {
     templateId,

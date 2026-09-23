@@ -6,7 +6,9 @@ import {
   useEffect,
   useState,
 } from "react";
+
 import { programService } from "../services/program.service";
+
 import {
   AssignedExercise,
   ExerciseTemplate,
@@ -14,30 +16,30 @@ import {
   WorkoutDetail,
 } from "../types/workout-builder.types";
 
-interface ApiExerciseTemplate extends Omit<
-  ExerciseTemplate,
-  "exercise"
-> {
+interface ApiExerciseTemplate
+  extends Omit<ExerciseTemplate, "exercise"> {
   exercise?: LibraryExercise;
-  // Compatibility with older MSW data while it is being migrated.
+
   exerciseId?: number;
+
   name?: string;
   difficulty?: string;
   equipment?: string[];
   instructions?: string;
   illustrations?: string[];
   muscles?: string[];
+
   defaultDurationMinutes?: number;
 }
 
-interface ApiWorkoutDetail extends Omit<
-  WorkoutDetail,
-  "exercises"
-> {
+interface ApiWorkoutDetail
+  extends Omit<WorkoutDetail, "exercises"> {
   exercises?: ApiExerciseTemplate[];
 }
 
-export function useWorkoutBuilder(workoutId: number) {
+export function useWorkoutBuilder(
+  workoutId: number
+) {
   const [workout, setWorkout] =
     useState<WorkoutDetail | null>(null);
 
@@ -53,14 +55,20 @@ export function useWorkoutBuilder(workoutId: number) {
   const [isModalOpen, setIsModalOpen] =
     useState(false);
 
-  const [selectedExerciseIds, setSelectedExerciseIds] =
-    useState<number[]>([]);
+  const [
+    selectedExerciseIds,
+    setSelectedExerciseIds,
+  ] = useState<number[]>([]);
 
   const [searchQuery, setSearchQuery] =
     useState("");
 
-  const [editingExercise, setEditingExercise] =
-    useState<AssignedExercise | null>(null);
+  const [
+    editingExercise,
+    setEditingExercise,
+  ] = useState<AssignedExercise | null>(
+    null
+  );
 
   const [setsCount, setSetsCount] =
     useState<number | string>(3);
@@ -74,14 +82,20 @@ export function useWorkoutBuilder(workoutId: number) {
   const [weight, setWeight] =
     useState<number | string>(0);
 
-  const [durationMinutes, setDurationMinutes] =
-    useState<number | string>(0);
+  const [
+    durationMinutes,
+    setDurationMinutes,
+  ] = useState<number | string>(1);
 
-  const [isEditingWorkoutName, setIsEditingWorkoutName] =
-    useState(false);
+  const [
+    isEditingWorkoutName,
+    setIsEditingWorkoutName,
+  ] = useState(false);
 
-  const [workoutNameInput, setWorkoutNameInput] =
-    useState("");
+  const [
+    workoutNameInput,
+    setWorkoutNameInput,
+  ] = useState("");
 
   const [draggedIndex, setDraggedIndex] =
     useState<number | null>(null);
@@ -97,10 +111,10 @@ export function useWorkoutBuilder(workoutId: number) {
       : fallback;
   };
 
-  /**
-   * Convert the documented nested ExerciseTemplate API shape into
-   * the flattened shape consumed by the existing UI.
-   */
+  // ---------------------------------------------------------------------------
+  // Normalize backend ExerciseTemplate
+  // ---------------------------------------------------------------------------
+
   const normalizeExercise = useCallback(
     (
       raw: ApiExerciseTemplate,
@@ -111,52 +125,57 @@ export function useWorkoutBuilder(workoutId: number) {
         library.find(
           (item) =>
             item.id ===
-            Number(
-              raw.exerciseId
-            )
+            Number(raw.exerciseId)
         );
 
-      const exerciseId =
-        Number(
-          libraryExercise?.id ??
-            raw.exerciseId
-        );
+      const exerciseId = Number(
+        libraryExercise?.id ??
+          raw.exerciseId
+      );
 
       const setsCountValue =
-        getNumber(
-          raw.defaultSets,
-          3
+        Math.max(
+          1,
+          getNumber(
+            raw.defaultSets,
+            3
+          )
         );
 
       const repsValue =
-        raw.defaultReps ??
-        "10";
+        raw.defaultReps ?? "10";
 
       const restValue =
-        getNumber(
-          raw.defaultRestTimeSeconds,
-          60
+        Math.max(
+          0,
+          getNumber(
+            raw.defaultRestTimeSeconds,
+            60
+          )
         );
 
       const weightValue =
-        getNumber(
-          raw.defaultWeight,
-          0
+        Math.max(
+          0,
+          getNumber(
+            raw.defaultWeight,
+            0
+          )
         );
 
       const durationValue =
-        getNumber(
-          raw.durationMinutes ??
-            raw.defaultDurationMinutes,
-          0
+        Math.max(
+          1,
+          getNumber(
+            raw.durationMinutes ??
+              raw.defaultDurationMinutes,
+            1
+          )
         );
 
       const sets = Array.from(
         {
-          length: Math.max(
-            1,
-            setsCountValue
-          ),
+          length: setsCountValue,
         },
         (_, index) => ({
           setNumber: index + 1,
@@ -170,51 +189,70 @@ export function useWorkoutBuilder(workoutId: number) {
 
       return {
         id: Number(raw.id),
+
         exerciseId,
+
         name:
           libraryExercise?.name ??
           raw.name ??
           "Exercise",
+
         difficulty:
           libraryExercise?.difficulty ??
           raw.difficulty,
+
         equipment:
           libraryExercise?.equipment ??
           raw.equipment,
+
         instructions:
           libraryExercise?.instructions ??
           raw.instructions,
+
         illustrations:
           libraryExercise?.illustrations ??
           raw.illustrations,
+
         muscles:
           libraryExercise?.muscles ??
           raw.muscles,
+
         sequenceNumber:
-          Number(
-            raw.sequenceNumber
-          ),
+          Number(raw.sequenceNumber),
+
         defaultSets:
           setsCountValue,
+
         defaultReps:
           String(repsValue),
+
         defaultRestTimeSeconds:
           restValue,
+
         durationMinutes:
           durationValue,
+
         defaultWeight:
           weightValue,
+
         sets,
+
         reps:
           getNumber(
             repsValue,
             10
           ),
-        rest: restValue,
+
+        rest:
+          restValue,
       };
     },
     []
   );
+
+  // ---------------------------------------------------------------------------
+  // Load workout
+  // ---------------------------------------------------------------------------
 
   const loadWorkoutData =
     useCallback(async () => {
@@ -249,8 +287,10 @@ export function useWorkoutBuilder(workoutId: number) {
           fetchedLibrary as LibraryExercise[];
 
         const normalizedExercises =
-          (fetchedWorkout.exercises ??
-            [])
+          (
+            fetchedWorkout.exercises ??
+            []
+          )
             .map((exercise) =>
               normalizeExercise(
                 exercise,
@@ -295,8 +335,12 @@ export function useWorkoutBuilder(workoutId: number) {
     ]);
 
   useEffect(() => {
-    loadWorkoutData();
+    void loadWorkoutData();
   }, [loadWorkoutData]);
+
+  // ---------------------------------------------------------------------------
+  // Exercise library selection
+  // ---------------------------------------------------------------------------
 
   const toggleSelectExercise = (
     id: number
@@ -311,12 +355,10 @@ export function useWorkoutBuilder(workoutId: number) {
     );
   };
 
-  /**
-   * Add existing library exercises to this workout/day.
-   *
-   * The POST only returns a success message, so the real source
-   * of the new exercise-template ID is the subsequent GET.
-   */
+  // ---------------------------------------------------------------------------
+  // Add exercises
+  // ---------------------------------------------------------------------------
+
   const handleAddSelectedExercises =
     async () => {
       if (
@@ -328,7 +370,7 @@ export function useWorkoutBuilder(workoutId: number) {
 
       try {
         let nextSequence =
-          exercises.length;
+          exercises.length + 1;
 
         for (const exerciseId of
           selectedExerciseIds) {
@@ -347,14 +389,22 @@ export function useWorkoutBuilder(workoutId: number) {
             {
               workoutTemplateId:
                 workoutId,
+
               exerciseId,
+
               sequenceNumber:
                 nextSequence,
+
               defaultSets: 3,
+
               defaultReps: "10",
+
               defaultRestTimeSeconds:
                 60,
-              durationMinutes: 0,
+
+              defaultDurationMinutes:
+                1,
+
               defaultWeight: 0,
             }
           );
@@ -362,7 +412,6 @@ export function useWorkoutBuilder(workoutId: number) {
           nextSequence += 1;
         }
 
-        // Reload so IDs and all values come from the backend.
         await loadWorkoutData();
 
         setSelectedExerciseIds([]);
@@ -376,39 +425,45 @@ export function useWorkoutBuilder(workoutId: number) {
       }
     };
 
-  const handleRemoveExercise = async (
-    exerciseTemplateId: number
-  ) => {
-    try {
-      await programService.deleteWorkoutExercise(
-        exerciseTemplateId
-      );
+  // ---------------------------------------------------------------------------
+  // Remove exercise
+  // ---------------------------------------------------------------------------
 
-      await loadWorkoutData();
-    } catch (err) {
-      console.error(
-        "Failed to remove exercise",
-        err
-      );
-    }
-  };
+  const handleRemoveExercise =
+    async (
+      exerciseTemplateId: number
+    ) => {
+      try {
+        await programService.deleteWorkoutExercise(
+          exerciseTemplateId
+        );
 
-  /**
-   * Persist the ordering using the exercise-template IDs.
-   * The backend owns those IDs; the library exercise IDs are
-   * never used as the identity for this operation.
-   */
+        await loadWorkoutData();
+      } catch (err) {
+        console.error(
+          "Failed to remove exercise",
+          err
+        );
+      }
+    };
+
+  // ---------------------------------------------------------------------------
+  // Persist exercise order
+  // ---------------------------------------------------------------------------
+
   const persistExerciseOrder =
     async (
       updatedExercises: AssignedExercise[]
     ) => {
-      const ordered = updatedExercises.map(
-        (exercise, index) => ({
-          id: exercise.id,
-          sequenceNumber:
-            index,
-        })
-      );
+      const ordered =
+        updatedExercises.map(
+          (exercise, index) => ({
+            id: exercise.id,
+
+            sequenceNumber:
+              index + 1,
+          })
+        );
 
       try {
         await programService.reorderExercises(
@@ -422,8 +477,17 @@ export function useWorkoutBuilder(workoutId: number) {
           "Failed to save exercise reordering",
           err
         );
+
+        // Reload the real backend state so a failed
+        // reorder does not leave the UI showing a
+        // state that was never persisted.
+        await loadWorkoutData();
       }
     };
+
+  // ---------------------------------------------------------------------------
+  // Move exercise up/down
+  // ---------------------------------------------------------------------------
 
   const handleMoveExercise = (
     index: number,
@@ -463,11 +527,16 @@ export function useWorkoutBuilder(workoutId: number) {
     );
   };
 
+  // ---------------------------------------------------------------------------
+  // Drag/drop
+  // ---------------------------------------------------------------------------
+
   const handleDragStart = (
     e: DragEvent,
     index: number
   ) => {
     setDraggedIndex(index);
+
     e.dataTransfer.effectAllowed =
       "move";
   };
@@ -476,6 +545,7 @@ export function useWorkoutBuilder(workoutId: number) {
     e: DragEvent
   ) => {
     e.preventDefault();
+
     e.dataTransfer.dropEffect =
       "move";
   };
@@ -504,6 +574,11 @@ export function useWorkoutBuilder(workoutId: number) {
       1
     );
 
+    if (!movedItem) {
+      setDraggedIndex(null);
+      return;
+    }
+
     updated.splice(
       dropIndex,
       0,
@@ -520,6 +595,10 @@ export function useWorkoutBuilder(workoutId: number) {
 
     setDraggedIndex(null);
   };
+
+  // ---------------------------------------------------------------------------
+  // Workout name
+  // ---------------------------------------------------------------------------
 
   const handleSaveWorkoutName =
     async () => {
@@ -569,11 +648,10 @@ export function useWorkoutBuilder(workoutId: number) {
       }
     };
 
-  /**
-   * Existing component callers can continue passing four arguments.
-   * Duration is optional so the hook remains compatible while exposing
-   * the duration field to the edit UI.
-   */
+  // ---------------------------------------------------------------------------
+  // Edit exercise
+  // ---------------------------------------------------------------------------
+
   const handleEditExercise = (
     exercise: AssignedExercise,
     setsLen: number,
@@ -586,7 +664,7 @@ export function useWorkoutBuilder(workoutId: number) {
     );
 
     setSetsCount(
-      setsLen
+      Math.max(1, setsLen)
     );
 
     setRepsCount(
@@ -594,7 +672,7 @@ export function useWorkoutBuilder(workoutId: number) {
     );
 
     setRestTime(
-      restVal
+      Math.max(0, restVal)
     );
 
     setWeight(
@@ -608,15 +686,19 @@ export function useWorkoutBuilder(workoutId: number) {
     );
 
     setDurationMinutes(
-      durationVal ??
-        exercise.durationMinutes ??
-        0
+      Math.max(
+        1,
+        durationVal ??
+          exercise.durationMinutes ??
+          1
+      )
     );
   };
 
-  /**
-   * Save all five editable workout-specific exercise fields.
-   */
+  // ---------------------------------------------------------------------------
+  // Save exercise configuration
+  // ---------------------------------------------------------------------------
+
   const handleSaveReps =
     async () => {
       if (!editingExercise) {
@@ -626,12 +708,14 @@ export function useWorkoutBuilder(workoutId: number) {
       const finalSetsCount =
         Math.max(
           1,
-          setsCount === ""
-            ? 3
-            : getNumber(
-                setsCount,
-                3
-              )
+          Math.floor(
+            setsCount === ""
+              ? 3
+              : getNumber(
+                  setsCount,
+                  3
+                )
+          )
         );
 
       const finalRepsValue =
@@ -644,12 +728,14 @@ export function useWorkoutBuilder(workoutId: number) {
       const finalRestTime =
         Math.max(
           0,
-          restTime === ""
-            ? 60
-            : getNumber(
-                restTime,
-                60
-              )
+          Math.floor(
+            restTime === ""
+              ? 60
+              : getNumber(
+                  restTime,
+                  60
+                )
+          )
         );
 
       const finalWeight =
@@ -665,13 +751,16 @@ export function useWorkoutBuilder(workoutId: number) {
 
       const finalDurationMinutes =
         Math.max(
-          0,
-          durationMinutes === ""
-            ? 0
-            : getNumber(
-                durationMinutes,
-                0
-              )
+          1,
+          Math.floor(
+            durationMinutes ===
+              ""
+              ? 1
+              : getNumber(
+                  durationMinutes,
+                  1
+                )
+          )
         );
 
       try {
@@ -680,12 +769,16 @@ export function useWorkoutBuilder(workoutId: number) {
           {
             defaultSets:
               finalSetsCount,
+
             defaultReps:
               finalRepsValue,
+
             defaultRestTimeSeconds:
               finalRestTime,
-            durationMinutes:
+
+            defaultDurationMinutes:
               finalDurationMinutes,
+
             defaultWeight:
               finalWeight,
           }
@@ -704,6 +797,10 @@ export function useWorkoutBuilder(workoutId: number) {
       }
     };
 
+  // ---------------------------------------------------------------------------
+  // Derived data
+  // ---------------------------------------------------------------------------
+
   const assignedExerciseIds =
     exercises.map(
       (exercise) =>
@@ -720,10 +817,17 @@ export function useWorkoutBuilder(workoutId: number) {
           )
     );
 
+  // ---------------------------------------------------------------------------
+  // Return
+  // ---------------------------------------------------------------------------
+
   return {
     workout,
+
     exercises,
+
     libraryExercises,
+
     loading,
 
     isModalOpen,
@@ -753,24 +857,34 @@ export function useWorkoutBuilder(workoutId: number) {
     setDurationMinutes,
 
     isEditingWorkoutName,
+
     workoutNameInput,
     setWorkoutNameInput,
+
     setIsEditingWorkoutName,
 
     assignedExerciseIds,
+
     filteredLibrary,
 
     toggleSelectExercise,
+
     handleAddSelectedExercises,
+
     handleRemoveExercise,
 
     handleMoveExercise,
+
     handleDragStart,
+
     handleDragOver,
+
     handleDrop,
 
     handleSaveWorkoutName,
+
     handleEditExercise,
+
     handleSaveReps,
   };
 }

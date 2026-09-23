@@ -1,29 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import { useRouter } from "@/i18n/navigation";
+
 import {
   useAppDispatch,
   useAppSelector,
 } from "@/store/hooks";
+
 import { RootState } from "@/store";
+
 import {
   fetchTemplates,
   createTemplate,
   PlanTemplate,
 } from "../store/program.slice";
+
 import { programService } from "../services/program.service";
+
 import {
   PrintableProgram,
 } from "../components/program-builder/ProgramPrintView";
+
 import {
   prepareProgramForExport,
 } from "../services/program-export.service";
+
 import axios from "axios";
 
 interface PayloadData {
   planId?: number | string;
   id?: number | string;
+
   data?: {
     planId?: number | string;
     id?: number | string;
@@ -31,11 +43,12 @@ interface PayloadData {
 }
 
 export function useTemplates() {
-  const dispatch =
-    useAppDispatch();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
-  const router =
-    useRouter();
+  // ---------------------------------------------------------------------------
+  // Templates from Redux
+  // ---------------------------------------------------------------------------
 
   const rawTemplates =
     useAppSelector(
@@ -51,7 +64,7 @@ export function useTemplates() {
                   };
             }
           >
-        ).trainerProgram?.templates ||
+        ).trainerProgram?.templates ??
         (
           state as unknown as Record<
             string,
@@ -66,14 +79,11 @@ export function useTemplates() {
         ).trainer?.templates
     );
 
-  const templates =
-    Array.isArray(
-      rawTemplates
-    )
+  const templates: PlanTemplate[] =
+    Array.isArray(rawTemplates)
       ? rawTemplates
       : rawTemplates &&
-          typeof rawTemplates ===
-            "object" &&
+          typeof rawTemplates === "object" &&
           "plans" in rawTemplates &&
           Array.isArray(
             (
@@ -89,15 +99,19 @@ export function useTemplates() {
           ).plans
         : [];
 
-  const [isCreating, setIsCreating] =
-    useState(false);
+  // ---------------------------------------------------------------------------
+  // Local UI state
+  // ---------------------------------------------------------------------------
+
+  const [
+    isCreating,
+    setIsCreating,
+  ] = useState(false);
 
   const [
     selectedPlanIdForAssign,
     setSelectedPlanIdForAssign,
-  ] = useState<number | null>(
-    null
-  );
+  ] = useState<number | null>(null);
 
   const [
     printableProgram,
@@ -112,31 +126,78 @@ export function useTemplates() {
     setIsExporting,
   ] = useState(false);
 
-  /*
-   * Always fetch fresh templates
-   * when the page mounts.
-   */
+  // ---------------------------------------------------------------------------
+  // Load templates
+  //
+  // IMPORTANT:
+  // The list endpoint already returns durationWeekTemplates.
+  //
+  // Example:
+  //
+  // {
+  //   "id": 1,
+  //   "name": "Template 1",
+  //   "durationWeekTemplates": 3
+  // }
+  //
+  // We therefore use that value directly instead of making another request
+  // and potentially replacing the correct value with 0.
+  // ---------------------------------------------------------------------------
+
   useEffect(() => {
-    dispatch(
-      fetchTemplates()
-    );
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const result =
+          await dispatch(
+            fetchTemplates()
+          );
+
+        if (cancelled) {
+          return;
+        }
+
+        if (
+          !fetchTemplates.fulfilled.match(
+            result
+          )
+        ) {
+          console.error(
+            "Failed to load templates:",
+            result.payload
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error(
+            "Failed to load templates:",
+            error
+          );
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch]);
 
-  /*
-   * Open the browser print dialog
-   * once the printable component
-   * has rendered.
-   */
+  // ---------------------------------------------------------------------------
+  // Browser print lifecycle
+  // ---------------------------------------------------------------------------
+
   useEffect(() => {
     if (!printableProgram) {
       return;
     }
 
-    const handleAfterPrint =
-      () => {
-        setPrintableProgram(null);
-        setIsExporting(false);
-      };
+    const handleAfterPrint = () => {
+      setPrintableProgram(null);
+      setIsExporting(false);
+    };
 
     window.addEventListener(
       "afterprint",
@@ -160,9 +221,10 @@ export function useTemplates() {
     };
   }, [printableProgram]);
 
-  /*
-   * Create a new plan template.
-   */
+  // ---------------------------------------------------------------------------
+  // Create
+  // ---------------------------------------------------------------------------
+
   const handleCreate = async (
     name: string,
     description: string
@@ -172,6 +234,8 @@ export function useTemplates() {
     }
 
     try {
+      setIsCreating(true);
+
       const resultAction =
         await dispatch(
           createTemplate({
@@ -189,10 +253,18 @@ export function useTemplates() {
           resultAction.payload as PayloadData;
 
         const planId =
-          payloadData?.planId ||
-          payloadData?.id ||
-          payloadData?.data?.planId ||
+          payloadData?.planId ??
+          payloadData?.id ??
+          payloadData?.data?.planId ??
           payloadData?.data?.id;
+
+        if (
+          planId === undefined
+        ) {
+          throw new Error(
+            "Create template response did not contain a template ID."
+          );
+        }
 
         setIsCreating(false);
 
@@ -206,45 +278,44 @@ export function useTemplates() {
         );
 
         setIsCreating(false);
-
-
       }
-    } catch (err) {
+    } catch (error) {
       console.error(
         "Failed to create template:",
-        err
+        error
       );
 
       setIsCreating(false);
     }
   };
 
-  /*
-   * Duplicate an existing template.
-   */
-  const handleDuplicate =
-    async (
-      id: number
-    ) => {
-      try {
-        await programService.duplicateTemplate(
-          id
-        );
+  // ---------------------------------------------------------------------------
+  // Duplicate
+  // ---------------------------------------------------------------------------
 
-        await dispatch(
-          fetchTemplates()
-        );
-      } catch (err) {
-        console.error(
-          "Failed to duplicate template:",
-          err
-        );
-      }
-    };
+  const handleDuplicate = async (
+    id: number
+  ) => {
+    try {
+      await programService.duplicateTemplate(
+        id
+      );
 
-  /*
-   * Update an existing template.
-   */
+      await dispatch(
+        fetchTemplates()
+      );
+    } catch (error) {
+      console.error(
+        "Failed to duplicate template:",
+        error
+      );
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // Edit
+  // ---------------------------------------------------------------------------
+
   const handleEdit = async (
     id: number,
     name: string,
@@ -262,17 +333,18 @@ export function useTemplates() {
       await dispatch(
         fetchTemplates()
       );
-    } catch (err) {
+    } catch (error) {
       console.error(
         "Failed to update template:",
-        err
+        error
       );
     }
   };
 
-  /*
-   * Delete an existing template.
-   */
+  // ---------------------------------------------------------------------------
+  // Delete
+  // ---------------------------------------------------------------------------
+
   const handleDelete = async (
     id: number
   ) => {
@@ -284,12 +356,11 @@ export function useTemplates() {
       await dispatch(
         fetchTemplates()
       );
-    }  catch (err: unknown) {
-  if (
-    axios.isAxiosError(err) &&
-    err.response?.status ===
-      409
-  ) {
+    } catch (error: unknown) {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.status === 409
+      ) {
         window.alert(
           "This template cannot be deleted because it is currently assigned to a trainee."
         );
@@ -299,7 +370,7 @@ export function useTemplates() {
 
       console.error(
         "Failed to delete template:",
-        err
+        error
       );
 
       window.alert(
@@ -308,9 +379,10 @@ export function useTemplates() {
     }
   };
 
-  /*
-   * Prepare a program for printing.
-   */
+  // ---------------------------------------------------------------------------
+  // Export
+  // ---------------------------------------------------------------------------
+
   const handleExport = async (
     templateId: number
   ) => {
@@ -329,20 +401,20 @@ export function useTemplates() {
       setPrintableProgram(
         program
       );
-    } catch (err) {
+    } catch (error) {
       console.error(
         "Failed to prepare program for PDF export:",
-        err
+        error
       );
 
       setIsExporting(false);
     }
   };
 
-  /*
-   * Navigate to the template
-   * configuration page.
-   */
+  // ---------------------------------------------------------------------------
+  // Configure
+  // ---------------------------------------------------------------------------
+
   const handleConfigure = (
     id: number
   ) => {
@@ -351,9 +423,10 @@ export function useTemplates() {
     );
   };
 
-  /*
-   * Open the assign modal.
-   */
+  // ---------------------------------------------------------------------------
+  // Assign
+  // ---------------------------------------------------------------------------
+
   const handleAssign = (
     id: number
   ) => {
@@ -362,26 +435,21 @@ export function useTemplates() {
     );
   };
 
-  /*
-   * Close the assign modal.
-   */
-  const closeAssignModal =
-    () => {
-      setSelectedPlanIdForAssign(
-        null
-      );
-    };
+  const closeAssignModal = () => {
+    setSelectedPlanIdForAssign(
+      null
+    );
+  };
 
-  /*
-   * Refresh templates after
-   * successful assignment.
-   */
-  const handleAssignSuccess =
-    () => {
-      dispatch(
-        fetchTemplates()
-      );
-    };
+  const handleAssignSuccess = () => {
+    void dispatch(
+      fetchTemplates()
+    );
+  };
+
+  // ---------------------------------------------------------------------------
+  // Return
+  // ---------------------------------------------------------------------------
 
   return {
     templates,

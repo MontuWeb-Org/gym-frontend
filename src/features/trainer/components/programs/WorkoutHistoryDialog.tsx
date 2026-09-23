@@ -21,11 +21,6 @@ interface WorkoutHistoryDialogProps {
   logsError: string | null;
   onClose: () => void;
   onWorkoutLogClick: (log: WorkoutLog) => void;
-  formatDateTime: (date: string) => string;
-  getWorkoutDuration: (
-    startedAt: string,
-    endedAt: string
-  ) => string;
 }
 
 export default function WorkoutHistoryDialog({
@@ -37,8 +32,6 @@ export default function WorkoutHistoryDialog({
   logsError,
   onClose,
   onWorkoutLogClick,
-  formatDateTime,
-  getWorkoutDuration,
 }: WorkoutHistoryDialogProps) {
   return (
     <Dialog
@@ -51,9 +44,7 @@ export default function WorkoutHistoryDialog({
     >
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            Workout History
-          </DialogTitle>
+          <DialogTitle>Workout History</DialogTitle>
 
           <DialogDescription>
             {selectedProgram
@@ -79,8 +70,7 @@ export default function WorkoutHistoryDialog({
             !logsError &&
             workoutLogs.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                No workout sessions found for this
-                program.
+                No workout sessions found for this program.
               </p>
             )}
 
@@ -88,33 +78,23 @@ export default function WorkoutHistoryDialog({
             !logsError &&
             workoutLogs.map((log) => (
               <button
-                key={log.id}
+                key={log.workoutLogId}
                 type="button"
                 className="w-full rounded-lg border p-4 text-left transition-colors hover:bg-muted/50"
-                onClick={() =>
-                  onWorkoutLogClick(log)
-                }
+                onClick={() => onWorkoutLogClick(log)}
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="font-medium">
-                      {workoutNames[
-                        log.workoutTemplateId
-                      ] ??
+                      {log.workoutTemplateName ??
+                        workoutNames[log.workoutTemplateId] ??
                         `Workout ${log.workoutTemplateId}`}
-                    </p>
-
-                    <p className="text-sm text-muted-foreground">
-                      {formatDateTime(log.startedAt)}
                     </p>
                   </div>
 
                   <div className="text-right">
                     <p className="text-sm font-medium">
-                      {getWorkoutDuration(
-                        log.startedAt,
-                        log.endedAt
-                      )}
+                      {Math.round(log.durationMinutes)} min
                     </p>
 
                     <p className="text-xs text-muted-foreground">
@@ -145,3 +125,4 @@ export default function WorkoutHistoryDialog({
     </Dialog>
   );
 }
+

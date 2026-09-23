@@ -25,7 +25,6 @@ interface ProgramsHistoryTableProps {
   rows: ProgramHistoryRow[];
   isLoading?: boolean;
   onRowClick?: (row: ProgramHistoryRow) => void;
-  onUpdateDuration?: (row: ProgramHistoryRow) => void;
   onRemove?: (row: ProgramHistoryRow) => void;
 }
 
@@ -33,7 +32,6 @@ export default function ProgramsHistoryTable({
   rows,
   isLoading = false,
   onRowClick,
-  onUpdateDuration,
   onRemove,
 }: ProgramsHistoryTableProps) {
   const formatDate = (date: string) => {
@@ -70,7 +68,7 @@ export default function ProgramsHistoryTable({
         <TableHeader>
           <TableRow>
             <TableHead>Trainee</TableHead>
-            <TableHead>Plan </TableHead>
+            <TableHead>Plan</TableHead>
             <TableHead>Start Date</TableHead>
             <TableHead>End Date</TableHead>
             <TableHead>Duration</TableHead>
@@ -140,25 +138,11 @@ export default function ProgramsHistoryTable({
                       event.stopPropagation()
                     }
                   >
-                    {onUpdateDuration && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          onUpdateDuration(row)
-                        }
-                      >
-                        Update Duration
-                      </Button>
-                    )}
-
                     {onRemove && (
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() =>
-                          onRemove(row)
-                        }
+                        onClick={() => onRemove(row)}
                       >
                         Remove
                       </Button>

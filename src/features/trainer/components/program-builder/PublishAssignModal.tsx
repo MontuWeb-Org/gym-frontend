@@ -1,330 +1,413 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchTrainerTrainees } from "@/features/trainer/store/trainer.slice";
-import { programService } from "../../services/program.service";
-import { SelectedTraineesChips } from "./SelectedTraineesChips";
-import { TraineeSelectList } from "./TraineeSelectList";
-import { fetchTemplates } from "../../store/program.slice";
+
+import {
+useAppDispatch,
+useAppSelector,
+} from "@/store/hooks";
+
+import {
+fetchTrainerTrainees,
+} from "@/features/trainer/store/trainer.slice";
+
+import {
+programService,
+} from "../../services/program.service";
+
+import {
+SelectedTraineesChips,
+} from "./SelectedTraineesChips";
+
+import {
+TraineeSelectList,
+} from "./TraineeSelectList";
+
+import {
+fetchTemplates,
+} from "../../store/program.slice";
 
 interface PublishAssignModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  planId: number;
-  onSuccess: () => void;
+isOpen: boolean;
+onClose: () => void;
+planId: number;
+onSuccess: () => void;
 }
 
-export interface TraineeAssignmentConfig {
-  startDate: string;
-  durationWeeks: number | string;
-}
-
-interface PlanAssignment {
-  id: number;
-  planTemplateId: number;
-  traineeId: number;
-  createdAt: string;
-  endedAt: string;
+interface ApiError {
+response?: {
+status?: number;
+data?: {
+message?: string;
+code?: string;
+error?: string;
+};
+};
+message?: string;
+config?: {
+url?: string;
+method?: string;
+};
 }
 
 export function PublishAssignModal({
-  isOpen,
-  onClose,
-  planId,
-  onSuccess,
+isOpen,
+onClose,
+planId,
+onSuccess,
 }: PublishAssignModalProps) {
-  const dispatch = useAppDispatch();
+const dispatch = useAppDispatch();
 
-  const { trainees = [], isLoading: loading } =
-    useAppSelector((state) => state.trainer);
+const {
+trainees = [],
+isLoading: loading,
+} = useAppSelector(
+(state) => state.trainer
+);
 
-  const [assignments, setAssignments] = useState<
-    Record<number, TraineeAssignmentConfig>
-  >({});
+const [selectedTraineeIds, setSelectedTraineeIds] =
+useState<number[]>([]);
 
-  const [existingAssignments, setExistingAssignments] =
-    useState<PlanAssignment[]>([]);
+const [submitting, setSubmitting] =
+useState(false);
 
-  const [loadingAssignments, setLoadingAssignments] =
-    useState(false);
+const [errorMessage, setErrorMessage] =
+useState<string | null>(null);
 
-  const [submitting, setSubmitting] =
-    useState(false);
+useEffect(() => {
+if (!isOpen) {
+return;
+}
 
-  useEffect(() => {
-    if (!isOpen) return;
 
-    dispatch(
-      fetchTrainerTrainees({
-        page: 1,
-        limit: 10,
-      })
+setSelectedTraineeIds([]);
+setErrorMessage(null);
+
+void dispatch(
+  fetchTrainerTrainees({
+    page: 1,
+    limit: 10,
+  })
+);
+
+
+}, [isOpen, dispatch]);
+
+const toggleSelectTrainee = (
+traineeId: number
+) => {
+setErrorMessage(null);
+
+setSelectedTraineeIds((prev) => {
+  if (prev.includes(traineeId)) {
+    return prev.filter(
+      (id) => id !== traineeId
     );
+  }
 
-    const loadExistingAssignments = async () => {
-      try {
-        setLoadingAssignments(true);
+  return [...prev, traineeId];
+});
 
-        const response =
-          await programService.getAssignments();
 
-        const data: PlanAssignment[] =
-          response.data?.data ?? [];
+};
 
-        setExistingAssignments(data);
-      } catch (error) {
-        console.error(
-          "Failed to load existing plan assignments:",
-          error
-        );
+const handleRemoveTrainee = (
+traineeId: number
+) => {
+setSelectedTraineeIds((prev) =>
+prev.filter(
+(id) => id !== traineeId
+)
+);
+};
 
-        setExistingAssignments([]);
-      } finally {
-        setLoadingAssignments(false);
+const handlePublishAndAssign =
+async () => {
+setErrorMessage(null);
+
+
+  if (
+    selectedTraineeIds.length === 0
+  ) {
+    setErrorMessage(
+      "Please select at least one trainee."
+    );
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+
+    await programService.updatePlanTemplate(
+      planId,
+      {
+        status: "ACTIVE",
       }
-    };
-
-    loadExistingAssignments();
-  }, [isOpen, dispatch]);
-
-  const assignedTraineeIds = existingAssignments
-    .filter(
-      (assignment) =>
-        Number(assignment.planTemplateId) ===
-        Number(planId)
-    )
-    .map((assignment) =>
-      Number(assignment.traineeId)
     );
 
-  const assignedTraineeIdSet = new Set(
-    assignedTraineeIds
-  );
-
-  const availableTrainees = trainees.filter(
-    (trainee) =>
-      !assignedTraineeIdSet.has(Number(trainee.id))
-  );
-
-  const toggleSelectTrainee = (id: number) => {
-    // Do not allow a trainee that is already
-    // assigned to this template to be selected.
-    if (assignedTraineeIdSet.has(Number(id))) {
-      return;
-    }
-
-    setAssignments((prev) => {
-      const copy = { ...prev };
-
-      if (copy[id]) {
-        delete copy[id];
-      } else {
-        const today = new Date()
-          .toISOString()
-          .split("T")[0];
-
-        copy[id] = {
-          startDate: today,
-          durationWeeks: 4,
-        };
-      }
-
-      return copy;
-    });
-  };
-
-  const handleRemoveTrainee = (id: number) => {
-    setAssignments((prev) => {
-      const copy = { ...prev };
-
-      delete copy[id];
-
-      return copy;
-    });
-  };
-
-  const handleUpdateConfig = (
-    id: number,
-    config: Partial<TraineeAssignmentConfig>
-  ) => {
-    setAssignments((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        ...config,
-      },
-    }));
-  };
-
-  const handlePublishAndAssign = async () => {
-    const selectedIds =
-      Object.keys(assignments).map(Number);
-
-    if (selectedIds.length === 0) return;
-
-    // Final duplicate protection before sending
-    // the assignment requests.
-    const duplicateIds = selectedIds.filter((id) =>
-      assignedTraineeIdSet.has(Number(id))
-    );
-
-    if (duplicateIds.length > 0) {
-      console.error(
-        "Some trainees are already assigned to this template:",
-        duplicateIds
+    const assignmentResults =
+      await Promise.allSettled(
+        selectedTraineeIds.map(
+          (traineeId) =>
+            programService.assignPlan({
+              planTemplateId:
+                Number(planId),
+              traineeId:
+                Number(traineeId),
+            })
+        )
       );
 
-      return;
-    }
+    const failedAssignments =
+      assignmentResults.filter(
+        (
+          result
+        ): result is PromiseRejectedResult =>
+          result.status === "rejected"
+      );
 
-    try {
-      setSubmitting(true);
+    if (
+      failedAssignments.length > 0
+    ) {
+      console.error(
+        "Some plan assignments failed:",
+        failedAssignments
+      );
 
-      // 1. Update plan template status to ACTIVE
-      await programService.updatePlanTemplate(
-        planId,
-        {
-          status: "ACTIVE",
+      /*
+       * Log the actual Axios/backend error details.
+       */
+      failedAssignments.forEach(
+        (result, index) => {
+          const error =
+            result.reason as ApiError;
+
+          console.error(
+            `Assignment failure ${index + 1}:`,
+            {
+              message:
+                error?.message,
+              status:
+                error?.response?.status,
+              response:
+                error?.response?.data,
+              url:
+                error?.config?.url,
+              method:
+                error?.config?.method,
+            }
+          );
+
+          console.error(
+            "Full error:",
+            result.reason
+          );
         }
       );
 
-      // 2. Assign the plan to each selected trainee
-      // with their custom timeline.
-      await Promise.all(
-        selectedIds.map((traineeId) => {
-          const config =
-            assignments[traineeId];
+      const conflictCount =
+        failedAssignments.filter(
+          (result) => {
+            const error =
+              result.reason as ApiError;
 
-          const start = new Date(
-            config.startDate
-          );
+            return (
+              error?.response?.status ===
+              409
+            );
+          }
+        ).length;
 
-          const weeks =
-            parseInt(
-              String(config.durationWeeks),
-              10
-            ) || 1;
+      if (
+        conflictCount ===
+        failedAssignments.length
+      ) {
+        setErrorMessage(
+          "The plan was published, but the selected trainee(s) already have this plan assigned."
+        );
+      } else if (
+        conflictCount > 0
+      ) {
+        setErrorMessage(
+          `${failedAssignments.length} trainee assignment${
+            failedAssignments.length === 1
+              ? ""
+              : "s"
+          } could not be created. Some trainees may already have this plan assigned.`
+        );
+      } else {
+        setErrorMessage(
+          failedAssignments.length ===
+          selectedTraineeIds.length
+            ? "The plan was published, but the assignments could not be created. Please try again."
+            : `${failedAssignments.length} trainee assignment${
+                failedAssignments.length ===
+                1
+                  ? ""
+                  : "s"
+              } could not be created.`
+        );
+      }
 
-          const endedAt = new Date(
-            start.getTime() +
-              weeks *
-                7 *
-                24 *
-                60 *
-                60 *
-                1000
-          ).toISOString();
-
-          return programService.assignPlan({
-            planTemplateId: planId,
-            traineeId,
-            createdAt:
-              start.toISOString(),
-            endedAt,
-          });
-        })
+      await dispatch(
+        fetchTemplates()
       );
 
-      // 3. Refresh Redux state
-      dispatch(fetchTemplates());
-
-      // 4. Clear selected trainees
-      setAssignments({});
-
-      onSuccess();
-      onClose();
-    } catch (err) {
-      console.error(
-        "Failed to publish and assign plan",
-        err
-      );
-    } finally {
-      setSubmitting(false);
+      return;
     }
-  };
 
-  if (!isOpen) return null;
+    await dispatch(
+      fetchTemplates()
+    );
 
-  const selectedTraineeIds =
-    Object.keys(assignments).map(Number);
+    setSelectedTraineeIds([]);
+    setErrorMessage(null);
 
-  const selectedTraineesList = trainees.filter(
-    (trainee) =>
-      selectedTraineeIds.includes(
-        Number(trainee.id)
-      )
+    onSuccess();
+    onClose();
+  } catch (error: unknown) {
+    console.error(
+      "Failed to publish and assign plan:",
+      error
+    );
+
+    const apiError =
+      error as ApiError;
+
+    const backendMessage =
+      apiError?.response?.data
+        ?.message;
+
+    setErrorMessage(
+      backendMessage ||
+        apiError?.message ||
+        "Failed to publish and assign the plan. Please try again."
+    );
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+
+if (!isOpen) {
+return null;
+}
+
+/*
+
+* Hide only trainees that are explicitly known
+* to already have this exact plan assigned.
+  */
+  const availableTrainees =
+  trainees.filter((trainee) => {
+  const assignedPlanIds =
+  trainee.assignedPlanTemplateIds ?? [];
+
+  return !assignedPlanIds.includes(
+  Number(planId)
   );
+  });
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-xl border bg-card p-6 shadow-xl space-y-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b pb-3">
-          <h3 className="text-lg font-semibold">
-            Publish & Assign Plan
-          </h3>
+const selectedTraineesList =
+availableTrainees.filter((trainee) =>
+selectedTraineeIds.includes(
+Number(trainee.id)
+)
+);
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-          >
-            ✕
-          </Button>
-        </div>
+const hasNoTrainees =
+!loading &&
+availableTrainees.length === 0;
 
-        <SelectedTraineesChips
-          selectedTrainees={
-            selectedTraineesList
-          }
-          assignments={assignments}
-          onUpdateConfig={
-            handleUpdateConfig
-          }
-          onRemove={handleRemoveTrainee}
-        />
+return ( <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm"> <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-6 rounded-xl border bg-card p-6 shadow-xl">
 
-        <TraineeSelectList
-          trainees={availableTrainees}
-          selectedIds={selectedTraineeIds}
-          loading={
-            loading || loadingAssignments
-          }
-          onToggle={toggleSelectTrainee}
-        />
 
-        {!loading &&
-          !loadingAssignments &&
-          availableTrainees.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center">
-              All trainees are already assigned
-              to this template.
-            </p>
-          )}
+    <div className="flex items-center justify-between border-b pb-3">
+      <h3 className="text-lg font-semibold">
+        Publish & Assign Plan
+      </h3>
 
-        <div className="flex justify-end gap-2 pt-3 border-t">
-          <Button
-            variant="outline"
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            onClick={handlePublishAndAssign}
-            disabled={
-              selectedTraineeIds.length === 0 ||
-              submitting ||
-              loadingAssignments
-            }
-          >
-            {submitting
-              ? "Publishing..."
-              : "Confirm & Publish"}
-          </Button>
-        </div>
-      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        type="button"
+        onClick={onClose}
+        disabled={submitting}
+        aria-label="Close"
+      >
+        ✕
+      </Button>
     </div>
-  );
+
+    {errorMessage && (
+      <div
+        role="alert"
+        className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+      >
+        {errorMessage}
+      </div>
+    )}
+
+    <SelectedTraineesChips
+      selectedTrainees={
+        selectedTraineesList
+      }
+      onRemove={
+        handleRemoveTrainee
+      }
+    />
+
+    <div className="space-y-2">
+      <TraineeSelectList
+        trainees={availableTrainees}
+        selectedIds={
+          selectedTraineeIds
+        }
+        loading={loading}
+        onToggle={
+          toggleSelectTrainee
+        }
+      />
+
+      {hasNoTrainees && (
+        <p className="text-center text-xs text-muted-foreground">
+          No trainees available for this plan.
+        </p>
+      )}
+    </div>
+
+    <div className="flex justify-end gap-2 border-t pt-3">
+      <Button
+        variant="outline"
+        type="button"
+        onClick={onClose}
+        disabled={submitting}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        type="button"
+        onClick={
+          handlePublishAndAssign
+        }
+        disabled={
+          selectedTraineeIds.length ===
+            0 ||
+          submitting ||
+          loading
+        }
+      >
+        {submitting
+          ? "Publishing..."
+          : "Confirm & Publish"}
+      </Button>
+    </div>
+  </div>
+</div>
+
+
+);
 }

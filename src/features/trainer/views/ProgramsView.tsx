@@ -48,17 +48,8 @@ export default function ProgramsView() {
   const [selectedTemplate, setSelectedTemplate] =
     useState<string>("all");
 
-  const [selectedRow, setSelectedRow] =
-    useState<ProgramHistoryRow | null>(null);
-
-  const [durationWeeks, setDurationWeeks] =
-    useState<number>(1);
-
   const [rowToRemove, setRowToRemove] =
     useState<ProgramHistoryRow | null>(null);
-
-  const [isUpdating, setIsUpdating] =
-    useState(false);
 
   const [isRemoving, setIsRemoving] =
     useState(false);
@@ -101,31 +92,11 @@ export default function ProgramsView() {
     );
   }, [rows, selectedTemplate]);
 
-  const getDurationWeeks = (
-    createdAt: string,
-    endedAt: string
-  ) => {
-    const start = new Date(createdAt).getTime();
-    const end = new Date(endedAt).getTime();
-
-    if (
-      Number.isNaN(start) ||
-      Number.isNaN(end) ||
-      end <= start
-    ) {
-      return 1;
+  const formatDateTime = (date: string) => {
+    if (!date) {
+      return "Not started";
     }
 
-    return Math.max(
-      1,
-      Math.round(
-        (end - start) /
-          (1000 * 60 * 60 * 24 * 7)
-      )
-    );
-  };
-
-  const formatDateTime = (date: string) => {
     const value = new Date(date);
 
     if (Number.isNaN(value.getTime())) {
@@ -172,8 +143,23 @@ export default function ProgramsView() {
           row.traineeId
         );
 
-      const logs: WorkoutLog[] =
-        response.data?.data ?? [];
+   console.log(
+  "WORKOUT LOG API RESPONSE:",
+  response.data
+);
+
+const logs: WorkoutLog[] =
+  response.data?.data ?? [];
+
+console.log(
+  "WORKOUT LOGS:",
+  logs
+);
+
+console.log(
+  "WORKOUT LOG IDS:",
+  logs.map((log) => log.workoutLogId)
+);
 
       const assignmentLogs = logs.filter(
         (log) =>
@@ -240,79 +226,41 @@ export default function ProgramsView() {
     }
   };
 
-  const handleWorkoutLogClick = async (
-    log: WorkoutLog
-  ) => {
-    setSelectedWorkoutLog(null);
-    setLogDetailError(null);
-    setIsLoadingLogDetail(true);
 
-    try {
-      const response =
-        await programService.getWorkoutLogDetail(
-          log.id
-        );
+const handleWorkoutLogClick = async (
+  log: WorkoutLog
+) => {
+  console.log("CLICKED WORKOUT LOG:", log);
+  console.log("CLICKED WORKOUT LOG ID:", log.workoutLogId);
 
-      const detail: WorkoutLogDetail =
-        response.data?.data;
+  setSelectedWorkoutLog(null);
+  setLogDetailError(null);
+  setIsLoadingLogDetail(true);
 
-      setSelectedWorkoutLog(detail);
-    } catch (error) {
-      console.error(
-        "Failed to fetch workout log details:",
-        error
+  try {
+    const response =
+      await programService.getWorkoutLogDetail(
+        log.workoutLogId
       );
 
-      setLogDetailError(
-        "Failed to load workout session details."
-      );
-    } finally {
-      setIsLoadingLogDetail(false);
-    }
-  };
+    const detail: WorkoutLogDetail =
+      response.data?.data;
 
-  const handleUpdateDuration = async () => {
-    if (!selectedRow) {
-      return;
-    }
+    setSelectedWorkoutLog(detail);
+  } catch (error) {
+    console.error(
+      "Failed to fetch workout log details:",
+      error
+    );
 
-    setIsUpdating(true);
-    setActionError(null);
+    setLogDetailError(
+      "Failed to load workout session details."
+    );
+  } finally {
+    setIsLoadingLogDetail(false);
+  }
+};
 
-    try {
-      const startDate = new Date(
-        selectedRow.createdAt
-      );
-
-      const newEndDate = new Date(startDate);
-
-      newEndDate.setDate(
-        newEndDate.getDate() +
-          durationWeeks * 7
-      );
-
-      await programService.updateAssignment(
-        selectedRow.id,
-        {
-          endedAt: newEndDate.toISOString(),
-        }
-      );
-
-      setSelectedRow(null);
-      await refresh();
-    } catch (error) {
-      console.error(
-        "Failed to update program duration:",
-        error
-      );
-
-      setActionError(
-        "Failed to update program duration."
-      );
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
   const handleRemoveAssignment = async () => {
     if (!rowToRemove) {
@@ -386,120 +334,11 @@ export default function ProgramsView() {
         rows={filteredRows}
         isLoading={isLoading}
         onRowClick={handleRowClick}
-        onUpdateDuration={(row) => {
-          setSelectedRow(row);
-
-          setDurationWeeks(
-            getDurationWeeks(
-              row.createdAt,
-              row.endedAt
-            )
-          );
-
-          setActionError(null);
-        }}
         onRemove={(row) => {
           setRowToRemove(row);
           setActionError(null);
         }}
       />
-
-      {/* Update Duration Dialog */}
-      <Dialog
-        open={selectedRow !== null}
-        onOpenChange={(open) => {
-          if (!open && !isUpdating) {
-            setSelectedRow(null);
-            setActionError(null);
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Update Program Duration
-            </DialogTitle>
-
-            <DialogDescription>
-              Update the duration of this program
-              assignment.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium">
-                Program
-              </p>
-
-              <p className="text-sm text-muted-foreground">
-                {selectedRow?.templateName}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium">
-                Trainee
-              </p>
-
-              <p className="text-sm text-muted-foreground">
-                {selectedRow?.traineeName}
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">
-                Duration (weeks)
-              </label>
-
-              <input
-                type="number"
-                min={1}
-                value={durationWeeks}
-                onChange={(event) =>
-                  setDurationWeeks(
-                    Math.max(
-                      1,
-                      Number(event.target.value)
-                    )
-                  )
-                }
-                className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
-              />
-            </div>
-
-            {actionError && (
-              <p className="text-sm text-destructive">
-                {actionError}
-              </p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isUpdating}
-              onClick={() => {
-                setSelectedRow(null);
-                setActionError(null);
-              }}
-            >
-              Cancel
-            </Button>
-
-            <Button
-              type="button"
-              disabled={isUpdating}
-              onClick={handleUpdateDuration}
-            >
-              {isUpdating
-                ? "Updating..."
-                : "Update"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Remove Assignment Dialog */}
       <Dialog
