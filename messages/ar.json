@@ -65,7 +65,11 @@
     "adminHub": "بوابة الإدارة",
     "workouts": "التمارين",
     "members": "الأعضاء",
-    "classes": "الصفوف"
+    "classes": "الصفوف",
+    "current-plans": "الخطط الحالية",
+    "todays-workout": "تمرين اليوم",
+    "progress": "التقدم",
+    "notifications": "الإشعارات"
   },
   "Trainer": {
     "panelTitle": "لوحة المدرب",
@@ -297,5 +301,52 @@
     "planAssigned": "تم تعيينك البرنامج \"{planName}\"",
     "personalRecord": "سجل شخصي جديد على {exerciseName}!",
     "adherenceLow": "انخفض التزامك بالبرنامج \"{planName}\" إلى {percentage}%"
+  },
+  "PlanTimeline": {
+    "loading": "جاري تحميل الجدول الزمني للخطة...",
+    "back": "رجوع",
+    "backToTrainee": "العودة للمتدرب",
+    "noActivePlans": "لا توجد خطط نشطة",
+    "noActivePlansDesc": "ليس لديك أي خطط تدريبية نشطة في الوقت الحالي.",
+    "week": "الأسبوع {number}",
+    "legend": {
+      "title": "المفتاح"
+    },
+    "statuses": {
+      "completed": "مكتمل",
+      "in_progress": "قيد التنفيذ",
+      "skipped": "تم التخطي",
+      "not_started": "لم يبدأ",
+      "current": "الحالي"
+    },
+    "statusLabels": {
+      "active": "نشط",
+      "completed": "مكتمل",
+      "paused": "متوقف مؤقتاً",
+      "cancelled": "ملغى"
+    },
+    "info": {
+      "startedAt": "بدأ في",
+      "weeks": "الأسابيع",
+      "completed": "منجز",
+      "currentPosition": "الموضع",
+      "weekWorkout": "أ{week} · #ت{workout}"
+    },
+    "log": {
+      "minutes": "دقيقة",
+      "viewLog": "عرض السجل"
+    },
+    "actions": {
+      "start": "ابدأ",
+      "resume": "استئناف",
+      "startAgain": "البدء مجدداً",
+      "skip": "تخطي"
+    },
+    "toasts": {
+      "startSuccess": "تم بدء التمرين!",
+      "startError": "فشل بدء التمرين.",
+      "skipSuccess": "تم تخطي التمرين.",
+      "skipError": "فشل تخطي التمرين."
+    }
   }
 }

@@ -1,5 +1,5 @@
 // src/lib/offlineQueue.ts
-import { openDB, DBSchema } from 'idb';
+import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import {
   StartWorkoutPayload,
   LogExercisePayload,
@@ -22,7 +22,7 @@ interface QueueDB extends DBSchema {
 }
 
 const dbPromise = openDB<QueueDB>('gym-offline-queue', 1, {
-  upgrade(db) {
+  upgrade(db: IDBPDatabase<QueueDB>) {
     db.createObjectStore('requests', { keyPath: 'id' });
     db.createObjectStore('idMap', { keyPath: 'tempId' });
   },
@@ -34,18 +34,18 @@ export async function enqueue(item: NewQueuedRequest) {
   await db.add('requests', entry);
 }
 
-export async function getQueueForSession(sessionTempId: string) {
+export async function getQueueForSession(sessionTempId: string): Promise<QueuedRequest[]> {
   const db = await dbPromise;
   const all = await db.getAll('requests');
   return all
-    .filter((r) => r.sessionTempId === sessionTempId)
-    .sort((a, b) => a.createdAt - b.createdAt);
+    .filter((r: QueuedRequest) => r.sessionTempId === sessionTempId)
+    .sort((a: QueuedRequest, b: QueuedRequest) => a.createdAt - b.createdAt);
 }
 
-export async function getAllSessionIds() {
+export async function getAllSessionIds(): Promise<string[]> {
   const db = await dbPromise;
   const all = await db.getAll('requests');
-  return [...new Set(all.map((r) => r.sessionTempId))];
+  return Array.from(new Set(all.map((r: QueuedRequest) => r.sessionTempId)));
 }
 
 export async function removeFromQueue(id: string) {
@@ -56,7 +56,7 @@ export async function resolveId(tempId: string, realId: number) {
   (await dbPromise).put('idMap', { tempId, realId });
 }
 
-export async function getResolvedId(tempId: string) {
+export async function getResolvedId(tempId: string): Promise<number | null> {
   const row = await (await dbPromise).get('idMap', tempId);
-  return row?.realId ?? null;
+  return row ? row.realId : null;
 }

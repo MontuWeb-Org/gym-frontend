@@ -9,6 +9,7 @@ import {
 import {
   TrainerDashboardResponse,
 } from "../types/dashboard.types";
+import { GetTraineeTimeline } from "../types/timeline.types";
 
 export const trainerService = {
   async getTrainerTrainees(
@@ -82,5 +83,25 @@ export const trainerService = {
       );
 
     return response.data.data;
+  },
+
+  // Timeline
+  async getTraineeTimeline(planAssignmentId: number): Promise<{ data: GetTraineeTimeline }> {
+    const response = await authApi.get<{ data: GetTraineeTimeline }>(
+      `/plans/assignments/${planAssignmentId}`
+    );
+    return response.data;
+  },
+
+  async startWorkout(planAssignmentId: number, workoutTemplateId: number): Promise<void> {
+    await authApi.post(
+      `/plans/assignments/${planAssignmentId}/workouts/${workoutTemplateId}/start`
+    );
+  },
+
+  async skipWorkout(planAssignmentId: number, workoutTemplateId: number): Promise<void> {
+    await authApi.post(
+      `/plans/assignments/${planAssignmentId}/workouts/${workoutTemplateId}/skip`
+    );
   },
 };

@@ -10,11 +10,21 @@ export const ROUTES = {
     TRAINER: "/signup/trainer",
   },
 
+  // Shared plan routes — accessible by both trainer and trainee
+  PLANS: {
+    TIMELINE: (planAssignmentId: string | number) => `/plans/${planAssignmentId}`,
+    WORKOUT_TEMPLATE_DETAIL: (
+      planAssignmentId: string | number,
+      workoutId: string | number
+    ) => `/plans/${planAssignmentId}/workouts/${workoutId}`,
+    WORKOUT_LOG_DETAIL: (logId: string | number) => `/workout-logs/${logId}`,
+  },
+
   TRAINER: {
     ROOT: "/trainer",
     DASHBOARD: "/trainer/dashboard",
     TRAINEES: "/trainer/trainees",
-    TRAINEE_DETAILS: (id: number) => `/trainer/trainees/${id}`,
+    TRAINEE_DETAILS: (id: string | number) => `/trainer/trainees/${id}`,
     PROGRAMS: "/trainer/programs",
     TEMPLATES: "/trainer/templates",
     BILLING: "/trainer/billing",
@@ -27,6 +37,7 @@ export const ROUTES = {
     PROGRESS: "/trainee/progress",
     NOTIFICATIONS: "/trainee/notifications",
     PROFILE: "/trainee/profile",
+    CURRENT_PLANS: "/trainee/current-plans",
   },
 
   ADMIN: {
