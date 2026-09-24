@@ -175,7 +175,7 @@ export const programService = {
   // Workout Exercises
   // ---------------------------------------------------------------------------
 
-  addExerciseToWorkout: (data: {
+    addExerciseToWorkout: (data: {
     exerciseId: number;
     workoutTemplateId: number;
     sequenceNumber: number;
@@ -210,7 +210,7 @@ export const programService = {
             data.defaultRestTimeSeconds
           )
         ),
-        defaultDurationMinutes: Math.max(
+        durationMinutes: Math.max(
           1,
           Math.floor(
             data.defaultDurationMinutes
@@ -285,7 +285,7 @@ export const programService = {
         ...(data.defaultDurationMinutes !==
         undefined
           ? {
-              defaultDurationMinutes:
+              durationMinutes:
                 Math.max(
                   1,
                   Math.floor(
@@ -305,7 +305,6 @@ export const programService = {
           : {}),
       }
     ),
-
   deleteWorkoutExercise: (
     exerciseTemplateId: number
   ) =>

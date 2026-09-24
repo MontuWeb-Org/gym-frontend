@@ -109,6 +109,11 @@ export function useTemplates() {
   ] = useState(false);
 
   const [
+    createError,
+    setCreateError,
+  ] = useState<string | null>(null);
+
+  const [
     selectedPlanIdForAssign,
     setSelectedPlanIdForAssign,
   ] = useState<number | null>(null);
@@ -128,20 +133,6 @@ export function useTemplates() {
 
   // ---------------------------------------------------------------------------
   // Load templates
-  //
-  // IMPORTANT:
-  // The list endpoint already returns durationWeekTemplates.
-  //
-  // Example:
-  //
-  // {
-  //   "id": 1,
-  //   "name": "Template 1",
-  //   "durationWeekTemplates": 3
-  // }
-  //
-  // We therefore use that value directly instead of making another request
-  // and potentially replacing the correct value with 0.
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
@@ -229,7 +220,28 @@ export function useTemplates() {
     name: string,
     description: string
   ) => {
-    if (!name.trim()) {
+    const trimmedName =
+      name.trim();
+
+    const trimmedDescription =
+      description.trim();
+
+    // Clear previous error
+    setCreateError(null);
+
+    // Validate name
+    if (!trimmedName) {
+      setCreateError(
+        "Please enter a template name."
+      );
+      return;
+    }
+
+    // Validate description
+    if (!trimmedDescription) {
+      setCreateError(
+        "Please enter a description for the template."
+      );
       return;
     }
 
@@ -239,8 +251,9 @@ export function useTemplates() {
       const resultAction =
         await dispatch(
           createTemplate({
-            name,
-            description,
+            name: trimmedName,
+            description:
+              trimmedDescription,
           })
         );
 
@@ -271,18 +284,38 @@ export function useTemplates() {
         router.push(
           `/trainer/template/${planId}`
         );
-      } else {
-        console.error(
-          "Create template was rejected:",
-          resultAction.payload
-        );
 
-        setIsCreating(false);
+        return;
       }
+
+      // -----------------------------------------------------------------------
+      // Backend rejected the request
+      // -----------------------------------------------------------------------
+
+      const errorMessage =
+        typeof resultAction.payload ===
+        "string"
+          ? resultAction.payload
+          : "The template could not be created. Please check the information you entered.";
+
+      setCreateError(
+        errorMessage
+      );
+
+      console.error(
+        "Create template was rejected:",
+        resultAction.payload
+      );
+
+      setIsCreating(false);
     } catch (error) {
       console.error(
         "Failed to create template:",
         error
+      );
+
+      setCreateError(
+        "Something went wrong while creating the template. Please try again."
       );
 
       setIsCreating(false);
@@ -351,10 +384,6 @@ export function useTemplates() {
     try {
       await programService.deleteTemplate(
         id
-      );
-
-      await dispatch(
-        fetchTemplates()
       );
     } catch (error: unknown) {
       if (
@@ -456,6 +485,8 @@ export function useTemplates() {
 
     isCreating,
     setIsCreating,
+
+    createError,
 
     selectedPlanIdForAssign,
     closeAssignModal,

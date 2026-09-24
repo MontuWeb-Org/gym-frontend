@@ -68,6 +68,10 @@ const initialState: ProgramState = {
   error: null,
 };
 
+// -----------------------------------------------------------------------------
+// Fetch Templates
+// -----------------------------------------------------------------------------
+
 export const fetchTemplates =
   createAsyncThunk(
     "trainerProgram/fetchTemplates",
@@ -97,6 +101,10 @@ export const fetchTemplates =
     }
   );
 
+// -----------------------------------------------------------------------------
+// Create Template
+// -----------------------------------------------------------------------------
+
 export const createTemplate =
   createAsyncThunk(
     "trainerProgram/createTemplate",
@@ -118,9 +126,21 @@ export const createTemplate =
         if (
           axios.isAxiosError(err)
         ) {
+          const responseData =
+            err.response?.data;
+
+          // Keep the useful backend validation
+          // message instead of hiding it.
+          if (
+            responseData?.message
+          ) {
+            return rejectWithValue(
+              responseData.message
+            );
+          }
+
           return rejectWithValue(
-            err.response?.data?.message ||
-              "Failed to create template"
+            "Failed to create template"
           );
         }
 
@@ -130,6 +150,10 @@ export const createTemplate =
       }
     }
   );
+
+// -----------------------------------------------------------------------------
+// Fetch Exercises
+// -----------------------------------------------------------------------------
 
 export const fetchExercises =
   createAsyncThunk(
@@ -164,6 +188,7 @@ export const programSlice =
   createSlice({
     name: "trainerProgram",
     initialState,
+
     reducers: {
       setCurrentTemplate(
         state,
@@ -222,12 +247,16 @@ export const programSlice =
     extraReducers: (builder) => {
       builder
 
+        // ---------------------------------------------------------------------
         // Fetch Templates
+        // ---------------------------------------------------------------------
+
         .addCase(
           fetchTemplates.pending,
           (state) => {
             state.status =
               "loading";
+
             state.error = null;
           }
         )
@@ -244,8 +273,6 @@ export const programSlice =
             const payload =
               action.payload;
 
-            // Unwraps safely across common nested shapes
-            // (e.g., payload.data.plans or payload.plans)
             const plansList =
               payload?.data?.plans ||
               payload?.plans ||
@@ -280,13 +307,31 @@ export const programSlice =
           }
         )
 
+        // ---------------------------------------------------------------------
         // Create Template
+        // ---------------------------------------------------------------------
+
+        .addCase(
+          createTemplate.pending,
+          (state) => {
+            state.status =
+              "loading";
+
+            state.error = null;
+          }
+        )
+
         .addCase(
           createTemplate.fulfilled,
           (
             state,
             action
           ) => {
+            state.status =
+              "succeeded";
+
+            state.error = null;
+
             const payload =
               action.payload;
 
@@ -344,7 +389,25 @@ export const programSlice =
           }
         )
 
+        .addCase(
+          createTemplate.rejected,
+          (
+            state,
+            action
+          ) => {
+            state.status =
+              "failed";
+
+            state.error =
+              (action.payload as string) ||
+              "Failed to create template";
+          }
+        )
+
+        // ---------------------------------------------------------------------
         // Fetch Exercises
+        // ---------------------------------------------------------------------
+
         .addCase(
           fetchExercises.fulfilled,
           (
