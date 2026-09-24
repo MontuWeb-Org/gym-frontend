@@ -6,5 +6,6 @@ interface TraineePageProps {
 
 export default async function TraineePage({ params }: TraineePageProps) {
   const { locale } = await params;
-  redirect({ href: "/trainee/dashboard", locale });
+
+  redirect({ href: "/trainee/todays-workout", locale });
 }
