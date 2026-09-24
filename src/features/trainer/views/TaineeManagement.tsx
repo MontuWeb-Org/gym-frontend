@@ -11,7 +11,7 @@ import { InvitationModal } from "../components/InvitationModal";
 import { toast } from "sonner";
 
 export default function TraineeManagement() {
-  const t = useTranslations("TraineeManagement");
+  const t = useTranslations("TraineesTable");
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);

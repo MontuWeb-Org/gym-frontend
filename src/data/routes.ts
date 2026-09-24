@@ -169,8 +169,9 @@ export const ROUTES = {
 
   TRAINEE: {
     ROOT: "/trainee",
-    DASHBOARD: "/trainee/dashboard",
-    WORKOUTS: "/trainee/workouts",
+    TODAYS_WORKOUT: "/trainee/todays-workout",
+    Progress: "/trainee/progress",
+    Notifications: "/trainee/notifications",
     profile: "/trainee/profile",
   },
 
