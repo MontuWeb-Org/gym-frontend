@@ -1,0 +1,229 @@
+.program-print-view {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+  }
+
+  body {
+    margin: 0 !important;
+  }
+
+  /*
+   * Hide the normal application while printing.
+   */
+  body * {
+    visibility: hidden;
+  }
+
+  /*
+   * Show only the printable program.
+   */
+  .program-print-view,
+  .program-print-view * {
+    visibility: visible;
+  }
+
+  .program-print-view {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .program-print-document {
+    width: 100%;
+    color: #111827;
+    font-family:
+      Arial,
+      Helvetica,
+      sans-serif;
+  }
+
+  .program-print-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+
+    border-bottom: 2px solid #111827;
+
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+  }
+
+  .program-print-label {
+    margin: 0 0 6px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.12em;
+
+    color: #6b7280;
+  }
+
+  .program-print-title {
+    margin: 0;
+
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 700;
+  }
+
+  .program-print-description {
+    max-width: 550px;
+
+    margin: 10px 0 0;
+
+    font-size: 12px;
+    line-height: 1.6;
+
+    color: #4b5563;
+  }
+
+  .program-print-meta {
+    min-width: 130px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+  .program-print-meta div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .program-print-meta span {
+    font-size: 9px;
+
+    color: #6b7280;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .program-print-meta strong {
+    font-size: 12px;
+  }
+
+  .program-print-week {
+    margin-bottom: 24px;
+  }
+
+  .program-print-week-header {
+    border-bottom: 1px solid #d1d5db;
+
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+  }
+
+  .program-print-week-header h2 {
+    margin: 0;
+
+    font-size: 20px;
+  }
+
+  .program-print-workouts {
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+  }
+
+  .program-print-workout {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    overflow: hidden;
+  }
+
+  .program-print-workout-header {
+    padding: 12px 14px;
+
+    background: #f3f4f6;
+
+    border-bottom: 1px solid #d1d5db;
+  }
+
+  .program-print-workout-header h3 {
+    margin: 2px 0 0;
+
+    font-size: 15px;
+  }
+
+  .program-print-day {
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+
+    color: #6b7280;
+  }
+
+  .program-print-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 10px;
+  }
+
+  .program-print-table th {
+    padding: 8px 10px;
+
+    text-align: left;
+    font-weight: 700;
+
+    background: #f9fafb;
+
+    border-bottom: 1px solid #d1d5db;
+  }
+
+  .program-print-table td {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    vertical-align: middle;
+  }
+
+  .program-print-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .program-print-exercise-name {
+    font-weight: 600;
+  }
+
+  .program-print-empty {
+    margin: 0;
+
+    padding: 14px;
+
+    font-size: 10px;
+
+    color: #6b7280;
+  }
+
+  .avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+}

@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { authReducer } from "@/features/auth";
 import { trainerReducer } from "@/features/trainer";
 import userReducer from "@/features/user/store/user.slice";
+import programReducer from "@/features/trainer/store/program.slice";
 import notificationReducer from "@/features/trainee/store/notification.slice";
 
 
@@ -10,6 +11,7 @@ export const store = configureStore({
     auth: authReducer,
     trainer: trainerReducer,
     user: userReducer,
+    trainerProgram: programReducer,
     notifications: notificationReducer,
 
   },
@@ -17,6 +19,7 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: false,
     }),
+  devTools: process.env.NODE_ENV !== "production",
 });
 
 export type RootState = ReturnType<typeof store.getState>;

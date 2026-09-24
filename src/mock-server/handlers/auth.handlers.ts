@@ -238,9 +238,11 @@ export const authHandlers = [
     );
   }),
 
-  // 6. Refresh Token
+   // 6. Refresh Token
   http.post("*/api/auth/refresh", async ({ request }) => {
-    const userId = getUserIdFromCookie(request);
+    const userId =
+      getUserIdFromCookie(request) ??
+      getUserIdFromToken(request);
 
     if (!userId) {
       return HttpResponse.json(
@@ -249,10 +251,12 @@ export const authHandlers = [
       );
     }
 
+    const accessToken = `mock_jwt_${userId}_${Date.now()}`;
+
     return HttpResponse.json(
       {
         data: {
-          accessToken: `mock_jwt_${userId}_${Date.now()}`,
+          accessToken,
         },
       },
       {
@@ -271,12 +275,12 @@ export const authHandlers = [
       {
         status: 200,
         headers: {
-          "Set-Cookie": "refreshToken=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax",
+          "Set-Cookie":
+            "refreshToken=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax",
         },
       }
     );
   }),
-
   // 8. Get Current User
   http.get("*/api/users/me", async ({ request }) => {
     const userId = getUserIdFromToken(request);

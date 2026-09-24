@@ -4,30 +4,43 @@ export type TraineeStatus =
   | "NOT_STARTED"
   | "FALLING_BEHIND"
   | "NEEDS_PLAN";
-export interface TraineePlanTemplate {
-  templateName: string;
-  templateId: number;
-}
-
-export interface TraineePlanLastSession {
-  status: string;
-  startedAt: string;
-}
 
 export interface TraineePlan {
-  adherencePercentage: number;
-  template: TraineePlanTemplate;
-  lastSession?: TraineePlanLastSession | null;
+  planId: number;
+
   status: string;
-  planAdherenceStatus: string;
+
+  adherencePercentage: number;
+
+  template: {
+    templateName: string;
+    templateId: number;
+  };
+
+  lastSession: {
+    status: string;
+    startedAt: string | null;
+  } | null;
+
+  planAdherenceStatus: TraineeStatus;
 }
 
 export interface Trainee {
+  // API / trainee-management fields
   traineeId: number;
   traineeName: string;
   traineeStatus: TraineeStatus;
   plans: TraineePlan[];
   email?: string;
+
+  // Existing normalized trainer fields
+  id: number;
+  name: string;
+  adherence: number;
+  programName: string;
+  lastSessionDate: string | null;
+  status: TraineeStatus;
+  assignedPlanTemplateIds: number[];
 }
 
 export interface OffsetPagination {
@@ -37,14 +50,54 @@ export interface OffsetPagination {
   totalPages: number;
 }
 
-export interface GetTraineesResponse {
-  data: Trainee[];
-  pagination: OffsetPagination;
+export interface GetTraineesApiItem {
+  traineeId: number;
+  traineeName: string;
+  traineeStatus: TraineeStatus;
+  plans: TraineePlan[];
+  email?: string;
 }
 
+export interface GetTraineesResponse {
+  data: GetTraineesApiItem[];
+
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+/**
+ * Supports both:
+ *
+ * Existing frontend usage:
+ *   { page: 1, limit: 10 }
+ *
+ * Backend-aligned usage:
+ *   { pageNumber: 1, pageSize: 10 }
+ *
+ * The service translates these into the backend query format.
+ */
 export interface GetTraineesQueryParams {
+  status?: TraineeStatus;
+
+  search?: string;
+
+  // Existing frontend names
   page?: number;
   limit?: number;
+
+  // Backend API names
+  pageNumber?: number;
+  pageSize?: number;
+
+  sortBy?: "createdAt" | "totalAmount";
+
+  sortOrder?: "asc" | "desc";
 }
 
 export interface TraineeSessionRecord {
@@ -90,26 +143,40 @@ export interface TraineeProfile {
 
 export interface PersonalRecord {
   exercise: ExerciseRef;
+
   heaviestWeight: number;
+
   heaviestWeightSet: SetLog;
+
   estimatedOneRm: number;
+
   estimatedOneRmSet: SetLog;
+
   updatedAt: string;
 }
 
 export interface ProgressionEntry {
   id: number;
+
   exercise: ExerciseRef;
+
   heaviestWeight: number;
+
   estimatedOneRm: number;
+
   isWeightPr: boolean;
+
   isOneRmPr: boolean;
+
   achievedAt: string;
+
   setLog: SetLog;
 }
 
 export interface TraineeDetailedInfo {
   traineeProfile: TraineeProfile;
+
   personalRecords: PersonalRecord[];
+
   progression: ProgressionEntry[];
 }

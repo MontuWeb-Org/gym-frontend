@@ -20,10 +20,10 @@ export default function TrainerLayout({
   const localizedSidebarItems = TRAINER_SIDEBAR_DATA.map((item) => {
     const translationKey = item.id as Parameters<typeof t>[0];
 
-    // Ensure item.href is safely handled as a string
     const rawHref = typeof item.href === "string" ? item.href : "";
 
     let targetHref = rawHref;
+
     if (!targetHref) {
       targetHref = ROUTES.TRAINER.DASHBOARD;
     } else if (!targetHref.startsWith("/")) {
@@ -37,9 +37,14 @@ export default function TrainerLayout({
     };
   });
 
-  // 2. Match active item against current URL path using ROUTES constants
+  // 2. Match active item against current URL path
   const activeItem =
     localizedSidebarItems.find((item) => {
+      // Keep Templates active throughout the Program Builder routes.
+      if (pathname.includes("/trainer/template")) {
+        return item.id === "templates";
+      }
+
       if (
         item.href === ROUTES.TRAINER.ROOT ||
         item.href === ROUTES.TRAINER.DASHBOARD
@@ -49,6 +54,7 @@ export default function TrainerLayout({
           pathname === ROUTES.TRAINER.DASHBOARD
         );
       }
+
       return pathname.startsWith(item.href);
     }) ?? localizedSidebarItems[0];
 
@@ -59,10 +65,13 @@ export default function TrainerLayout({
     const matchedItem = localizedSidebarItems.find(
       (item) => item.id === segment || item.href.endsWith(`/${segment}`)
     );
+
     if (matchedItem) return matchedItem.label;
+
     if (t.has(segment as Parameters<typeof t>[0])) {
       return t(segment as Parameters<typeof t>[0]);
     }
+
     return segment.replace(/-/g, " ");
   };
 
@@ -80,7 +89,6 @@ export default function TrainerLayout({
 
       <div className="flex-1 flex flex-col overflow-y-auto bg-background">
         <header className="px-6 py-4 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-10 flex flex-col gap-2">
-          {/* Breadcrumb Navigation */}
           <nav
             aria-label="Breadcrumbs"
             className="flex items-center gap-1.5 text-xs text-muted-foreground"
@@ -94,6 +102,7 @@ export default function TrainerLayout({
                   {index > 0 && (
                     <ChevronRight className="size-3 rtl:rotate-180 shrink-0" />
                   )}
+
                   <span
                     className={
                       isLast
