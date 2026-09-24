@@ -348,5 +348,39 @@
       "skipSuccess": "Workout skipped.",
       "skipError": "Failed to skip workout."
     }
+  },
+  "WorkoutLog": {
+    "loading": "Loading today's workout...",
+    "empty": "No workout is scheduled for today.",
+    "ready": "{count} exercises are ready to log.",
+    "offline": "Offline mode",
+    "set": "Set {current} of {total}",
+    "prescription": "Target: {reps} reps · Suggested weight: {weight}",
+    "fields": {
+      "reps": "Repetitions",
+      "weight": "Weight"
+    },
+    "actions": {
+      "start": "Start workout",
+      "next": "Save set and continue",
+      "finish": "Finish workout"
+    },
+    "rest": {
+      "title": "Rest timer",
+      "recommended": "Recommended rest: {seconds} seconds",
+      "pause": "Pause",
+      "resume": "Resume",
+      "reset": "Reset",
+      "nextSet": "Next set",
+      "skip": "Skip rest"
+    },
+    "complete": {
+      "title": "Workout complete",
+      "description": "All exercises were recorded successfully or queued for sync."
+    },
+    "errors": {
+      "loadWorkout": "Unable to load today's workout.",
+      "missingTemplateIds": "The workout response is missing exercise template IDs. Please ask the backend team to include each template ID before starting."
+    }
   }
 }

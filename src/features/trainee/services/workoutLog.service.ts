@@ -3,6 +3,18 @@ import { authApi } from '@/lib/axios';
 import { enqueue } from '@/lib/offlineQueue';
 import { WorkoutSession, ExerciseLogDraft } from '../types/workoutLog.types';
 
+function extractWorkoutLogId(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isInteger(value)) return value;
+  if (!value || typeof value !== 'object') return null;
+
+  const object = value as Record<string, unknown>;
+  for (const key of ['workoutLogId', 'workoutLog', 'log', 'data', 'id']) {
+    const id = extractWorkoutLogId(object[key]);
+    if (id !== null) return id;
+  }
+  return null;
+}
+
 export async function startWorkout(session: WorkoutSession): Promise<number | null> {
   const payload = {
     planAssignmentId: session.planAssignmentId,
@@ -15,13 +27,20 @@ export async function startWorkout(session: WorkoutSession): Promise<number | nu
     return null;
   }
 
+  let responseData: unknown;
   try {
-    const { data } = await authApi.post('/api/logs/workouts', payload);
-    return data.data.workoutLogId as number;
+    const response = await authApi.post('/logs/workouts', payload);
+    responseData = response.data;
   } catch {
     await enqueue({ sessionTempId: session.tempId, kind: 'start-workout', payload });
     return null;
   }
+
+  const workoutLogId = extractWorkoutLogId(responseData);
+  if (workoutLogId === null) {
+    throw new Error('Start workout response did not contain a numeric workout log ID');
+  }
+  return workoutLogId;
 }
 
 export async function logExercise(
@@ -29,6 +48,9 @@ export async function logExercise(
   workoutLogId: number | null,
   exercise: ExerciseLogDraft
 ) {
+  if (workoutLogId !== null && !Number.isInteger(workoutLogId)) {
+    throw new Error('Cannot log exercise without a numeric workout log ID');
+  }
   const payload = {
     workoutLogId: workoutLogId ?? undefined, // filled in by sync engine if null
     workoutExerciseTemplateId: exercise.workoutExerciseTemplateId,
@@ -51,7 +73,7 @@ export async function logExercise(
   }
 
   try {
-    await authApi.post('/api/logs/exercises', payload);
+    await authApi.post('/logs/exercises', payload);
   } catch {
     await enqueue({ sessionTempId, kind: 'log-exercise', payload });
   }
@@ -63,6 +85,9 @@ export async function completeWorkout(
   endedAt: string,
   notes?: string
 ) {
+  if (workoutLogId !== null && !Number.isInteger(workoutLogId)) {
+    throw new Error('Cannot complete workout without a numeric workout log ID');
+  }
   const payload = { endedAt, notes };
 
   if (workoutLogId === null || !navigator.onLine) {
@@ -71,7 +96,7 @@ export async function completeWorkout(
   }
 
   try {
-    await authApi.patch(`/api/logs/workouts/${workoutLogId}/complete`, payload);
+    await authApi.patch(`/logs/workouts/${workoutLogId}/complete`, payload);
   } catch {
     await enqueue({ sessionTempId, kind: 'complete-workout', payload });
   }

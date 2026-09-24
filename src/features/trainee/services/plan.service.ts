@@ -1,5 +1,9 @@
 import { authApi } from "@/lib/axios";
-import { TraineeActivePlan } from "../types/plan.types";
+import {
+  TraineeActivePlan,
+  WorkoutDetailsResponse,
+  WorkoutExerciseDetails,
+} from "../types/plan.types";
 
 export const traineePlanService = {
   async getActivePlans(): Promise<TraineeActivePlan[]> {
@@ -43,6 +47,30 @@ export const traineePlanService = {
         planId,
         id: planId,
       } as TraineeActivePlan;
+    });
+  },
+
+  async getWorkoutDetails(
+    assignmentId: number,
+    workoutId: number
+  ): Promise<WorkoutExerciseDetails[]> {
+    const response = await authApi.get<{ data: WorkoutDetailsResponse }>(
+      `/plans/assignments/${assignmentId}/workouts/${workoutId}`
+    );
+    return response.data.data.exercisesTemplates.map((template) => {
+      return {
+        id: template.id,
+        exerciseId: template.exercise.id,
+        exerciseName: template.exercise.name,
+        equipment: template.exercise.equipment,
+        instructions: template.exercise.instructions,
+        difficulty: template.exercise.difficulty,
+        sequenceNumber: template.sequenceNumber,
+        defaultSets: template.sets,
+        defaultReps: template.reps,
+        defaultWeight: template.weight,
+        defaultRestTimeSeconds: template.restSeconds,
+      };
     });
   },
 };
