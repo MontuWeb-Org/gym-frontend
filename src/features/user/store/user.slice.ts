@@ -90,6 +90,4 @@ const userSlice = createSlice({
 export const { clearError, clearUser } = userSlice.actions;
 export default userSlice.reducer;
 
-export const selectCurrentUser = (state: {
-  user: UserState;
-}) => state.user.user;
+export const selectCurrentUser = (state: { user: UserState }) => state.user.user;
