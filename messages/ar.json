@@ -182,9 +182,9 @@
       "needsPlan": "يحتاج خطة"
     },
     "actions": {
-    "resend": "إعادة الإرسال",
-    "open": "فتح",
-    "delete": "حذف المتدرب"
+      "resend": "إعادة الإرسال",
+      "open": "فتح",
+      "delete": "حذف المتدرب"
     },
     "deleteDialog": {
       "title": "إزالة المتدرب؟",
@@ -224,8 +224,8 @@
       "notes": "الملاحظات"
     },
     "metrics": {
-    "personalRecords": "السجلات الشخصية",
-    "latestPr": "أحدث رقم قياسي"
+      "personalRecords": "السجلات الشخصية",
+      "latestPr": "أحدث رقم قياسي"
     },
     "personalRecords": {
       "title": "السجلات الشخصية",
@@ -266,5 +266,14 @@
     "bioPlaceholder": "اكتب نبذة قصيرة عن نفسك...",
     "submitButton": "حفظ التغييرات",
     "saving": "جاري الحفظ..."
+  },
+  "Notifications": {
+    "title": "الإشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "empty": "لا توجد إشعارات بعد",
+    "loadMore": "تحميل المزيد",
+    "planAssigned": "تم تعيينك البرنامج \"{planName}\"",
+    "personalRecord": "سجل شخصي جديد على {exerciseName}!",
+    "adherenceLow": "انخفض التزامك بالبرنامج \"{planName}\" إلى {percentage}%"
   }
 }
