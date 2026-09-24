@@ -131,8 +131,8 @@ export default function WorkoutSessionDetailsDialog({
                           key={exercise.id}
                           className="rounded-lg border p-4"
                         >
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
                               <p className="font-medium">
                                 {exercise.exerciseName}
                               </p>
@@ -144,19 +144,16 @@ export default function WorkoutSessionDetailsDialog({
                                   0 && (
                                   <>
                                     {" × "}
-                                    {
-                                      exercise.expectedWeight
-                                    }{" "}
+                                    {exercise.expectedWeight}{" "}
                                     kg
                                   </>
                                 )}
                               </p>
                             </div>
 
-                            <p className="text-sm text-muted-foreground">
+                            <p className="shrink-0 text-sm text-muted-foreground">
                               {exercise.setLogs.length}{" "}
-                              {exercise.setLogs.length ===
-                              1
+                              {exercise.setLogs.length === 1
                                 ? "set"
                                 : "sets"}
                             </p>
@@ -197,9 +194,7 @@ export default function WorkoutSessionDetailsDialog({
                                         className="border-b last:border-0"
                                       >
                                         <td className="px-3 py-2">
-                                          {
-                                            set.sequenceNumber
-                                          }
+                                          {set.sequenceNumber}
                                         </td>
 
                                         <td className="px-3 py-2">
@@ -211,16 +206,12 @@ export default function WorkoutSessionDetailsDialog({
                                         </td>
 
                                         <td className="px-3 py-2">
-                                          {
-                                            set.durationSeconds
-                                          }{" "}
+                                          {set.durationSeconds}{" "}
                                           sec
                                         </td>
 
                                         <td className="px-3 py-2">
-                                          {
-                                            set.restTimeSeconds
-                                          }{" "}
+                                          {set.restTimeSeconds}{" "}
                                           sec
                                         </td>
                                       </tr>
@@ -242,3 +233,4 @@ export default function WorkoutSessionDetailsDialog({
     </Dialog>
   );
 }
+

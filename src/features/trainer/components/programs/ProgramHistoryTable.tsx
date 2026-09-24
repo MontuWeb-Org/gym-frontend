@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 export interface ProgramHistoryRow {
   id: number;
@@ -27,6 +27,9 @@ interface ProgramsHistoryTableProps {
   rows: ProgramHistoryRow[];
   isLoading: boolean;
   onRowClick: (
+    row: ProgramHistoryRow
+  ) => void;
+  onEdit: (
     row: ProgramHistoryRow
   ) => void;
   onRemove: (
@@ -79,6 +82,7 @@ export default function ProgramsHistoryTable({
   rows,
   isLoading,
   onRowClick,
+  onEdit,
   onRemove,
 }: ProgramsHistoryTableProps) {
   if (isLoading) {
@@ -126,7 +130,7 @@ export default function ProgramsHistoryTable({
               End Date
             </TableHead>
 
-            <TableHead className="w-[80px] text-right">
+            <TableHead className="w-[100px] text-right">
               Actions
             </TableHead>
           </TableRow>
@@ -168,18 +172,33 @@ export default function ProgramsHistoryTable({
               </TableCell>
 
               <TableCell className="text-right">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onRemove(row);
-                  }}
-                  aria-label={`Remove ${row.templateName} from ${row.traineeName}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center justify-end gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onEdit(row);
+                    }}
+                    aria-label={`Edit ${row.templateName} for ${row.traineeName}`}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onRemove(row);
+                    }}
+                    aria-label={`Remove ${row.templateName} from ${row.traineeName}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
@@ -188,3 +207,4 @@ export default function ProgramsHistoryTable({
     </div>
   );
 }
+

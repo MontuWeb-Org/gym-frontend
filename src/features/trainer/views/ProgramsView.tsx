@@ -8,6 +8,7 @@ import type { ProgramHistoryRow } from "../components/programs/ProgramHistoryTab
 
 import WorkoutHistoryDialog from "../components/programs/WorkoutHistoryDialog";
 import WorkoutSessionDetailsDialog from "../components/programs/WorkoutSessionDetailsDialog";
+import EditProgramAssignmentDialog from "../components/programs/EditProgramAssignmentDialog";
 
 import type {
   WorkoutLog,
@@ -81,6 +82,9 @@ export default function ProgramsView() {
   const [logDetailError, setLogDetailError] =
     useState<string | null>(null);
 
+  const [rowToEdit, setRowToEdit] =
+    useState<ProgramHistoryRow | null>(null);
+
   const filteredRows = useMemo(() => {
     if (selectedTemplate === "all") {
       return rows;
@@ -88,12 +92,21 @@ export default function ProgramsView() {
 
     return rows.filter(
       (row) =>
-        String(row.templateId) === selectedTemplate
+        String(row.templateId) === selectedTemplate,
     );
   }, [rows, selectedTemplate]);
 
+  /*
+   * Load workout history for the selected trainee/program.
+   *
+   * Important:
+   * We only show logs belonging to this exact assignment.
+   * The relationship is:
+   *
+   * assignment.id === log.planAssignmentId
+   */
   const handleRowClick = async (
-    row: ProgramHistoryRow
+    row: ProgramHistoryRow,
   ) => {
     setSelectedProgram(row);
     setWorkoutLogs([]);
@@ -106,101 +119,70 @@ export default function ProgramsView() {
     try {
       const response =
         await programService.getWorkoutLogs(
-          row.traineeId
+          row.traineeId,
         );
-
-      console.log(
-        "WORKOUT LOG API RESPONSE:",
-        response.data
-      );
 
       const logs: WorkoutLog[] =
         response.data?.data ?? [];
 
-      console.log(
-        "WORKOUT LOGS:",
-        logs
-      );
-
-      console.log(
-        "WORKOUT LOG IDS:",
-        logs.map(
-          (log) => log.workoutLogId
-        )
-      );
-
       const assignmentLogs = logs.filter(
         (log) =>
           Number(log.planAssignmentId) ===
-          Number(row.id)
+          Number(row.id),
       );
 
       const uniqueWorkoutIds = [
         ...new Set(
           assignmentLogs.map(
-            (log) =>
-              log.workoutTemplateId
-          )
+            (log) => log.workoutTemplateId,
+          ),
         ),
       ];
 
-      const workoutDetails =
-        await Promise.all(
-          uniqueWorkoutIds.map(
-            async (workoutId) => {
-              try {
-                const workoutResponse =
-                  await programService.getWorkoutDetail(
-                    workoutId
-                  );
+      const workoutDetails = await Promise.all(
+        uniqueWorkoutIds.map(async (workoutId) => {
+          try {
+            const workoutResponse =
+              await programService.getWorkoutDetail(
+                workoutId,
+              );
 
-                return {
-                  id: workoutId,
-                  name:
-                    workoutResponse.data?.data
-                      ?.name ??
-                    `Workout ${workoutId}`,
-                };
-              } catch (error) {
-                console.error(
-                  `Failed to fetch workout ${workoutId}:`,
-                  error
-                );
+            return {
+              id: workoutId,
+              name:
+                workoutResponse.data?.data?.name ??
+                `Workout ${workoutId}`,
+            };
+          } catch (error) {
+            console.error(
+              `Failed to fetch workout ${workoutId}:`,
+              error,
+            );
 
-                return {
-                  id: workoutId,
-                  name: `Workout ${workoutId}`,
-                };
-              }
-            }
-          )
-        );
-
-      const names: Record<
-        number,
-        string
-      > = {};
-
-      workoutDetails.forEach(
-        (workout) => {
-          names[workout.id] =
-            workout.name;
-        }
+            return {
+              id: workoutId,
+              name: `Workout ${workoutId}`,
+            };
+          }
+        }),
       );
 
-      setWorkoutLogs(
-        assignmentLogs
-      );
+      const names: Record<number, string> = {};
 
+      workoutDetails.forEach((workout) => {
+        names[workout.id] = workout.name;
+      });
+
+      setWorkoutLogs(assignmentLogs);
       setWorkoutNames(names);
     } catch (error) {
       console.error(
         "Failed to fetch workout logs:",
-        error
+        error,
       );
 
       setLogsError(
-        "Failed to load workout history."
+        "Failed to load workout history.",
       );
     } finally {
       setIsLoadingLogs(false);
@@ -208,18 +190,8 @@ export default function ProgramsView() {
   };
 
   const handleWorkoutLogClick = async (
-    log: WorkoutLog
+    log: WorkoutLog,
   ) => {
-    console.log(
-      "CLICKED WORKOUT LOG:",
-      log
-    );
-
-    console.log(
-      "CLICKED WORKOUT LOG ID:",
-      log.workoutLogId
-    );
-
     setSelectedWorkoutLog(null);
     setLogDetailError(null);
     setIsLoadingLogDetail(true);
@@ -227,71 +199,66 @@ export default function ProgramsView() {
     try {
       const response =
         await programService.getWorkoutLogDetail(
-          log.workoutLogId
+          log.workoutLogId,
         );
 
       const detail: WorkoutLogDetail =
         response.data?.data;
 
-      setSelectedWorkoutLog(
-        detail
-      );
+      setSelectedWorkoutLog(detail);
     } catch (error) {
       console.error(
         "Failed to fetch workout log details:",
-        error
+        error,
       );
 
       setLogDetailError(
-        "Failed to load workout session details."
+        "Failed to load workout session details.",
       );
     } finally {
       setIsLoadingLogDetail(false);
     }
   };
 
-  const handleRemoveAssignment =
-    async () => {
-      if (!rowToRemove) {
-        return;
-      }
+  const handleRemoveAssignment = async () => {
+    if (!rowToRemove) {
+      return;
+    }
 
-      setIsRemoving(true);
-      setActionError(null);
+    setIsRemoving(true);
+    setActionError(null);
 
-      try {
-        await programService.deleteAssignment(
-          rowToRemove.id
-        );
+    try {
+      await programService.deleteAssignment(
+        rowToRemove.id,
+      );
 
-        setRowToRemove(null);
+      setRowToRemove(null);
 
-        await refresh();
-      } catch (error) {
-        console.error(
-          "Failed to remove program assignment:",
-          error
-        );
+      await refresh();
+    } catch (error) {
+      console.error(
+        "Failed to remove program assignment:",
+        error,
+      );
 
-        setActionError(
-          "Failed to remove program assignment."
-        );
-      } finally {
-        setIsRemoving(false);
-      }
-    };
+      setActionError(
+        "Failed to remove program assignment.",
+      );
+    } finally {
+      setIsRemoving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Filter */}
+      {/* Template filter */}
       <div className="flex items-center gap-3">
         <Filter className="h-4 w-4 text-muted-foreground" />
 
         <Select
           value={selectedTemplate}
-          onValueChange={
-            setSelectedTemplate
-          }
+          onValueChange={setSelectedTemplate}
         >
           <SelectTrigger className="w-[240px]">
             <SelectValue placeholder="Filter by template" />
@@ -302,50 +269,48 @@ export default function ProgramsView() {
               All Templates
             </SelectItem>
 
-            {templateOptions.map(
-              (template) => (
-                <SelectItem
-                  key={template.id}
-                  value={String(
-                    template.id
-                  )}
-                >
-                  {template.name}
-                </SelectItem>
-              )
-            )}
+            {templateOptions.map((template) => (
+              <SelectItem
+                key={template.id}
+                value={String(template.id)}
+              >
+                {template.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
-      {/* Error */}
       {error && (
         <p className="text-sm text-destructive">
           {error}
         </p>
       )}
 
-      {/* Program History */}
+      {/* Programs table */}
       <ProgramsHistoryTable
         rows={filteredRows}
         isLoading={isLoading}
         onRowClick={handleRowClick}
+        onEdit={(row) => setRowToEdit(row)}
         onRemove={(row) => {
           setRowToRemove(row);
           setActionError(null);
         }}
       />
 
-      {/* Remove Assignment Dialog */}
+      {/* Edit assignment */}
+      <EditProgramAssignmentDialog
+        open={rowToEdit !== null}
+        row={rowToEdit}
+        onClose={() => setRowToEdit(null)}
+      />
+
+      {/* Remove assignment */}
       <Dialog
-        open={
-          rowToRemove !== null
-        }
+        open={rowToRemove !== null}
         onOpenChange={(open) => {
-          if (
-            !open &&
-            !isRemoving
-          ) {
+          if (!open && !isRemoving) {
             setRowToRemove(null);
             setActionError(null);
           }
@@ -358,9 +323,8 @@ export default function ProgramsView() {
             </DialogTitle>
 
             <DialogDescription>
-              Are you sure you want to
-              remove this program
-              assignment?
+              Are you sure you want to remove this
+              program assignment?
             </DialogDescription>
           </DialogHeader>
 
@@ -403,73 +367,40 @@ export default function ProgramsView() {
               type="button"
               variant="destructive"
               disabled={isRemoving}
-              onClick={
-                handleRemoveAssignment
-              }
+              onClick={handleRemoveAssignment}
             >
-              {isRemoving
-                ? "Removing..."
-                : "Remove"}
+              {isRemoving ? "Removing..." : "Remove"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Workout History */}
+      {/* Workout history */}
       <WorkoutHistoryDialog
-        open={
-          selectedProgram !== null
-        }
-        selectedProgram={
-          selectedProgram
-        }
-        workoutLogs={
-          workoutLogs
-        }
-        workoutNames={
-          workoutNames
-        }
-        isLoadingLogs={
-          isLoadingLogs
-        }
-        logsError={
-          logsError
-        }
+        open={selectedProgram !== null}
+        selectedProgram={selectedProgram}
+        workoutLogs={workoutLogs}
+        workoutNames={workoutNames}
+        isLoadingLogs={isLoadingLogs}
+        logsError={logsError}
         onClose={() => {
-          setSelectedProgram(
-            null
-          );
+          setSelectedProgram(null);
           setWorkoutLogs([]);
           setWorkoutNames({});
           setLogsError(null);
         }}
-        onWorkoutLogClick={
-          handleWorkoutLogClick
-        }
+        onWorkoutLogClick={handleWorkoutLogClick}
       />
 
-      {/* Workout Session Details */}
+      {/* Workout session details */}
       <WorkoutSessionDetailsDialog
-        open={
-          selectedWorkoutLog !==
-          null
-        }
-        selectedWorkoutLog={
-          selectedWorkoutLog
-        }
-        isLoading={
-          isLoadingLogDetail
-        }
-        error={
-          logDetailError
-        }
+        open={selectedWorkoutLog !== null}
+        selectedWorkoutLog={selectedWorkoutLog}
+        isLoading={isLoadingLogDetail}
+        error={logDetailError}
         onClose={() => {
-          setSelectedWorkoutLog(
-            null
-          );
-          setLogDetailError(
-            null
-          );
+          setSelectedWorkoutLog(null);
+          setLogDetailError(null);
         }}
       />
     </div>

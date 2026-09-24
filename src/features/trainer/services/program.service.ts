@@ -1,33 +1,18 @@
 import { authApi } from "@/lib/axios";
 
 export const programService = {
-  // ---------------------------------------------------------------------------
   // Plan Templates
-  // ---------------------------------------------------------------------------
-
-  getTemplates: (
-    page = 1,
-    limit = 10
-  ) =>
-    authApi.get(
-      `/plans/templates?page=${page}&limit=${limit}`
-    ),
+  getTemplates: (page = 1, limit = 10) =>
+    authApi.get(`/plans/templates?page=${page}&limit=${limit}`),
 
   createTemplate: (data: {
     name: string;
     description: string;
   }) =>
-    authApi.post(
-      "/plans/templates",
-      data
-    ),
+    authApi.post("/plans/templates", data),
 
-  getTemplateDetail: (
-    planId: number
-  ) =>
-    authApi.get(
-      `/plans/templates/${planId}`
-    ),
+  getTemplateDetail: (planId: number) =>
+    authApi.get(`/plans/templates/${planId}`),
 
   updatePlanTemplate: (
     planId: number,
@@ -42,24 +27,17 @@ export const programService = {
       data
     ),
 
-  duplicateTemplate: (
-    planId: number
-  ) =>
+  duplicateTemplate: (planId: number) =>
     authApi.post(
       `/plans/templates/${planId}/duplicate`
     ),
 
-  deleteTemplate: (
-    planId: number
-  ) =>
+  deleteTemplate: (planId: number) =>
     authApi.delete(
       `/plans/templates/${planId}`
     ),
 
-  // ---------------------------------------------------------------------------
   // Week Templates
-  // ---------------------------------------------------------------------------
-
   createWeek: (data: {
     sequenceNumber: number;
     planTemplateId: number;
@@ -75,31 +53,20 @@ export const programService = {
       }
     ),
 
-  getWeekDetail: (
-    weekId: number
-  ) =>
-    authApi.get(
-      `/plans/templates/weeks/${weekId}`
-    ),
+  getWeekDetail: (weekId: number) =>
+    authApi.get(`/plans/templates/weeks/${weekId}`),
 
-  duplicateWeek: (
-    weekId: number
-  ) =>
+  duplicateWeek: (weekId: number) =>
     authApi.post(
       `/plans/templates/weeks/${weekId}/duplicate`
     ),
 
-  deleteWeek: (
-    weekId: number
-  ) =>
+  deleteWeek: (weekId: number) =>
     authApi.delete(
       `/plans/templates/weeks/${weekId}`
     ),
 
-  // ---------------------------------------------------------------------------
   // Workout Templates
-  // ---------------------------------------------------------------------------
-
   createWorkout: (data: {
     name: string;
     sequenceNumber: number;
@@ -138,31 +105,22 @@ export const programService = {
       }
     ),
 
-  getWorkoutDetail: (
-    workoutId: number
-  ) =>
+  getWorkoutDetail: (workoutId: number) =>
     authApi.get(
       `/plans/templates/workouts/${workoutId}`
     ),
 
-  duplicateWorkout: (
-    workoutId: number
-  ) =>
+  duplicateWorkout: (workoutId: number) =>
     authApi.post(
       `/plans/templates/workouts/${workoutId}/duplicate`
     ),
 
-  deleteWorkout: (
-    workoutId: number
-  ) =>
+  deleteWorkout: (workoutId: number) =>
     authApi.delete(
       `/plans/templates/workouts/${workoutId}`
     ),
 
-  // ---------------------------------------------------------------------------
   // Exercise Library
-  // ---------------------------------------------------------------------------
-
   getExercises: (
     page = 1,
     limit = 50
@@ -171,11 +129,8 @@ export const programService = {
       `/exercises?page=${page}&limit=${limit}`
     ),
 
-  // ---------------------------------------------------------------------------
   // Workout Exercises
-  // ---------------------------------------------------------------------------
-
-    addExerciseToWorkout: (data: {
+  addExerciseToWorkout: (data: {
     exerciseId: number;
     workoutTemplateId: number;
     sequenceNumber: number;
@@ -185,37 +140,42 @@ export const programService = {
     defaultDurationMinutes: number;
     defaultWeight: number;
   }) =>
-    authApi.post<{
-      message: string;
-    }>(
+    authApi.post<{ message: string }>(
       "/plans/templates/exercises",
       {
         exerciseId: data.exerciseId,
+
         workoutTemplateId:
           data.workoutTemplateId,
+
         sequenceNumber: Math.max(
           1,
           Math.floor(data.sequenceNumber)
         ),
+
         defaultReps: String(
           data.defaultReps
         ),
+
         defaultSets: Math.max(
           1,
           Math.floor(data.defaultSets)
         ),
+
         defaultRestTimeSeconds: Math.max(
           0,
           Math.floor(
             data.defaultRestTimeSeconds
           )
         ),
+
         durationMinutes: Math.max(
           1,
           Math.floor(
             data.defaultDurationMinutes
           )
         ),
+
         defaultWeight: Math.max(
           0,
           Number(data.defaultWeight)
@@ -234,9 +194,7 @@ export const programService = {
       defaultWeight?: number;
     }
   ) =>
-    authApi.put<{
-      message: string;
-    }>(
+    authApi.put<{ message: string }>(
       `/plans/templates/exercises/${exerciseTemplateId}`,
       {
         ...(data.sequenceNumber !== undefined
@@ -285,13 +243,12 @@ export const programService = {
         ...(data.defaultDurationMinutes !==
         undefined
           ? {
-              durationMinutes:
-                Math.max(
-                  1,
-                  Math.floor(
-                    data.defaultDurationMinutes
-                  )
-                ),
+              durationMinutes: Math.max(
+                1,
+                Math.floor(
+                  data.defaultDurationMinutes
+                )
+              ),
             }
           : {}),
 
@@ -305,6 +262,7 @@ export const programService = {
           : {}),
       }
     ),
+
   deleteWorkoutExercise: (
     exerciseTemplateId: number
   ) =>
@@ -344,8 +302,7 @@ export const programService = {
       index < normalized.length;
       index += 1
     ) {
-      const exercise =
-        normalized[index];
+      const exercise = normalized[index];
 
       await authApi.put<{
         message: string;
@@ -378,10 +335,7 @@ export const programService = {
     };
   },
 
-  // ---------------------------------------------------------------------------
   // Trainees
-  // ---------------------------------------------------------------------------
-
   getTrainees: (
     page = 1,
     limit = 10
@@ -396,16 +350,20 @@ export const programService = {
       }
     ),
 
-  // ---------------------------------------------------------------------------
   // Plan Assignments
-  // ---------------------------------------------------------------------------
-
   getAssignments: (params?: {
-    status?: "IDLE" | "ACTIVE" | "COMPLETED";
+    status?:
+      | "IDLE"
+      | "ACTIVE"
+      | "COMPLETED";
     pageNumber?: number;
     pageSize?: number;
-    sortBy?: "createdAt" | "totalAmount";
-    sortOrder?: "asc" | "desc";
+    sortBy?:
+      | "createdAt"
+      | "totalAmount";
+    sortOrder?:
+      | "asc"
+      | "desc";
     traineeId?: number;
   }) =>
     authApi.get(
@@ -413,7 +371,9 @@ export const programService = {
       {
         params: {
           ...(params?.status !== undefined
-            ? { status: params.status }
+            ? {
+                status: params.status,
+              }
             : {}),
 
           pageNumber:
@@ -438,17 +398,6 @@ export const programService = {
       }
     ),
 
-  /**
-   * Assign an existing plan template to a trainee.
-   *
-   * Backend request body:
-   * {
-   *   planTemplateId: number;
-   *   traineeId: number;
-   * }
-   *
-   * The backend creates the assignment dates/status.
-   */
   assignPlan: (data: {
     planTemplateId: number;
     traineeId: number;
@@ -462,12 +411,6 @@ export const programService = {
       data
     ),
 
-  /**
-   * End an active plan assignment.
-   *
-   * Backend endpoint:
-   * PATCH /api/plans/assignments/:assignmentId/end
-   */
   endAssignment: (
     assignmentId: number
   ) =>
@@ -475,12 +418,6 @@ export const programService = {
       `/plans/assignments/${assignmentId}/end`
     ),
 
-  /**
-   * Start an IDLE plan assignment.
-   *
-   * Backend endpoint:
-   * PATCH /api/plans/assignments/:assignmentId/start
-   */
   startAssignment: (
     assignmentId: number
   ) =>
@@ -488,9 +425,6 @@ export const programService = {
       `/plans/assignments/${assignmentId}/start`
     ),
 
-  /**
-   * Delete a plan assignment.
-   */
   deleteAssignment: (
     assignmentId: number
   ) =>
@@ -498,13 +432,66 @@ export const programService = {
       `/plans/assignments/${assignmentId}`
     ),
 
-  // ---------------------------------------------------------------------------
-  // Workout Logs
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Get all workout session logs for a trainee.
+  /*
+   * Get a workout as it applies to a
+   * specific trainee assignment.
+   *
+   * This is the endpoint we use when
+   * editing reps for a trainee.
+   *
+   * It is NOT based on workout logs and
+   * it does NOT modify the shared template.
    */
+  getAssignedWorkoutDetail: (
+    assignmentId: number,
+    workoutId: number
+  ) =>
+    authApi.get<{
+      data: {
+        id: number;
+        name: string;
+        exercisesTemplates: Array<{
+          id: number;
+          reps: string | number | null;
+          sets?: number | null;
+          weight?: number | null;
+          restSeconds?: number | null;
+          exercise?: {
+            id?: number;
+            name?: string;
+          } | null;
+        }>;
+      };
+    }>(
+      `/plans/assignments/${assignmentId}/workouts/${workoutId}`
+    ),
+
+  /*
+   * Override exercises for ONE assignment.
+   *
+   * This does NOT modify the shared plan
+   * template.
+   */
+  overridePlanExercises: (
+    assignmentId: number,
+    overrides: Array<{
+      workoutExerciseTemplateId: number;
+      sets?: number;
+      weight?: number;
+      reps?: string;
+      restSeconds?: number;
+    }>
+  ) =>
+    authApi.put<{
+      message: string;
+    }>(
+      `/plans/assignments/${assignmentId}/overrides`,
+      {
+        overrides,
+      }
+    ),
+
+  // Workout Logs
   getWorkoutLogs: (
     traineeId: number
   ) =>
@@ -512,10 +499,6 @@ export const programService = {
       `/logs/workouts?traineeId=${traineeId}`
     ),
 
-  /**
-   * Get the complete details of one workout session,
-   * including exercise logs and sets.
-   */
   getWorkoutLogDetail: (
     workoutLogId: number
   ) =>
@@ -523,3 +506,4 @@ export const programService = {
       `/logs/workouts/${workoutLogId}`
     ),
 };
+
