@@ -3,21 +3,25 @@
 interface AnalyticsHeaderProps {
   exerciseCount: number;
   personalRecordCount: number;
+  title?: string;
+  description?: string;
 }
 
 export default function AnalyticsHeader({
   exerciseCount,
   personalRecordCount,
+  title = "My Progress",
+  description = "Track your personal records and PR history.",
 }: AnalyticsHeaderProps) {
   return (
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-          My Progress
+          {title}
         </h1>
 
         <p className="mt-1 text-sm text-gray-500">
-          Track your personal records and PR history.
+          {description}
         </p>
       </div>
 
