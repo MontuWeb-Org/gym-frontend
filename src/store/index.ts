@@ -6,9 +6,7 @@ import { trainerReducer } from "@/features/trainer";
 import userReducer from "@/features/user/store/user.slice";
 import programReducer from "@/features/trainer/store/program.slice";
 import dashboardReducer from "@/features/trainer/store/dashboard.slice";
-import userReducer from "@/features/user/store/user.slice";
 import notificationReducer from "@/features/trainee/store/notification.slice";
-
 
 export const store = configureStore({
   reducer: {
@@ -18,7 +16,6 @@ export const store = configureStore({
     trainerProgram: programReducer,
     dashboard: dashboardReducer,
     notifications: notificationReducer,
-
   },
 
   middleware: (getDefaultMiddleware) =>
