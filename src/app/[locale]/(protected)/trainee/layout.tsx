@@ -20,7 +20,7 @@ export default function TraineeLayout({
 
     let targetHref = item.href;
     if (!targetHref || targetHref === "") {
-      targetHref = "/trainee/dashboard";
+      targetHref = "/trainee/todays-workout";
     } else if (!targetHref.startsWith("/")) {
       targetHref = `/trainee/${targetHref}`;
     }
