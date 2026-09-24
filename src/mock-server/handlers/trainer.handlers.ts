@@ -4,6 +4,8 @@ import planAssignmentsData from "../data/planAssignments.json";
 import planTemplatesData from "../data/planTemplates.json";
 import weekTemplatesData from "../data/weekTemplates.json";
 import workoutTemplatesData from "../data/workoutTemplates.json";
+import workoutExerciseTemplatesData from "../data/workoutExerciseTemplates.json";
+import exercisesData from "../data/exercises.json";
 
 
 // Helper to extract userId from "Bearer mock_jwt_{userId}_{timestamp}"
@@ -17,6 +19,68 @@ function getUserIdFromToken(request: Request): string | null {
 }
 
 export const trainerHandlers = [
+  http.get("*/api/plans/assignments/:assignmentId/workouts/:workoutTemplateId", async ({ request, params }) => {
+    if (!getUserIdFromToken(request)) {
+      return HttpResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const workoutTemplateId = Number(params.workoutTemplateId);
+    const details = workoutExerciseTemplatesData
+      .filter((template) => template.workoutTemplateId === workoutTemplateId)
+      .sort((a, b) => a.sequenceNumber - b.sequenceNumber)
+      .map((template) => {
+        const exercise = exercisesData.find((item) => item.id === template.exerciseId);
+        return {
+          id: template.id,
+          exerciseId: template.exerciseId,
+          exerciseName: exercise?.name ?? `Exercise ${template.exerciseId}`,
+          sequenceNumber: template.sequenceNumber,
+          defaultSets: template.defaultSets,
+          defaultReps: template.defautlReps,
+          defaultWeight: Number(template.defaultWeight),
+          defaultRestTimeSeconds: template.defaultRestTimeSeconds,
+        };
+      });
+
+    const workout = workoutTemplatesData.find(
+      (template) => template.id === workoutTemplateId
+    );
+    return HttpResponse.json({
+      data: {
+        id: workoutTemplateId,
+        name: workout?.name ?? `Workout ${workoutTemplateId}`,
+        sequenceNumber: workout?.sequenceNumber ?? 0,
+        weekTemplate: {
+          id: workout?.weekTemplateId ?? 0,
+          sequenceNumber: 0,
+          planTemplate: {
+            id: 0,
+            name: "Mock Plan",
+            description: "Mock workout details",
+            trainerId: 0,
+          },
+        },
+        exercisesTemplates: details.map((detail) => ({
+          id: detail.id,
+          sequenceNumber: detail.sequenceNumber,
+          exercise: {
+            id: detail.exerciseId,
+            name: detail.exerciseName,
+            equipment: [],
+            illustrations: [],
+            instructions: "",
+            difficulty: "",
+          },
+          durationMinutes: 15,
+          sets: detail.defaultSets,
+          reps: detail.defaultReps,
+          weight: detail.defaultWeight,
+          restSeconds: detail.defaultRestTimeSeconds,
+        })),
+      },
+    });
+  }),
+
   // 1. Get Trainer's Trainees List (Paginated)
   http.get("*/api/users/trainer/trainees", async ({ request }) => {
     const userId = getUserIdFromToken(request);
