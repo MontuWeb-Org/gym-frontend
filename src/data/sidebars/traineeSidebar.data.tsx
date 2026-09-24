@@ -5,16 +5,16 @@ import { ROUTES } from "@/data/routes";
 
 export const TRAINEE_SIDEBAR_DATA: SidebarItem[] = [
   {
-    id: "current-plans",
-    label: "Current Plans",
-    href: ROUTES.TRAINEE.CURRENT_PLANS,
-    icon: <CalendarDays className="size-5" />,
-  },
-  {
     id: "todays-workout",
     label: "Today's Workout",
     href: ROUTES.TRAINEE.TODAYS_WORKOUT,
     icon: <Dumbbell className="size-5" />,
+  },
+  {
+    id: "current-plans",
+    label: "Current Plans",
+    href: ROUTES.TRAINEE.CURRENT_PLANS,
+    icon: <CalendarDays className="size-5" />,
   },
   {
     id: "progress",
