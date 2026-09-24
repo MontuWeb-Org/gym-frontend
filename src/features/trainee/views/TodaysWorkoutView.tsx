@@ -1,7 +1,6 @@
-// src/components/views/trainee/TraineeDashboardView.tsx
 "use client";
 
-export default function TraineeDashboardView() {
+export default function TodaysWorkoutView() {
   return (
     <div className="space-y-6">
       {/* Add your dashboard widgets, stats, or metrics here */}
