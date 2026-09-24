@@ -64,10 +64,15 @@ export function TraineeDetailsView({
     };
   }, [dispatch, traineeId]);
 
-  // Keep these arrays available on every render so that
-  // all hooks are always called in the same order.
-  const personalRecords = data?.personalRecords ?? [];
-  const progression = data?.progression ?? [];
+  const personalRecords = useMemo(
+    () => data?.personalRecords ?? [],
+    [data?.personalRecords],
+  );
+
+  const progression = useMemo(
+    () => data?.progression ?? [],
+    [data?.progression],
+  );
 
   const exercises = useMemo(() => {
     const exerciseMap = new Map<
@@ -94,9 +99,14 @@ export function TraineeDetailsView({
     );
   }, [personalRecords, progression]);
 
+  const activeExerciseId =
+    selectedExerciseId ??
+    exercises[0]?.id ??
+    null;
+
   const selectedProgression =
     useMemo<ProgressionEvent[]>(() => {
-      if (selectedExerciseId === null) {
+      if (activeExerciseId === null) {
         return [];
       }
 
@@ -104,28 +114,14 @@ export function TraineeDetailsView({
         .filter(
           (event) =>
             event.exercise.id ===
-            selectedExerciseId,
+            activeExerciseId,
         )
         .sort(
           (a, b) =>
             new Date(a.achievedAt).getTime() -
             new Date(b.achievedAt).getTime(),
         );
-    }, [progression, selectedExerciseId]);
-
-  useEffect(() => {
-    if (personalRecords.length > 0) {
-      setSelectedExerciseId(
-        personalRecords[0].exercise.id,
-      );
-    } else if (progression.length > 0) {
-      setSelectedExerciseId(
-        progression[0].exercise.id,
-      );
-    } else {
-      setSelectedExerciseId(null);
-    }
-  }, [personalRecords, progression]);
+    }, [progression, activeExerciseId]);
 
   // Loading
   if (isLoading && !data) {
@@ -385,7 +381,7 @@ export function TraineeDetailsView({
               <ExerciseSelector
                 exercises={exercises}
                 selectedExerciseId={
-                  selectedExerciseId
+                  activeExerciseId
                 }
                 onChange={
                   setSelectedExerciseId
