@@ -10,7 +10,7 @@ export const programService = {
     limit = 10
   ) =>
     authApi.get(
-      `/api/plans/templates?page=${page}&limit=${limit}`
+      `/plans/templates?page=${page}&limit=${limit}`
     ),
 
   createTemplate: (data: {
@@ -18,7 +18,7 @@ export const programService = {
     description: string;
   }) =>
     authApi.post(
-      "/api/plans/templates",
+      "/plans/templates",
       data
     ),
 
@@ -26,7 +26,7 @@ export const programService = {
     planId: number
   ) =>
     authApi.get(
-      `/api/plans/templates/${planId}`
+      `/plans/templates/${planId}`
     ),
 
   updatePlanTemplate: (
@@ -38,7 +38,7 @@ export const programService = {
     }
   ) =>
     authApi.put(
-      `/api/plans/templates/${planId}`,
+      `/plans/templates/${planId}`,
       data
     ),
 
@@ -46,14 +46,14 @@ export const programService = {
     planId: number
   ) =>
     authApi.post(
-      `/api/plans/templates/${planId}/duplicate`
+      `/plans/templates/${planId}/duplicate`
     ),
 
   deleteTemplate: (
     planId: number
   ) =>
     authApi.delete(
-      `/api/plans/templates/${planId}`
+      `/plans/templates/${planId}`
     ),
 
   // ---------------------------------------------------------------------------
@@ -65,7 +65,7 @@ export const programService = {
     planTemplateId: number;
   }) =>
     authApi.post(
-      "/api/plans/templates/weeks",
+      "/plans/templates/weeks",
       {
         ...data,
         sequenceNumber: Math.max(
@@ -79,21 +79,21 @@ export const programService = {
     weekId: number
   ) =>
     authApi.get(
-      `/api/plans/templates/weeks/${weekId}`
+      `/plans/templates/weeks/${weekId}`
     ),
 
   duplicateWeek: (
     weekId: number
   ) =>
     authApi.post(
-      `/api/plans/templates/weeks/${weekId}/duplicate`
+      `/plans/templates/weeks/${weekId}/duplicate`
     ),
 
   deleteWeek: (
     weekId: number
   ) =>
     authApi.delete(
-      `/api/plans/templates/weeks/${weekId}`
+      `/plans/templates/weeks/${weekId}`
     ),
 
   // ---------------------------------------------------------------------------
@@ -106,7 +106,7 @@ export const programService = {
     weekTemplateId: number;
   }) =>
     authApi.post(
-      "/api/plans/templates/workouts",
+      "/plans/templates/workouts",
       {
         ...data,
         sequenceNumber: Math.max(
@@ -124,7 +124,7 @@ export const programService = {
     }
   ) =>
     authApi.put(
-      `/api/plans/templates/workouts/${workoutId}`,
+      `/plans/templates/workouts/${workoutId}`,
       {
         ...data,
         ...(data.sequenceNumber !== undefined
@@ -142,21 +142,21 @@ export const programService = {
     workoutId: number
   ) =>
     authApi.get(
-      `/api/plans/templates/workouts/${workoutId}`
+      `/plans/templates/workouts/${workoutId}`
     ),
 
   duplicateWorkout: (
     workoutId: number
   ) =>
     authApi.post(
-      `/api/plans/templates/workouts/${workoutId}/duplicate`
+      `/plans/templates/workouts/${workoutId}/duplicate`
     ),
 
   deleteWorkout: (
     workoutId: number
   ) =>
     authApi.delete(
-      `/api/plans/templates/workouts/${workoutId}`
+      `/plans/templates/workouts/${workoutId}`
     ),
 
   // ---------------------------------------------------------------------------
@@ -168,7 +168,7 @@ export const programService = {
     limit = 50
   ) =>
     authApi.get(
-      `/api/exercises?page=${page}&limit=${limit}`
+      `/exercises?page=${page}&limit=${limit}`
     ),
 
   // ---------------------------------------------------------------------------
@@ -188,7 +188,7 @@ export const programService = {
     authApi.post<{
       message: string;
     }>(
-      "/api/plans/templates/exercises",
+      "/plans/templates/exercises",
       {
         exerciseId: data.exerciseId,
         workoutTemplateId:
@@ -237,7 +237,7 @@ export const programService = {
     authApi.put<{
       message: string;
     }>(
-      `/api/plans/templates/exercises/${exerciseTemplateId}`,
+      `/plans/templates/exercises/${exerciseTemplateId}`,
       {
         ...(data.sequenceNumber !== undefined
           ? {
@@ -310,7 +310,7 @@ export const programService = {
     exerciseTemplateId: number
   ) =>
     authApi.delete(
-      `/api/plans/templates/exercises/${exerciseTemplateId}`
+      `/plans/templates/exercises/${exerciseTemplateId}`
     ),
 
   reorderExercises: async (
@@ -351,7 +351,7 @@ export const programService = {
       await authApi.put<{
         message: string;
       }>(
-        `/api/plans/templates/exercises/${exercise.id}`,
+        `/plans/templates/exercises/${exercise.id}`,
         {
           sequenceNumber:
             1000000 + index + 1,
@@ -363,7 +363,7 @@ export const programService = {
       await authApi.put<{
         message: string;
       }>(
-        `/api/plans/templates/exercises/${exercise.id}`,
+        `/plans/templates/exercises/${exercise.id}`,
         {
           sequenceNumber:
             exercise.sequenceNumber,
@@ -388,7 +388,7 @@ export const programService = {
     limit = 10
   ) =>
     authApi.get(
-      "/api/users/trainer/trainees",
+      "/users/trainer/trainees",
       {
         params: {
           page,
@@ -410,7 +410,7 @@ export const programService = {
     traineeId?: number;
   }) =>
     authApi.get(
-      "/api/plans/assignments",
+      "/plans/assignments",
       {
         params: {
           ...(params?.status !== undefined
@@ -459,7 +459,7 @@ export const programService = {
         planAssignmentId: number;
       };
     }>(
-      "/api/plans/assignments",
+      "/plans/assignments",
       data
     ),
 
@@ -473,7 +473,7 @@ export const programService = {
     assignmentId: number
   ) =>
     authApi.patch(
-      `/api/plans/assignments/${assignmentId}/end`
+      `/plans/assignments/${assignmentId}/end`
     ),
 
   /**
@@ -486,7 +486,7 @@ export const programService = {
     assignmentId: number
   ) =>
     authApi.patch(
-      `/api/plans/assignments/${assignmentId}/start`
+      `/plans/assignments/${assignmentId}/start`
     ),
 
   /**
@@ -496,7 +496,7 @@ export const programService = {
     assignmentId: number
   ) =>
     authApi.delete(
-      `/api/plans/assignments/${assignmentId}`
+      `/plans/assignments/${assignmentId}`
     ),
 
   // ---------------------------------------------------------------------------
@@ -510,7 +510,7 @@ export const programService = {
     traineeId: number
   ) =>
     authApi.get(
-      `/api/logs/workouts?traineeId=${traineeId}`
+      `/logs/workouts?traineeId=${traineeId}`
     ),
 
   /**
@@ -521,6 +521,6 @@ export const programService = {
     workoutLogId: number
   ) =>
     authApi.get(
-      `/api/logs/workouts/${workoutLogId}`
+      `/logs/workouts/${workoutLogId}`
     ),
 };

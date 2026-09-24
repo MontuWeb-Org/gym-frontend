@@ -16,7 +16,7 @@ export const trainerService = {
   ): Promise<GetTraineesResponse> {
     const response =
       await authApi.get<GetTraineesResponse>(
-        "/api/users/trainer/trainees",
+        "/users/trainer/trainees",
         {
           params: {
             status: params?.status,
@@ -35,7 +35,7 @@ export const trainerService = {
   async getAtRiskTrainees(): Promise<GetTraineesResponse> {
     const response =
       await authApi.get<GetTraineesResponse>(
-        "/api/users/trainer/trainees",
+        "/users/trainer/trainees",
         {
           params: {
             status: "AT_RISK",
@@ -59,7 +59,7 @@ export const trainerService = {
       await authApi.get<{
         data: TraineeDetailedInfo;
       }>(
-        `/api/users/trainer/trainees/${traineeId}`
+        `/users/trainer/trainees/${traineeId}`
       );
 
     return response.data;
@@ -69,7 +69,7 @@ export const trainerService = {
     traineeId: number
   ): Promise<void> {
     await authApi.delete(
-      `/api/users/trainer/trainees/${traineeId}`
+      `/users/trainer/trainees/${traineeId}`
     );
   },
 
@@ -78,7 +78,7 @@ export const trainerService = {
       await authApi.get<{
         data: TrainerDashboardResponse;
       }>(
-        "/api/users/trainer/dashboard"
+        "/users/trainer/dashboard"
       );
 
     return response.data.data;
