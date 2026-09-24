@@ -18,16 +18,16 @@ export const TRAINER_SIDEBAR_DATA: SidebarItem[] = [
     icon: <Users className="size-5" />,
   },
   {
-    id: "programs",
-    label: "Programs",
-    href: ROUTES.TRAINER.PROGRAMS, 
-    icon: <Dumbbell className="size-5" />,
-  },
-  {
     id: "templates",
     label: "Workout Plan",
     href: ROUTES.TRAINER.TEMPLATES,
     icon: <FileText className="size-5" />,
+  },
+  {
+    id: "programs",
+    label: "Programs",
+    href: ROUTES.TRAINER.PROGRAMS, 
+    icon: <Dumbbell className="size-5" />,
   },
   // {
   //   id: "billing",

@@ -8,7 +8,7 @@ Before running the application, you need to set up your local environment variab
 2. If available, copy the environment template:
    ```bash
    cp .env.example .env
-    ``` 
+   ```
 
 ## Getting Started
 

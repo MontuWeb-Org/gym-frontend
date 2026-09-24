@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  allowedDevOrigins: ["eartha-connectional-marlana.ngrok-free.dev"],
   turbopack: {
     root: path.join(__dirname),
   },

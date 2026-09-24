@@ -5,6 +5,8 @@ import { selectCurrentUser, updateUserThunk } from "@/features/user/store/user.s
 import { UpdateProfilePayload, UserRole } from "@/features/user/types/user.types";
 import { ProfileAvatarSection } from "../components/ProfileAvatarSection";
 import { ProfileForm, ProfileFormData } from "../components/ProfileForm";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { useTranslations } from "next-intl";
 
 interface ProfileViewProps {
   avatarUrl?: string;
@@ -12,6 +14,7 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ avatarUrl, onPhotoChange }: ProfileViewProps) {
+  const t = useTranslations("Profile");
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectCurrentUser);
 
@@ -54,7 +57,8 @@ export function ProfileView({ avatarUrl, onPhotoChange }: ProfileViewProps) {
 };
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="max-w-3xl">
+      <PageHeader title={t("title")} />
       <ProfileAvatarSection avatarUrl={avatarUrl} fallbackName={user.name} onPhotoChange={onPhotoChange} />
       <ProfileForm role={user.role} initialData={initialData} onSubmit={handleSubmit} />
     </div>

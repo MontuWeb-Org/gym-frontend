@@ -8,4 +8,5 @@ interface TrainerPageProps {
 export default async function TrainerPage({ params }: TrainerPageProps) {
   const { locale } = await params;
   redirect({ href: ROUTES.TRAINER.DASHBOARD, locale });
+  
 }

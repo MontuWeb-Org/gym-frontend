@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TRAINEE_SIDEBAR_DATA } from "@/data/sidebars/traineeSidebar.data";
+import { ROUTES } from "@/data/routes";
 
 export default function TraineeLayout({
   children,
@@ -14,15 +15,14 @@ export default function TraineeLayout({
   const t = useTranslations("Nav");
   const pathname = usePathname();
 
-  // 1. Normalize route paths & apply translations
   const localizedSidebarItems = TRAINEE_SIDEBAR_DATA.map((item) => {
     const translationKey = item.id as Parameters<typeof t>[0];
 
-    let targetHref = item.href;
+    let targetHref = typeof item.href === "string" ? item.href : "";
     if (!targetHref || targetHref === "") {
-      targetHref = "/trainee/todays-workout";
+      targetHref = ROUTES.TRAINEE.TODAYS_WORKOUT;
     } else if (!targetHref.startsWith("/")) {
-      targetHref = `/trainee/${targetHref}`;
+      targetHref = `${ROUTES.TRAINEE.ROOT}/${targetHref}`;
     }
 
     return {
