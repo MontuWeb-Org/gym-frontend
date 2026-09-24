@@ -334,11 +334,11 @@ export function useWorkoutBuilder(
       workoutId,
     ]);
 
- useEffect(() => {
-  // Data fetching intentionally updates local state after the request resolves.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  void loadWorkoutData();
-}, [loadWorkoutData]);
+  useEffect(() => {
+    // Data fetching intentionally updates local state after the request resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadWorkoutData();
+  }, [loadWorkoutData]);
 
   // ---------------------------------------------------------------------------
   // Exercise library selection
@@ -371,8 +371,21 @@ export function useWorkoutBuilder(
       }
 
       try {
+        // Use the highest existing sequence number
+        // instead of exercises.length + 1.
+        //
+        // This prevents collisions when an exercise
+        // has been removed and sequence numbers are
+        // no longer contiguous.
         let nextSequence =
-          exercises.length + 1;
+          exercises.length === 0
+            ? 1
+            : Math.max(
+                ...exercises.map(
+                  (exercise) =>
+                    exercise.sequenceNumber
+                )
+              ) + 1;
 
         for (const exerciseId of
           selectedExerciseIds) {
