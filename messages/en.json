@@ -352,6 +352,7 @@
   "WorkoutLog": {
     "loading": "Loading today's workout...",
     "empty": "No workout is scheduled for today.",
+    "selectedWorkout": "Selected workout",
     "ready": "{count} exercises are ready to log.",
     "offline": "Offline mode",
     "set": "Set {current} of {total}",

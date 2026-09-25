@@ -110,24 +110,27 @@ export function TraineeTableRow({
 
       <TableCell className="justify-center text-center">
         <div className="flex items-center justify-center gap-3 px-2">
+          {trainee.traineeStatus === "NOT_STARTED" ? (
           <Button
             variant="outline"
             size="sm"
             onClick={() => onResend?.(trainee.traineeId)}
             className="flex-1 h-8 font-heading border-foreground/50 text-md tracking-wider hover:bg-foreground/80 hover:text-background transition-colors"
           >
-            {trainee.traineeStatus === "NOT_STARTED" ? (
-              <>
                 <RotateCw className="me-1.5 h-3.5 w-3.5" />
                 {t("actions.resend")}
-              </>
+          </Button>
             ) : (
-              <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpen?.(trainee.traineeId)}
+                className="flex-1 h-8 font-heading border-foreground/50 text-md tracking-wider hover:bg-foreground/80 hover:text-background transition-colors"
+              >
                 <ExternalLink className="me-1.5 h-3.5 w-3.5" />
                 {t("actions.open")}
-              </>
+              </Button>
             )}
-          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button

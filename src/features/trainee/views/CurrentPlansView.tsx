@@ -6,12 +6,15 @@ import { Loader2, CalendarX, AlertCircle, RefreshCw } from "lucide-react";
 import { traineePlanService } from "../services/plan.service";
 import { PlanTimelineView } from "@/features/trainer/views/PlanTimelineView";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
+import { ROUTES } from "@/data/routes";
 
 export function CurrentPlansView() {
   const t = useTranslations("PlanTimeline");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activePlanId, setActivePlanId] = useState<number | null>(null);
+  const router = useRouter();
 
   const fetchActivePlans = async () => {
     setIsLoading(true);
@@ -84,5 +87,14 @@ export function CurrentPlansView() {
     );
   }
 
-  return <PlanTimelineView planAssignmentId={activePlanId} />;
+  return (
+    <PlanTimelineView
+      planAssignmentId={activePlanId}
+      onWorkoutStarted={(workoutTemplateId) =>
+        router.push(
+          `${ROUTES.TRAINEE.TODAYS_WORKOUT}?workoutId=${workoutTemplateId}`
+        )
+      }
+    />
+  );
 }

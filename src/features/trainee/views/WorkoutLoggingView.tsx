@@ -1,6 +1,6 @@
 "use client";
 
-import { SyntheticEvent, useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import { CheckCircle2, Loader2, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   completeWorkoutSession,
+  hydrateWorkoutState,
   resetRestTimer,
   setActiveSet,
   startRestTimer,
@@ -55,16 +56,39 @@ export function WorkoutLoggingView({ plan }: Readonly<WorkoutLoggingViewProps>) 
   const [details, setDetails] = useState<WorkoutExerciseDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isStarting, setIsStarting] = useState(false);
+  const hasHydratedRef = useRef(false);
   const [isOnline, setIsOnline] = useState(
     () => typeof navigator === "undefined" || navigator.onLine
   );
 
   const workout = plan.currentWorkout;
+  const persistenceKey = `gym-workout:${plan.planId}:${workout?.workoutTemplateId ?? "none"}`;
   const activeExercise = workoutState.session?.exercises[workoutState.activeExerciseIndex];
   const activeExerciseDetails = details[workoutState.activeExerciseIndex];
   const activeSet = workoutState.session?.exercises[workoutState.activeExerciseIndex]?.sets[
     workoutState.activeSetIndex
   ];
+
+  useEffect(() => {
+    const savedState = window.localStorage.getItem(persistenceKey);
+    if (savedState) {
+      try {
+        dispatch(hydrateWorkoutState(JSON.parse(savedState)));
+      } catch {
+        window.localStorage.removeItem(persistenceKey);
+      }
+    }
+    hasHydratedRef.current = true;
+  }, [dispatch, persistenceKey]);
+
+  useEffect(() => {
+    if (!hasHydratedRef.current) return;
+    if (workoutState.status === "active") {
+      window.localStorage.setItem(persistenceKey, JSON.stringify(workoutState));
+    } else if (workoutState.status === "completed") {
+      window.localStorage.removeItem(persistenceKey);
+    }
+  }, [persistenceKey, workoutState]);
 
   useEffect(() => {
     const handleOnlineStatus = () => setIsOnline(navigator.onLine);

@@ -17,9 +17,13 @@ import { WeekSection } from "../components/WeekSection";
 
 interface PlanTimelineViewProps {
   planAssignmentId: number;
+  onWorkoutStarted?: (workoutTemplateId: number) => void;
 }
 
-export function PlanTimelineView({ planAssignmentId }: PlanTimelineViewProps) {
+export function PlanTimelineView({
+  planAssignmentId,
+  onWorkoutStarted,
+}: Readonly<PlanTimelineViewProps>) {
   const t = useTranslations("PlanTimeline");
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -53,6 +57,11 @@ export function PlanTimelineView({ planAssignmentId }: PlanTimelineViewProps) {
   }, [data]);
 
   const handleStart = async (workoutTemplateId: number) => {
+    if (onWorkoutStarted) {
+      onWorkoutStarted(workoutTemplateId);
+      return;
+    }
+
     const result = await dispatch(
       startWorkout({ planAssignmentId, workoutTemplateId })
     );

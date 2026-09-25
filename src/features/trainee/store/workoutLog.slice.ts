@@ -63,6 +63,27 @@ const initialState: WorkoutLogState = {
   offlineBuffer: [],
 };
 
+function normalizeHydratedState(value: WorkoutLogState): WorkoutLogState {
+  const session = value.session;
+  if (!session) return value;
+
+  const workoutLog = session.workoutLogId;
+  let workoutLogId: number | null = null;
+  if (typeof workoutLog === "number") {
+    workoutLogId = workoutLog;
+  } else if (workoutLog && typeof workoutLog === "object" && "id" in workoutLog) {
+    workoutLogId = Number((workoutLog as { id: unknown }).id);
+  }
+
+  return {
+    ...value,
+    session: {
+      ...session,
+      workoutLogId: Number.isInteger(workoutLogId) ? workoutLogId : null,
+    },
+  };
+}
+
 const workoutLogSlice = createSlice({
   name: "workoutLog",
   initialState,
@@ -158,6 +179,9 @@ const workoutLogSlice = createSlice({
       state.timer = initialTimer;
     },
     clearWorkoutSession: () => initialState,
+    hydrateWorkoutState: (state, action: PayloadAction<WorkoutLogState>) => {
+      return normalizeHydratedState(action.payload);
+    },
   },
 });
 
@@ -174,6 +198,7 @@ export const {
   removeBufferedOperation,
   completeWorkoutSession,
   clearWorkoutSession,
+  hydrateWorkoutState,
 } = workoutLogSlice.actions;
 
 export default workoutLogSlice.reducer;

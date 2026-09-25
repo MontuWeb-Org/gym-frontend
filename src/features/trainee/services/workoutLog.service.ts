@@ -15,6 +15,15 @@ function extractWorkoutLogId(value: unknown): number | null {
   return null;
 }
 
+function requireWorkoutLogId(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  const id = extractWorkoutLogId(value);
+  if (id === null) {
+    throw new Error('Workout log ID must be a number');
+  }
+  return id;
+}
+
 export async function startWorkout(session: WorkoutSession): Promise<number | null> {
   const payload = {
     planAssignmentId: session.planAssignmentId,
@@ -48,11 +57,9 @@ export async function logExercise(
   workoutLogId: number | null,
   exercise: ExerciseLogDraft
 ) {
-  if (workoutLogId !== null && !Number.isInteger(workoutLogId)) {
-    throw new Error('Cannot log exercise without a numeric workout log ID');
-  }
+  const numericWorkoutLogId = requireWorkoutLogId(workoutLogId);
   const payload = {
-    workoutLogId: workoutLogId ?? undefined, // filled in by sync engine if null
+    workoutLogId: numericWorkoutLogId ?? undefined, // filled in by sync engine if null
     workoutExerciseTemplateId: exercise.workoutExerciseTemplateId,
     sequenceNumber: exercise.sequenceNumber,
     planAssignmentId: exercise.planAssignmentId,
@@ -62,7 +69,7 @@ export async function logExercise(
   };
 
   // still waiting on the start request to resolve — must queue, can't send
-  if (workoutLogId === null) {
+  if (numericWorkoutLogId === null) {
     await enqueue({ sessionTempId, kind: 'log-exercise', payload });
     return;
   }
@@ -85,18 +92,16 @@ export async function completeWorkout(
   endedAt: string,
   notes?: string
 ) {
-  if (workoutLogId !== null && !Number.isInteger(workoutLogId)) {
-    throw new Error('Cannot complete workout without a numeric workout log ID');
-  }
+  const numericWorkoutLogId = requireWorkoutLogId(workoutLogId);
   const payload = { endedAt, notes };
 
-  if (workoutLogId === null || !navigator.onLine) {
+  if (numericWorkoutLogId === null || !navigator.onLine) {
     await enqueue({ sessionTempId, kind: 'complete-workout', payload });
     return;
   }
 
   try {
-    await authApi.patch(`/logs/workouts/${workoutLogId}/complete`, payload);
+    await authApi.patch(`/logs/workouts/${numericWorkoutLogId}/complete`, payload);
   } catch {
     await enqueue({ sessionTempId, kind: 'complete-workout', payload });
   }
