@@ -29,12 +29,12 @@ export const TRAINER_SIDEBAR_DATA: SidebarItem[] = [
     href: ROUTES.TRAINER.PROGRAMS, 
     icon: <Dumbbell className="size-5" />,
   },
-  // {
-  //   id: "billing",
-  //   label: "Billing",
-  //   href: ROUTES.TRAINER.BILLING,
-  //   icon: <CreditCard className="size-5" />,
-  // },
+  {
+    id: "billing",
+    label: "Billing",
+    href: ROUTES.TRAINER.BILLING,
+    icon: <CreditCard className="size-5" />,
+  },
   {
     id: "profile",
     label: "Profile",

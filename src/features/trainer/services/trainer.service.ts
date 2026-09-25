@@ -10,6 +10,11 @@ import {
   TrainerDashboardResponse,
 } from "../types/dashboard.types";
 import { GetTraineeTimeline } from "../types/timeline.types";
+import {
+  BillingHistoryQuery,
+  BillingHistoryResponse,
+  TrainerSubscription,
+} from "../types/billing.types";
 
 export const trainerService = {
   async getTrainerTrainees(
@@ -83,6 +88,37 @@ export const trainerService = {
       );
 
     return response.data.data;
+  },
+
+  async getCurrentSubscription(): Promise<TrainerSubscription | null> {
+    try {
+      const response = await authApi.get<{ data: TrainerSubscription }>(
+        "/users/trainer/plans/current"
+      );
+      return response.data.data;
+    } catch (error) {
+      const status = (error as { response?: { status?: number } }).response?.status;
+      if (status === 404) return null;
+      throw error;
+    }
+  },
+
+  async getSubscriptionHistory(
+    query: BillingHistoryQuery = {}
+  ): Promise<BillingHistoryResponse> {
+    const response = await authApi.get<BillingHistoryResponse>(
+      "/users/trainer/plans/history",
+      {
+        params: {
+          ...query,
+          pageNumber: query.pageNumber ?? 1,
+          pageSize: query.pageSize ?? 10,
+          sortBy: query.sortBy ?? "createdAt",
+          sortOrder: query.sortOrder ?? "desc",
+        },
+      }
+    );
+    return response.data;
   },
 
   // Timeline

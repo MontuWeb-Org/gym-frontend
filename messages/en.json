@@ -133,8 +133,47 @@
       "createButton": "Create & Open Builder"
     },
     "billing": {
-      "title": "Billing",
-      "description": "View your subscription status, invoices, and payment history."
+      "title": "Billing & Subscriptions",
+      "description": "Manage your subscription plans and view payment history.",
+      "loading": "Loading billing details...",
+      "planFallback": "Subscription Plan",
+      "notAvailable": "N/A",
+      "current": {
+        "label": "Current Subscription",
+        "price": "Price",
+        "traineeLimit": "Trainee Limit",
+        "started": "Started On",
+        "lastUpdated": "Last Updated",
+        "emptyTitle": "No Active Subscription",
+        "emptyDescription": "You do not currently have an active subscription plan."
+      },
+      "history": {
+        "title": "Billing History",
+        "description": "A record of all your past subscription payments and plan changes.",
+        "loading": "Loading billing history...",
+        "empty": "No billing history found.",
+        "page": "Page {page} of {totalPages}",
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "filters": {
+        "payment": "Filter by payment status",
+        "lifecycle": "Filter by lifecycle status",
+        "all": "All Statuses"
+      },
+      "payment": {
+        "PAID": "Paid",
+        "NOT_PAID": "Unpaid"
+      },
+      "lifecycle": {
+        "ACTIVE": "Active",
+        "COMPLETED": "Completed",
+        "CANCELED": "Canceled"
+      },
+      "errors": {
+        "loadCurrent": "Failed to load current subscription.",
+        "loadHistory": "Failed to load subscription history."
+      }
     },
     "settings": {
       "title": "Settings",
