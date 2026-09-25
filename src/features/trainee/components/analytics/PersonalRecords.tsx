@@ -5,26 +5,31 @@ import PersonalRecordCard from "./PersonalRecordCard";
 
 interface PersonalRecordsProps {
   records: PersonalRecord[];
+  title?: string;
+  description?: string;
 }
 
 export default function PersonalRecords({
   records,
+  title = "Personal Records",
+  description = "Your current best performance for each exercise.",
 }: PersonalRecordsProps) {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
-            Personal Records
+            {title}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Your current best performance for each exercise.
+            {description}
           </p>
         </div>
 
         <span className="text-sm text-gray-500">
-          {records.length} {records.length === 1 ? "record" : "records"}
+          {records.length}{" "}
+          {records.length === 1 ? "record" : "records"}
         </span>
       </div>
 

@@ -14,6 +14,9 @@ import type { ProgressionEvent } from "../../types/analytics.types";
 
 interface ProgressionChartProps {
   events: ProgressionEvent[];
+  title?: string;
+  description?: string;
+  singleEventDescription?: string;
 }
 
 interface ChartPoint {
@@ -77,6 +80,9 @@ function CustomTooltip({
 
 export default function ProgressionChart({
   events,
+  title = "Estimated 1RM PR History",
+  description = "How your estimated 1RM has changed across personal records.",
+  singleEventDescription = "Your personal record history for this exercise.",
 }: ProgressionChartProps) {
   if (events.length === 0) {
     return (
@@ -105,11 +111,11 @@ export default function ProgressionChart({
       <div className="box-border w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="mb-6 min-w-0">
           <h3 className="text-base font-semibold text-gray-900">
-            Estimated 1RM PR History
+            {title}
           </h3>
 
           <p className="mt-1 text-sm text-gray-500">
-            Your personal record history for this exercise.
+            {singleEventDescription}
           </p>
         </div>
 
@@ -152,23 +158,24 @@ export default function ProgressionChart({
 
   const range = maxValue - minValue || 1;
 
-  /*
-   * Add a little breathing room above and below the data.
-   * This keeps the first/last values from sitting directly
-   * on the chart boundaries.
-   */
-  const yAxisMin = Math.max(0, Math.floor(minValue - range * 0.15));
-  const yAxisMax = Math.ceil(maxValue + range * 0.15);
+  const yAxisMin = Math.max(
+    0,
+    Math.floor(minValue - range * 0.15),
+  );
+
+  const yAxisMax = Math.ceil(
+    maxValue + range * 0.15,
+  );
 
   return (
     <div className="box-border w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-5 min-w-0">
         <h3 className="text-base font-semibold text-gray-900">
-          Estimated 1RM PR History
+          {title}
         </h3>
 
         <p className="mt-1 text-sm text-gray-500">
-          How your estimated 1RM has changed across personal records.
+          {description}
         </p>
       </div>
 
