@@ -27,6 +27,8 @@ export function ProfileView({ avatarUrl, onPhotoChange }: ProfileViewProps) {
         phoneNumber: user.phoneNumber,
         bio: user.profile.bio ?? "",
         experience: user.profile.experience ?? "",
+        traineesFallingBehindThreshold: user.profile.traineesFallingBehindThreshold,
+        traineesAtRiskThreshold: user.profile.traineesAtRiskThreshold,
       }
     : {
         name: user.name,

@@ -107,7 +107,7 @@ export function PlanTimelineView({
   );
 
   return (
-    <div className="w-full space-y-6 pb-10">
+    <div className="w-full space-y-6">      
       {/* Back navigation — uses browser history so it works from any context */}
       <div>
         <button

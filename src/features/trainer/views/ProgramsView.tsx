@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { useTranslations } from "next-intl";
 
 export default function ProgramsView() {
   const {
@@ -45,6 +47,8 @@ export default function ProgramsView() {
     error,
     refresh,
   } = useProgramsHistory();
+
+  const t = useTranslations("Trainer.programs");
 
   const [selectedTemplate, setSelectedTemplate] =
     useState<string>("all");
@@ -252,6 +256,7 @@ export default function ProgramsView() {
 
   return (
     <div className="space-y-6">
+      <PageHeader title={t("title")} />
       {/* Template filter */}
       <div className="flex items-center gap-3">
         <Filter className="h-4 w-4 text-muted-foreground" />

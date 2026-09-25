@@ -8,8 +8,12 @@ import { PublishAssignModal } from "../components/program-builder/PublishAssignM
 import { ProgramPrintView } from "../components/program-builder/ProgramPrintView";
 
 import { useTemplates } from "../hooks/useTemplates";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { useTranslations } from "next-intl";
 
 export default function TemplatesContainer() {
+  const t = useTranslations("Trainer.templates");
+  
   const {
     templates,
 
@@ -34,6 +38,8 @@ export default function TemplatesContainer() {
   return (
     <>
       <div className="space-y-6 p-6">
+        <PageHeader title={t("title")} />
+        
         <Button
           onClick={() => {
             setIsCreating(true);

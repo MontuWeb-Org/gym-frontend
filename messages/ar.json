@@ -84,7 +84,32 @@
       "fallingBehindTitle": "متأخرون — يحتاجون إلى اهتمام",
       "weeklyActivityTitle": "نشاط هذا الأسبوع",
       "workoutsLogged": "التمارين المسجلة",
-      "errorTitle": "خطأ في لوحة التحكم"
+      "errorTitle": "خطأ في لوحة التحكم",
+      "cards": {
+        "trainees": "المتدربون",
+        "activePlans": "الخطط النشطة",
+        "averageAdherence": "متوسط الالتزام",
+        "completedPlans": "الخطط المكتملة"
+      },
+      "days": {
+        "sun": "الأحد",
+        "mon": "الاثنين",
+        "tue": "الثلاثاء",
+        "wed": "الأربعاء",
+        "thu": "الخميس",
+        "fri": "الجمعة",
+        "sat": "السبت"
+      },
+      "atRisk": {
+        "title": "متدربون يحتاجون إلى اهتمام",
+        "description": "المتدربون المصنفون حالياً كمعرضين للخطر",
+        "viewAll": "عرض الكل",
+        "emptyTitle": "لا يوجد متدربون يحتاجون إلى اهتمام",
+        "emptyDescription": "جميع المتدربين خارج حالة الخطر حالياً.",
+        "noPlan": "لا توجد خطة",
+        "adherence": "الالتزام",
+        "status": "معرض للخطر"
+      }
     },
     "trainees": {
       "title": "المتدربون",
@@ -238,6 +263,7 @@
     "sendInvite": "إرسال الدعوة"
   },
   "TraineeDetails": {
+    "title": "تفاصيل المتدرب",
     "backToTrainees": "العودة إلى قائمة المتدربين",
     "joinedPrefix": "انضم في",
     "message": "مراسلة",
@@ -288,6 +314,8 @@
     "female": "أنثى",
     "experienceLabel": "الخبرة",
     "experiencePlaceholder": "أدخل خبرتك (مثال: 5 سنوات في تطوير الويب)",
+    "traineesFallingBehindThresholdLabel": "عتبة المتدربين الذين يتأخرون",
+    "traineesAtRiskThresholdLabel": "عتبة المتدربين في خطر",
     "bioLabel": "النبذة الشخصية",
     "bioPlaceholder": "اكتب نبذة قصيرة عن نفسك...",
     "submitButton": "حفظ التغييرات",

@@ -31,6 +31,7 @@ import PersonalRecords from "@/features/trainee/components/analytics/PersonalRec
 import ProgressionChart from "@/features/trainee/components/analytics/ProgressionChart";
 
 import type { ProgressionEvent } from "@/features/trainee/types/analytics.types";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 interface TraineeDetailsViewProps {
   traineeId: number;
@@ -165,6 +166,7 @@ export function TraineeDetailsView({
   return (
     <div className="w-full space-y-6 p-6">
       {/* Back */}
+      <PageHeader title={t("title")} />
       <div>
         <Link
           href="/trainer/trainees"

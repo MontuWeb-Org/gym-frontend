@@ -17,6 +17,8 @@ export interface ProfileFormData {
   birthDate: string;
   gender: Gender;
   bodyMetrics: BodyMetrics;
+  traineesFallingBehindThreshold?: number;
+  traineesAtRiskThreshold?: number;
 }
 
 interface ProfileFormProps {
@@ -37,10 +39,11 @@ const buildInitialFormData = (initialData?: Partial<ProfileFormData>): ProfileFo
   experience: initialData?.experience || "",
   birthDate: formatForDateInput(initialData?.birthDate),
   gender: initialData?.gender || Gender.MALE,
+  traineesFallingBehindThreshold: initialData?.traineesFallingBehindThreshold,
+  traineesAtRiskThreshold: initialData?.traineesAtRiskThreshold,
   bodyMetrics: {
     weightKg: initialData?.bodyMetrics?.weightKg,
     heightCm: initialData?.bodyMetrics?.heightCm,
-    targetWeightKg: initialData?.bodyMetrics?.targetWeightKg,
   },
 });
 
@@ -101,6 +104,20 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
           <>
             <TextField id="experience" name="experience" label={t("experienceLabel")} value={formData.experience} onChange={handleChange} placeholder={t("experiencePlaceholder")} className="md:col-span-2" />
             <TextAreaField id="bio" name="bio" label={t("bioLabel")} value={formData.bio} onChange={handleChange} placeholder={t("bioPlaceholder")} />
+            <NumberField
+              id="traineesFallingBehindThreshold"
+              name="traineesFallingBehindThreshold"
+              label={t("traineesFallingBehindThresholdLabel")}
+              value={formData.traineesFallingBehindThreshold ?? ""}
+              onChange={handleChange}
+            />
+            <NumberField
+              id="traineesAtRiskThreshold"
+              name="traineesAtRiskThreshold"
+              label={t("traineesAtRiskThresholdLabel")}
+              value={formData.traineesAtRiskThreshold ?? ""}
+              onChange={handleChange}
+            />
           </>
         )}
 
@@ -120,7 +137,6 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
             />
             <NumberField id="weightKg" name="weightKg" label={t("weightLabel")} value={formData.bodyMetrics.weightKg ?? ""} onChange={handleBodyMetricChange} placeholder="70" />
             <NumberField id="heightCm" name="heightCm" label={t("heightLabel")} value={formData.bodyMetrics.heightCm ?? ""} onChange={handleBodyMetricChange} placeholder="175" />
-            <NumberField id="targetWeightKg" name="targetWeightKg" label={t("targetWeightLabel")} value={formData.bodyMetrics.targetWeightKg ?? ""} onChange={handleBodyMetricChange} placeholder="65" />
           </>
         )}
       </div>

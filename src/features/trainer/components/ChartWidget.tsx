@@ -17,7 +17,7 @@ interface ChartWidgetProps {
   };
 }
 
-export default function ChartWidget({ data }: ChartWidgetProps) {
+export default function ChartWidget({ data }: Readonly<ChartWidgetProps>) {
   const t = useTranslations("Trainer.dashboard");
 
   const title = data.titleKey ? t(data.titleKey as Parameters<typeof t>[0]) : (data.title || "");
@@ -27,7 +27,8 @@ export default function ChartWidget({ data }: ChartWidgetProps) {
 
   // Format data for Recharts
   const chartFormattedData = data.labels.map((label, index) => {
-    const entry: Record<string, string | number> = { name: label };
+    const translatedLabel = label.includes(".") ? t(label as Parameters<typeof t>[0]) : label;
+    const entry: Record<string, string | number> = { name: translatedLabel };
     typedDatasets.forEach((dataset) => {
       const key = dataset.labelKey ? t(dataset.labelKey as Parameters<typeof t>[0]) : (dataset.label || "Value");
       entry[key] = dataset.data[index];
@@ -46,9 +47,9 @@ export default function ChartWidget({ data }: ChartWidgetProps) {
               <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip />
-              {typedDatasets.map((ds, idx) => {
+              {typedDatasets.map((ds) => {
                 const key = ds.labelKey ? t(ds.labelKey as Parameters<typeof t>[0]) : (ds.label || "Value");
-                return <Line key={idx} type="monotone" dataKey={key} stroke="#2563eb" strokeWidth={2} />;
+                return <Line key={key} type="monotone" dataKey={key} stroke="#2563eb" strokeWidth={2} />;
               })}
             </LineChart>
           ) : (
@@ -57,9 +58,9 @@ export default function ChartWidget({ data }: ChartWidgetProps) {
               <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip />
-              {typedDatasets.map((ds, idx) => {
+              {typedDatasets.map((ds) => {
                 const key = ds.labelKey ? t(ds.labelKey as Parameters<typeof t>[0]) : (ds.label || "Value");
-                return <Bar key={idx} dataKey={key} fill="#2563eb" radius={[4, 4, 0, 0]} />;
+                return <Bar key={key} dataKey={key} fill="#2563eb" radius={[4, 4, 0, 0]} />;
               })}
             </BarChart>
           )}

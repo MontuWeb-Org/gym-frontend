@@ -84,7 +84,32 @@
       "fallingBehindTitle": "Falling behind — needs attention",
       "weeklyActivityTitle": "This week's activity",
       "workoutsLogged": "Workouts Logged",
-      "errorTitle": "Dashboard Error"
+      "errorTitle": "Dashboard Error",
+      "cards": {
+        "trainees": "Trainees",
+        "activePlans": "Active Plans",
+        "averageAdherence": "Average Adherence",
+        "completedPlans": "Completed Plans"
+      },
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      },
+      "atRisk": {
+        "title": "Trainees Requiring Attention",
+        "description": "Trainees currently marked as at risk",
+        "viewAll": "View all",
+        "emptyTitle": "No trainees require attention",
+        "emptyDescription": "All trainees are currently outside the at-risk status.",
+        "noPlan": "No plan",
+        "adherence": "Adherence",
+        "status": "At Risk"
+      }
     },
     "trainees": {
       "title": "Total Trainees",
@@ -238,6 +263,7 @@
     "sendInvite": "Send Invite"
   },
   "TraineeDetails": {
+    "title": "Trainee Details",
     "backToTrainees": "Back to Trainees",
     "joinedPrefix": "Joined",
     "message": "Message",
@@ -290,6 +316,8 @@
     "experiencePlaceholder": "Enter your experience (e.g. 5 years in Web Dev)",
     "bioLabel": "Bio",
     "bioPlaceholder": "Write a short bio about yourself...",
+    "traineesFallingBehindThresholdLabel": "Trainees Falling Behind Threshold",
+    "traineesAtRiskThresholdLabel": "Trainees At Risk Threshold",
     "submitButton": "Save Changes",
     "saving": "Saving..."
   },
