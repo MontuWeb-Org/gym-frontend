@@ -1,4 +1,3 @@
-// src/views/HomeView.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -23,6 +22,7 @@ export function HomeView() {
       <main className="container mx-auto px-4 py-12 md:px-6 lg:py-20">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
           
+          {/* Left Column */}
           <div className="flex flex-col items-start space-y-6 text-start lg:col-span-7">
             <Badge variant="outline" className="flex items-center gap-2 px-3 py-2 text-md uppercase tracking-widest border-primary/40 text-primary">
               <Dumbbell className="size-5" />
@@ -66,19 +66,20 @@ export function HomeView() {
                 </>
               )}
             </div>
-
           </div>
 
           {/* Right Column: Dynamic Fitness Preview Grid */}
           <div className="lg:col-span-5 relative">
-            <div className="relative rounded-2xl border border-border/80 bg-card/50 p-6 backdrop-blur-xl shadow-2xl space-y-6">
-              <div className="flex items-center justify-between border-b border-border/60 pb-4">
+            <div className="relative rounded-2xl border border-border/80 bg-card/50 p-6 backdrop-blur-xl shadow-2xl space-y-3">
+              
+              {/* Entry 1: Activity Status */}
+              <div className="flex items-center justify-between p-4 rounded-xl bg-background/60 border border-border/40">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                    <Activity className="h-6 w-6" />
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <Activity className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-heading text-xl uppercase tracking-wider text-foreground">{t("widget.title")}</h3>
+                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">{t("widget.title")}</h3>
                     <p className="text-xs text-muted-foreground">{t("widget.subtitle")}</p>
                   </div>
                 </div>
@@ -87,6 +88,7 @@ export function HomeView() {
                 </Badge>
               </div>
 
+              {/* Entry 2: Today's Workout */}
               <div className="flex items-center justify-between p-4 rounded-xl bg-background/60 border border-border/40">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
@@ -100,6 +102,7 @@ export function HomeView() {
                 <span className="font-heading text-sm text-foreground">{t("widget.workoutTime")}</span>
               </div>
 
+              {/* Entry 3: Personal Trainer */}
               <div className="flex items-center justify-between p-4 rounded-xl bg-background/60 border border-border/40">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
@@ -112,6 +115,7 @@ export function HomeView() {
                 </div>
                 <span className="font-heading text-sm text-emerald-500">{t("widget.statusConnected")}</span>
               </div>
+
             </div>
           </div>
 

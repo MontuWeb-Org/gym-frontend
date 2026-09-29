@@ -283,7 +283,9 @@
     },
     "toasts": {
       "deleteSuccess": "Trainee removed successfully.",
-      "deleteError": "Failed to remove trainee."
+      "deleteError": "Failed to remove trainee.",
+      "inviteSuccess": "Invitation sent successfully.",
+      "inviteError": "Failed to send invitation."
     },
     "states": {
       "loading": "Loading trainees...",

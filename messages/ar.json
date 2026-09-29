@@ -283,7 +283,9 @@
     },
     "toasts": {
       "deleteSuccess": "تم حذف المتدرب بنجاح.",
-      "deleteError": "فشل حذف المتدرب."
+      "deleteError": "فشل حذف المتدرب.",
+      "inviteSuccess": "Invitation sent successfully.",
+      "inviteError": "Failed to send invitation."
     },
     "states": {
       "loading": "جاري تحميل المتدربين...",

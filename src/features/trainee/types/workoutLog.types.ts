@@ -26,7 +26,7 @@ export interface WorkoutSession {
   startedAt: string;
   endedAt: string | null;
   notes?: string;
-  status: 'in-progress' | 'completed';
+  status: "in-progress" | "completed";
   pendingStart: boolean;
   exercises: ExerciseLogDraft[];
 }
@@ -50,4 +50,36 @@ export interface LogExercisePayload {
 export interface CompleteWorkoutPayload {
   endedAt: string;
   notes?: string;
+}
+
+export type WorkoutLogStatus = "IN_PROGRESS" | "COMPLETED" | "SKIPPED";
+
+export interface GetTraineeWorkoutLogsParams {
+  status?: WorkoutLogStatus;
+  pageNumber?: number;
+  pageSize?: number;
+  sortBy?: "createdAt" | "totalAmount";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface TraineeWorkoutLogItem {
+  workoutLogId: number;
+  notes: string | null;
+  status: WorkoutLogStatus;
+  workoutTemplateId: number;
+  workoutTemplateName: string;
+  exerciseTemplateCount: number;
+  exerciseLogsCount: number;
+  planAssignmentId: number;
+  durationMinutes: number;
+}
+
+export interface PaginatedWorkoutLogsResponse {
+  data: TraineeWorkoutLogItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
