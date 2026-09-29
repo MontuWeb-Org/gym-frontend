@@ -12,7 +12,6 @@ export enum Gender {
 export interface BodyMetrics {
   weightKg?: number;
   heightCm?: number;
-  targetWeightKg?: number;
 }
 
 export interface BaseUserEntity {
@@ -36,6 +35,8 @@ export interface TraineeProfile {
   bodyMetrics?: BodyMetrics;
   trainerId?: number;
   trainerName?: string;
+  traineesFallingBehindThreshold?: number;
+  traineesAtRiskThreshold?: number;
 }
 
 export interface TrainerUser extends BaseUserEntity {
@@ -64,6 +65,8 @@ export interface UpdateProfilePayload {
     birthDate?: string;
     gender?: Gender;
     bodyMetrics?: BodyMetrics;
+    traineesFallingBehindThreshold?: number;
+    traineesAtRiskThreshold?: number;
   };
 }
 

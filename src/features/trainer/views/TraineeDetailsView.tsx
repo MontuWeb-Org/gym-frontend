@@ -24,6 +24,8 @@ import {
 } from "../store/trainer.slice";
 
 import TraineeSessionHistory from "../components/trainee-details/TraineeSessionHistory";
+import EditProgramAssignmentDialog from "../components/programs/EditProgramAssignmentDialog";
+import type { ProgramHistoryRow } from "../components/programs/ProgramHistoryTable";
 
 import AnalyticsHeader from "@/features/trainee/components/analytics/AnalyticsHeader";
 import ExerciseSelector from "@/features/trainee/components/analytics/ExerciseSelector";
@@ -31,6 +33,7 @@ import PersonalRecords from "@/features/trainee/components/analytics/PersonalRec
 import ProgressionChart from "@/features/trainee/components/analytics/ProgressionChart";
 
 import type { ProgressionEvent } from "@/features/trainee/types/analytics.types";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 interface TraineeDetailsViewProps {
   traineeId: number;
@@ -38,19 +41,19 @@ interface TraineeDetailsViewProps {
 
 type ActiveTab = "overview" | "history" | "charts";
 
-export function TraineeDetailsView({
-  traineeId,
-}: TraineeDetailsViewProps) {
+export function TraineeDetailsView({ traineeId }: TraineeDetailsViewProps) {
   const t = useTranslations("TraineeDetails");
   const dispatch = useAppDispatch();
 
-  const [activeTab, setActiveTab] =
-    useState<ActiveTab>("overview");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
+  const [selectedExerciseId, setSelectedExerciseId] = useState<number | null>(
+    null
+  );
+  const [isEditProgramOpen, setIsEditProgramOpen] = useState(false);
 
-  const [selectedExerciseId, setSelectedExerciseId] =
-    useState<number | null>(null);
-
+  // 1. Single Redux selector call
   const {
+    trainees,
     selectedTrainee: data,
     isLoading,
     error,
@@ -64,66 +67,71 @@ export function TraineeDetailsView({
     };
   }, [dispatch, traineeId]);
 
+  // 2. Derive active plan from data or table fallback in Redux store
+  const activePlan = useMemo(() => {
+    const tableTrainee = trainees.find((t) => t.traineeId === traineeId);
+    const plans = (data as any)?.plans ?? tableTrainee?.plans ?? [];
+
+    return plans.find((p: any) => p.status === "ACTIVE") ?? plans[0] ?? null;
+  }, [data, trainees, traineeId]);
+
+  // 3. Construct Active Program Assignment Row for the edit dialog
+  const activeProgramRow = useMemo<ProgramHistoryRow | null>(() => {
+    if (!activePlan) return null;
+
+    const traineeName = data?.traineeProfile?.name ?? "Trainee";
+
+    return {
+      id: activePlan.planId ?? activePlan.id,
+      templateId: activePlan.template?.templateId ?? activePlan.templateId,
+      traineeId: traineeId,
+      traineeName: traineeName,
+      templateName:
+        activePlan.template?.templateName ??
+        activePlan.templateName ??
+        "Active Program",
+    };
+  }, [activePlan, data, traineeId]);
+
   const personalRecords = useMemo(
     () => data?.personalRecords ?? [],
-    [data?.personalRecords],
+    [data?.personalRecords]
   );
 
   const progression = useMemo(
     () => data?.progression ?? [],
-    [data?.progression],
+    [data?.progression]
   );
 
   const exercises = useMemo(() => {
-    const exerciseMap = new Map<
-      number,
-      { id: number; name: string }
-    >();
+    const exerciseMap = new Map<number, { id: number; name: string }>();
 
     personalRecords.forEach((record) => {
-      exerciseMap.set(
-        record.exercise.id,
-        record.exercise,
-      );
+      exerciseMap.set(record.exercise.id, record.exercise);
     });
 
     progression.forEach((event) => {
-      exerciseMap.set(
-        event.exercise.id,
-        event.exercise,
-      );
+      exerciseMap.set(event.exercise.id, event.exercise);
     });
 
-    return Array.from(exerciseMap.values()).sort(
-      (a, b) => a.name.localeCompare(b.name),
+    return Array.from(exerciseMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
     );
   }, [personalRecords, progression]);
 
-  const activeExerciseId =
-    selectedExerciseId ??
-    exercises[0]?.id ??
-    null;
+  const activeExerciseId = selectedExerciseId ?? exercises[0]?.id ?? null;
 
-  const selectedProgression =
-    useMemo<ProgressionEvent[]>(() => {
-      if (activeExerciseId === null) {
-        return [];
-      }
+  const selectedProgression = useMemo<ProgressionEvent[]>(() => {
+    if (activeExerciseId === null) return [];
 
-      return progression
-        .filter(
-          (event) =>
-            event.exercise.id ===
-            activeExerciseId,
-        )
-        .sort(
-          (a, b) =>
-            new Date(a.achievedAt).getTime() -
-            new Date(b.achievedAt).getTime(),
-        );
-    }, [progression, activeExerciseId]);
+    return progression
+      .filter((event) => event.exercise.id === activeExerciseId)
+      .sort(
+        (a, b) =>
+          new Date(a.achievedAt).getTime() - new Date(b.achievedAt).getTime()
+      );
+  }, [progression, activeExerciseId]);
 
-  // Loading
   if (isLoading && !data) {
     return (
       <div className="flex h-96 w-full items-center justify-center text-muted-foreground">
@@ -133,7 +141,6 @@ export function TraineeDetailsView({
     );
   }
 
-  // Error
   if (error) {
     return (
       <div className="p-6 text-center text-sm font-medium text-destructive">
@@ -142,13 +149,9 @@ export function TraineeDetailsView({
     );
   }
 
-  // No data
-  if (!data) {
-    return null;
-  }
+  if (!data) return null;
 
   const { traineeProfile } = data;
-
   const initials = traineeProfile.name
     .split(" ")
     .map((n) => n[0])
@@ -158,13 +161,12 @@ export function TraineeDetailsView({
     .filter((p) => p.isOneRmPr)
     .sort(
       (a, b) =>
-        new Date(b.achievedAt).getTime() -
-        new Date(a.achievedAt).getTime(),
+        new Date(b.achievedAt).getTime() - new Date(a.achievedAt).getTime()
     )[0];
 
   return (
-    <div className="w-full space-y-6 p-6">
-      {/* Back */}
+    <div className="w-full space-y-6 text-start">
+      <PageHeader title={t("title")} />
       <div>
         <Link
           href="/trainer/trainees"
@@ -192,50 +194,56 @@ export function TraineeDetailsView({
             <p className="text-sm text-muted-foreground">
               {traineeProfile.email}
             </p>
+
+            {/* Active Plan Badge */}
+            {activePlan?.template?.templateName && (
+              <span className="mt-1.5 inline-block rounded-md bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                {activePlan.template.templateName}
+              </span>
+            )}
           </div>
         </div>
 
-        <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-          <Edit3 className="h-4 w-4" />
-          {t("editProgram")}
-        </Button>
+        {/* Edit Program Action Button */}
+        {activeProgramRow ? (
+          <Button
+            type="button"
+            onClick={() => setIsEditProgramOpen(true)}
+            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+          >
+            <Edit3 className="h-4 w-4" />
+            {t("editProgram")}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            disabled
+            variant="outline"
+            className="gap-2 opacity-60 cursor-not-allowed"
+          >
+            <Edit3 className="h-4 w-4" />
+            {t("editProgram")}
+          </Button>
+        )}
       </div>
 
       {/* Tabs */}
       <div className="border-b border-border">
-        <nav
-          className="-mb-px flex gap-6"
-          aria-label="Tabs"
-        >
+        <nav className="-mb-px flex gap-6" aria-label="Tabs">
           {[
-            {
-              id: "overview",
-              label: t("tabs.overview"),
-            },
-            {
-              id: "history",
-              label: t("tabs.sessionHistory"),
-            },
-            {
-              id: "charts",
-              label: t("tabs.progressCharts"),
-            },
+            { id: "overview", label: t("tabs.overview") },
+            { id: "history", label: t("tabs.sessionHistory") },
+            { id: "charts", label: t("tabs.progressCharts") },
           ].map((tab) => {
-            const isActive =
-              activeTab === tab.id;
-
+            const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() =>
-                  setActiveTab(
-                    tab.id as ActiveTab,
-                  )
-                }
+                onClick={() => setActiveTab(tab.id as ActiveTab)}
                 className={`border-b-2 pb-3 text-sm font-medium transition-colors ${
                   isActive
-                    ? "border-foreground font-semibold text-foreground"
+                    ? "border-primary font-semibold text-foreground"
                     : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                 }`}
               >
@@ -321,9 +329,7 @@ export function TraineeDetailsView({
                       </TableCell>
 
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(
-                          pr.updatedAt,
-                        ).toLocaleDateString()}
+                        {new Date(pr.updatedAt).toLocaleDateString()}
                       </TableCell>
                     </TableRow>
                   ))
@@ -333,9 +339,7 @@ export function TraineeDetailsView({
                       colSpan={4}
                       className="h-24 text-center text-sm text-muted-foreground"
                     >
-                      {t(
-                        "personalRecords.empty",
-                      )}
+                      {t("personalRecords.empty")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -347,9 +351,7 @@ export function TraineeDetailsView({
 
       {/* Session History */}
       {activeTab === "history" && (
-        <TraineeSessionHistory
-          traineeId={traineeId}
-        />
+        <TraineeSessionHistory traineeId={traineeId} />
       )}
 
       {/* Progress Charts */}
@@ -357,9 +359,7 @@ export function TraineeDetailsView({
         <div className="w-full max-w-full min-w-0 space-y-8">
           <AnalyticsHeader
             exerciseCount={exercises.length}
-            personalRecordCount={
-              personalRecords.length
-            }
+            personalRecordCount={personalRecords.length}
             title="Trainee Progress"
             description="Track this trainee's personal records and PR history."
           />
@@ -380,12 +380,8 @@ export function TraineeDetailsView({
 
               <ExerciseSelector
                 exercises={exercises}
-                selectedExerciseId={
-                  activeExerciseId
-                }
-                onChange={
-                  setSelectedExerciseId
-                }
+                selectedExerciseId={activeExerciseId}
+                onChange={setSelectedExerciseId}
               />
             </div>
 
@@ -400,6 +396,13 @@ export function TraineeDetailsView({
           </section>
         </div>
       )}
+
+      {/* Dialog for Editing Program */}
+      <EditProgramAssignmentDialog
+        open={isEditProgramOpen}
+        row={activeProgramRow}
+        onClose={() => setIsEditProgramOpen(false)}
+      />
     </div>
   );
 }

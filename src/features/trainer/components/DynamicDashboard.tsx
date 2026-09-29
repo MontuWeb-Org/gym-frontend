@@ -20,6 +20,7 @@ import ScoreCardWidget from "./ScoreCardWidget";
 import ChartWidget from "./ChartWidget";
 import WidgetErrorBoundary from "./WidgetErrorBoundary";
 import DashboardSkeleton from "./DashboardSkeleton";
+import { ROUTES } from "@/data/routes";
 
 export default function DynamicDashboard() {
   const t = useTranslations("Trainer.dashboard");
@@ -70,22 +71,15 @@ export default function DynamicDashboard() {
     dashboard.weeklyActivity;
 
   const chartData = {
-    title: "Weekly Activity",
+    title: "",
+    titleKey: "weeklyActivityTitle",
     chartType: "bar" as const,
 
-    labels: [
-      "Sun",
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat",
-    ],
+    labels: ["days.sun", "days.mon", "days.tue", "days.wed", "days.thu", "days.fri", "days.sat"],
 
     datasets: [
       {
-        label: "Workouts",
+        labelKey: "workoutsLogged",
 
         data: [
           weeklyActivity.sun,
@@ -100,6 +94,81 @@ export default function DynamicDashboard() {
     ],
   };
 
+  const renderAtRiskContent = () => {
+    if (isAtRiskLoading) {
+      return (
+        <div className="space-y-3">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="h-[72px] animate-pulse rounded-lg bg-muted" />
+          ))}
+        </div>
+      );
+    }
+
+    if (atRiskError) {
+      return (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          {atRiskError}
+        </div>
+      );
+    }
+
+    if (atRiskTrainees.length === 0) {
+      return (
+        <div className="rounded-lg border border-dashed p-8 text-center">
+          <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-emerald-500/10">
+            <AlertTriangle className="size-5 text-emerald-500" />
+          </div>
+          <p className="text-sm font-medium">{t("atRisk.emptyTitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("atRisk.emptyDescription")}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {atRiskTrainees.map((trainee) => {
+          const activePlan = trainee.plans?.find((plan) => plan.status === "ACTIVE") ?? trainee.plans?.[0];
+          const adherence = activePlan?.adherencePercentage ?? 0;
+          const initials = trainee.traineeName
+            .split(" ")
+            .map((name) => name[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+
+          return (
+            <button
+              key={trainee.traineeId}
+              type="button"
+              onClick={() => router.push(ROUTES.TRAINER.TRAINEE_DETAILS(trainee.traineeId))}
+              className="group flex w-full items-center gap-4 rounded-lg border bg-background p-4 text-left transition-colors hover:bg-muted/50"
+            >
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold">
+                {initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{trainee.traineeName}</p>
+                <p className="mt-1 truncate text-xs text-muted-foreground">
+                  {activePlan?.template?.templateName || t("atRisk.noPlan")}
+                </p>
+              </div>
+              <div className="hidden shrink-0 text-right sm:block">
+                <p className="text-sm font-semibold">{Math.round(adherence)}%</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("atRisk.adherence")}</p>
+              </div>
+              <div className="hidden shrink-0 items-center gap-2 sm:flex">
+                <span className="size-2 rounded-full bg-rose-500" />
+                <span className="text-xs font-medium">{t("atRisk.status")}</span>
+              </div>
+              <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Score Cards */}
@@ -107,7 +176,7 @@ export default function DynamicDashboard() {
         <WidgetErrorBoundary widgetId="trainees-count">
           <ScoreCardWidget
             data={{
-              title: "Trainees",
+              titleKey: "cards.trainees",
               value: dashboard.traineesCount,
               iconName: "users",
             }}
@@ -117,7 +186,7 @@ export default function DynamicDashboard() {
         <WidgetErrorBoundary widgetId="active-plans-count">
           <ScoreCardWidget
             data={{
-              title: "Active Plans",
+              titleKey: "cards.activePlans",
               value: dashboard.activePlansCount,
               iconName: "activity",
             }}
@@ -127,7 +196,7 @@ export default function DynamicDashboard() {
         <WidgetErrorBoundary widgetId="average-adherence">
           <ScoreCardWidget
             data={{
-              title: "Average Adherence",
+              titleKey: "cards.averageAdherence",
               value: `${dashboard.avgActivePlansAdherence}%`,
               iconName: "check-circle",
             }}
@@ -137,7 +206,7 @@ export default function DynamicDashboard() {
         <WidgetErrorBoundary widgetId="completed-plans-count">
           <ScoreCardWidget
             data={{
-              title: "Completed Plans",
+              titleKey: "cards.completedPlans",
               value: dashboard.completedPlansCount,
               iconName: "check-circle",
             }}
@@ -155,130 +224,25 @@ export default function DynamicDashboard() {
               </div>
 
               <div>
-                <h2 className="text-base font-semibold">
-                  Trainees Requiring Attention
-                </h2>
+                  <h2 className="text-base font-semibold">{t("atRisk.title")}</h2>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Trainees currently marked as at risk
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{t("atRisk.description")}</p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() =>
-                router.push("/trainer/trainees")
+                router.push(ROUTES.TRAINER.TRAINEES)
               }
               className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline"
             >
-              View all
+              {t("atRisk.viewAll")}
               <ArrowRight className="size-4" />
             </button>
           </div>
 
-          {isAtRiskLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="h-[72px] animate-pulse rounded-lg bg-muted"
-                />
-              ))}
-            </div>
-          ) : atRiskError ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-              {atRiskError}
-            </div>
-          ) : atRiskTrainees.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-8 text-center">
-              <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-emerald-500/10">
-                <AlertTriangle className="size-5 text-emerald-500" />
-              </div>
-
-              <p className="text-sm font-medium">
-                No trainees require attention
-              </p>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                All trainees are currently outside the at-risk status.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {atRiskTrainees.map((trainee) => {
-                const activePlan =
-                  trainee.plans?.find(
-                    (plan) =>
-                      plan.status === "ACTIVE"
-                  ) ?? trainee.plans?.[0];
-
-                const adherence =
-                  activePlan?.adherencePercentage ??
-                  0;
-
-                const initials = trainee.traineeName
-                  .split(" ")
-                  .map((name) => name[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2);
-
-                return (
-                  <button
-                    key={trainee.traineeId}
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        `/trainer/trainees/${trainee.traineeId}`
-                      )
-                    }
-                    className="group flex w-full items-center gap-4 rounded-lg border bg-background p-4 text-left transition-colors hover:bg-muted/50"
-                  >
-                    {/* Avatar */}
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold">
-                      {initials}
-                    </div>
-
-                    {/* Trainee information */}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">
-                        {trainee.traineeName}
-                      </p>
-
-                      <p className="mt-1 truncate text-xs text-muted-foreground">
-                        {activePlan?.template?.templateName ||
-                          "No plan"}
-                      </p>
-                    </div>
-
-                    {/* Adherence */}
-                    <div className="hidden shrink-0 text-right sm:block">
-                      <p className="text-sm font-semibold">
-                        {Math.round(adherence)}%
-                      </p>
-
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Adherence
-                      </p>
-                    </div>
-
-                    {/* Status */}
-                    <div className="hidden shrink-0 items-center gap-2 sm:flex">
-                      <span className="size-2 rounded-full bg-rose-500" />
-
-                      <span className="text-xs font-medium">
-                        At Risk
-                      </span>
-                    </div>
-
-                    {/* Arrow */}
-                    <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {renderAtRiskContent()}
         </section>
       </WidgetErrorBoundary>
 

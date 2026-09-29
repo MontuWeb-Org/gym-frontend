@@ -28,7 +28,7 @@ export function ProfileAvatarSection({
   };
 
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-5 mb-5">
       <Avatar className="size-24 border border-border shadow-xs">
         <AvatarImage src={avatarUrl} alt={fallbackName} className="object-cover" />
         <AvatarFallback className="bg-muted text-muted-foreground text-xl font-semibold">

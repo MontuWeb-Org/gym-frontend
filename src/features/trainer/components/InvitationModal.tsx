@@ -2,10 +2,18 @@
 
 import { useState, useId } from "react";
 import { useTranslations } from "next-intl";
-import { Mail, Loader2, X } from "lucide-react";
+import { Mail, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -55,31 +63,28 @@ export function InvitationModal({
     }
   };
 
-  const handleClose = () => {
-    if (isSubmitting) return;
-    setEmail("");
-    setError(null);
-    onClose();
+  const handleOpenChange = (open: boolean) => {
+    if (!open && !isSubmitting) {
+      setEmail("");
+      setError(null);
+      onClose();
+    }
   };
-
+    
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-      <div className="relative w-full max-w-md rounded-lg border border-border bg-card p-6 text-card-foreground shadow-lg">
-        <button
-          onClick={handleClose}
-          disabled={isSubmitting}
-          className="absolute right-4 top-4 rounded-xs p-1 text-muted-foreground hover:bg-muted hover:text-foreground rtl:left-4 rtl:right-auto"
-        >
-          <X className="size-4" />
-        </button>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="text-start">
+          <DialogTitle className="font-heading text-xl uppercase tracking-wider text-foreground">
+            {t("title")}
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            {t("description")}
+          </DialogDescription>
+        </DialogHeader>
 
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          {t("title")}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
-
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4" noValidate>
-          <div className="space-y-1.5">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2" noValidate>
+          <div className="space-y-1.5 text-start">
             <label
               htmlFor={fieldId}
               className={cn(
@@ -90,7 +95,7 @@ export function InvitationModal({
               {t("emailLabel")}
             </label>
             <div className="relative flex items-center">
-              <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground rtl:left-auto rtl:right-3" />
+              <Mail className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id={fieldId}
                 type="email"
@@ -104,47 +109,43 @@ export function InvitationModal({
                 aria-invalid={hasError}
                 aria-describedby={hasError ? `${fieldId}-error` : undefined}
                 className={cn(
-                  "bg-background pl-9 text-foreground border transition-colors rtl:pl-3 rtl:pr-9",
-                  hasError
-                    ? "border-destructive focus-visible:ring-destructive/50"
-                    : "border-input focus-visible:ring-ring"
+                  "ps-9 pe-3 text-foreground transition-colors",
+                  hasError ? "border-destructive focus-visible:ring-destructive/50" : ""
                 )}
               />
             </div>
             {hasError && (
-              <p
-                id={`${fieldId}-error`}
-                className="mt-1 text-xs font-medium text-destructive"
-              >
+              <p id={`${fieldId}-error`} className="text-xs font-medium text-destructive">
                 {error}
               </p>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              onClick={handleClose}
+              onClick={() => handleOpenChange(false)}
               disabled={isSubmitting}
-              className="border-border bg-card text-foreground hover:bg-muted"
+              className="w-full sm:w-auto"
             >
               {t("cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="min-w-[100px] bg-primary text-primary-foreground hover:bg-primary/90"
+              className="w-full sm:w-auto font-heading uppercase tracking-wider"
             >
               {isSubmitting ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Loader2 className="me-2 size-4 animate-spin" />
               ) : (
-                t("sendInvite")
+                <Send className="me-2 size-4" />
               )}
+              {t("sendInvite")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

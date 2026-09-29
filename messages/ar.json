@@ -4,22 +4,42 @@
     "description": "منصة متكاملة لإدارة الصالة الرياضية"
   },
   "Home": {
-    "title": "مرحبًا بك في منصة الجيم",
-    "description": "إدارة التدريبات والصفوف والاشتراكات بكل سهولة."
+    "badge": "إدارة لياقة بدنية متطورة",
+    "title": "مرحباً بك في منصة الجيم",
+    "description": "إدارة تمارينك، حصصك الرياضية، واشتراكاتك بكل سهولة.",
+    "welcomeBack": "مرحباً بعودتك، {name}",
+    "exploreAccount": "استكشاف الحساب",
+    "joinAsTrainer": "الانضمام كمدرب",
+    "stats": {
+      "customWorkouts": "تمارين مخصصة",
+      "progressTracking": "متابعة التقدم",
+      "fullLocalization": "دعم كامل للغة"
+    },
+    "widget": {
+      "title": "النشاط المباشر",
+      "subtitle": "لوحة أداء التمارين",
+      "statusActive": "نشط",
+      "todaysWorkout": "تمرين اليوم",
+      "workoutDesc": "ضخامة عضلية - الصدر والترايسبس",
+      "workoutTime": "45 دقيقة",
+      "personalTrainer": "المدرب الشخصي",
+      "trainerDesc": "معيّن وجاهز",
+      "statusConnected": "متصل"
+    }
   },
   "Login": {
     "title": "تسجيل الدخول",
-    "description": "أدخل بيانات اعتمادك للوصول إلى حسابك.",
+    "description": "أدخل بياناتك للوصول إلى حسابك.",
     "nameLabel": "الاسم",
     "emailLabel": "البريد الإلكتروني",
-    "roleLabel": "اختر الدور (للاختبار)",
+    "roleLabel": "اختر الدور (للتجربة)",
     "roles": {
-      "admin": "مدير",
+      "admin": "مدير النظام",
       "trainer": "مدرب",
       "trainee": "متدرب"
     },
     "submitButton": "تسجيل الدخول",
-    "backToHome": "العودة إلى الصفحة الرئيسية"
+    "backToHome": "العودة للرئيسية"
   },
   "Nav": {
     "brandName": "منصة الجيم",
@@ -45,7 +65,11 @@
     "adminHub": "بوابة الإدارة",
     "workouts": "التمارين",
     "members": "الأعضاء",
-    "classes": "الصفوف"
+    "classes": "الصفوف",
+    "current-plans": "الخطط الحالية",
+    "todays-workout": "تمرين اليوم",
+    "progress": "التقدم",
+    "notifications": "الإشعارات"
   },
   "Trainer": {
     "panelTitle": "لوحة المدرب",
@@ -60,7 +84,32 @@
       "fallingBehindTitle": "متأخرون — يحتاجون إلى اهتمام",
       "weeklyActivityTitle": "نشاط هذا الأسبوع",
       "workoutsLogged": "التمارين المسجلة",
-      "errorTitle": "خطأ في لوحة التحكم"
+      "errorTitle": "خطأ في لوحة التحكم",
+      "cards": {
+        "trainees": "المتدربون",
+        "activePlans": "الخطط النشطة",
+        "averageAdherence": "متوسط الالتزام",
+        "completedPlans": "الخطط المكتملة"
+      },
+      "days": {
+        "sun": "الأحد",
+        "mon": "الاثنين",
+        "tue": "الثلاثاء",
+        "wed": "الأربعاء",
+        "thu": "الخميس",
+        "fri": "الجمعة",
+        "sat": "السبت"
+      },
+      "atRisk": {
+        "title": "متدربون يحتاجون إلى اهتمام",
+        "description": "المتدربون المصنفون حالياً كمعرضين للخطر",
+        "viewAll": "عرض الكل",
+        "emptyTitle": "لا يوجد متدربون يحتاجون إلى اهتمام",
+        "emptyDescription": "جميع المتدربين خارج حالة الخطر حالياً.",
+        "noPlan": "لا توجد خطة",
+        "adherence": "الالتزام",
+        "status": "معرض للخطر"
+      }
     },
     "trainees": {
       "title": "المتدربون",
@@ -84,8 +133,47 @@
       "createButton": "إنشاء وفتح المنشئ"
     },
     "billing": {
-      "title": "الفواتير",
-      "description": "عرض حالة الاشتراك والفواتير وسجل المدفوعات."
+      "title": "الفواتير والاشتراكات",
+      "description": "إدارة خطط اشتراكك واستعراض سجل الدفع الخاص بك.",
+      "loading": "جاري تحميل تفاصيل الفواتير...",
+      "planFallback": "خطة الاشتراك",
+      "notAvailable": "غير متوفر",
+      "current": {
+        "label": "الاشتراك الحالي",
+        "price": "السعر",
+        "traineeLimit": "حد المتدربين",
+        "started": "تاريخ البدء",
+        "lastUpdated": "آخر تحديث",
+        "emptyTitle": "لا يوجد اشتراك نشط",
+        "emptyDescription": "ليس لديك خطة اشتراك نشطة حالياً."
+      },
+      "history": {
+        "title": "سجل الفواتير",
+        "description": "سجل بجميع عمليات دفع الاشتراكات وتغييرات الخطة السابقة.",
+        "loading": "جاري تحميل سجل الفواتير...",
+        "empty": "لا يوجد سجل فواتير.",
+        "page": "صفحة {page} من {totalPages}",
+        "previous": "السابق",
+        "next": "التالي"
+      },
+      "filters": {
+        "payment": "تصفية حسب حالة الدفع",
+        "lifecycle": "تصفية حسب حالة الاشتراك",
+        "all": "جميع الحالات"
+      },
+      "payment": {
+        "PAID": "مدفوع",
+        "NOT_PAID": "غير مدفوع"
+      },
+      "lifecycle": {
+        "ACTIVE": "نشط",
+        "COMPLETED": "مكتمل",
+        "CANCELED": "ملغى"
+      },
+      "errors": {
+        "loadCurrent": "تعذر تحميل الاشتراك الحالي.",
+        "loadHistory": "تعذر تحميل سجل الفواتير."
+      }
     },
     "settings": {
       "title": "الإعدادات",
@@ -167,6 +255,7 @@
       "pendingInvite": "لم يبدأ"
     },
     "columns": {
+      "avatar": "أفاتار",
       "name": "الاسم",
       "program": "البرنامج",
       "adherence": "الالتزام",
@@ -194,7 +283,9 @@
     },
     "toasts": {
       "deleteSuccess": "تم حذف المتدرب بنجاح.",
-      "deleteError": "فشل حذف المتدرب."
+      "deleteError": "فشل حذف المتدرب.",
+      "inviteSuccess": "Invitation sent successfully.",
+      "inviteError": "Failed to send invitation."
     },
     "states": {
       "loading": "جاري تحميل المتدربين...",
@@ -213,6 +304,7 @@
     "sendInvite": "إرسال الدعوة"
   },
   "TraineeDetails": {
+    "title": "تفاصيل المتدرب",
     "backToTrainees": "العودة إلى قائمة المتدربين",
     "joinedPrefix": "انضم في",
     "message": "مراسلة",
@@ -246,6 +338,7 @@
     "loading": "جاري تحميل تفاصيل المتدرب..."
   },
   "Profile": {
+    "title": "الملف الشخصي",
     "nameLabel": "الاسم الكامل",
     "namePlaceholder": "أدخل اسمك الكامل",
     "phoneNumberLabel": "رقم الهاتف",
@@ -262,6 +355,8 @@
     "female": "أنثى",
     "experienceLabel": "الخبرة",
     "experiencePlaceholder": "أدخل خبرتك (مثال: 5 سنوات في تطوير الويب)",
+    "traineesFallingBehindThresholdLabel": "عتبة المتدربين الذين يتأخرون",
+    "traineesAtRiskThresholdLabel": "عتبة المتدربين في خطر",
     "bioLabel": "النبذة الشخصية",
     "bioPlaceholder": "اكتب نبذة قصيرة عن نفسك...",
     "submitButton": "حفظ التغييرات",
@@ -275,5 +370,87 @@
     "planAssigned": "تم تعيينك البرنامج \"{planName}\"",
     "personalRecord": "سجل شخصي جديد على {exerciseName}!",
     "adherenceLow": "انخفض التزامك بالبرنامج \"{planName}\" إلى {percentage}%"
+  },
+  "PlanTimeline": {
+    "loading": "جاري تحميل الجدول الزمني للخطة...",
+    "back": "رجوع",
+    "backToTrainee": "العودة للمتدرب",
+    "noActivePlans": "لا توجد خطط نشطة",
+    "noActivePlansDesc": "ليس لديك أي خطط تدريبية نشطة في الوقت الحالي.",
+    "week": "الأسبوع {number}",
+    "legend": {
+      "title": "المفتاح"
+    },
+    "statuses": {
+      "completed": "مكتمل",
+      "in_progress": "قيد التنفيذ",
+      "skipped": "تم التخطي",
+      "not_started": "لم يبدأ",
+      "current": "الحالي"
+    },
+    "statusLabels": {
+      "active": "نشط",
+      "completed": "مكتمل",
+      "paused": "متوقف مؤقتاً",
+      "cancelled": "ملغى"
+    },
+    "info": {
+      "startedAt": "بدأ في",
+      "weeks": "الأسابيع",
+      "completed": "منجز",
+      "currentPosition": "الموضع",
+      "weekWorkout": "أ{week} · #ت{workout}"
+    },
+    "log": {
+      "minutes": "دقيقة",
+      "viewLog": "عرض السجل"
+    },
+    "actions": {
+      "start": "ابدأ",
+      "resume": "استئناف",
+      "startAgain": "البدء مجدداً",
+      "skip": "تخطي"
+    },
+    "toasts": {
+      "startSuccess": "تم بدء التمرين!",
+      "startError": "فشل بدء التمرين.",
+      "skipSuccess": "تم تخطي التمرين.",
+      "skipError": "فشل تخطي التمرين."
+    }
+  },
+  "WorkoutLog": {
+    "loading": "جارٍ تحميل تمرين اليوم...",
+    "empty": "لا يوجد تمرين مجدول اليوم.",
+    "selectedWorkout": "التمرين المحدد",
+    "ready": "تم تجهيز {count} تمارين للتسجيل.",
+    "offline": "وضع عدم الاتصال",
+    "set": "المجموعة {current} من {total}",
+    "prescription": "المستهدف: {reps} تكرارات · الوزن المقترح: {weight}",
+    "fields": {
+      "reps": "التكرارات",
+      "weight": "الوزن"
+    },
+    "actions": {
+      "start": "بدء التمرين",
+      "next": "حفظ المجموعة والمتابعة",
+      "finish": "إنهاء التمرين"
+    },
+    "rest": {
+      "title": "مؤقت الراحة",
+      "recommended": "الراحة المقترحة: {seconds} ثانية",
+      "pause": "إيقاف مؤقت",
+      "resume": "استئناف",
+      "reset": "إعادة ضبط",
+      "nextSet": "المجموعة التالية",
+      "skip": "تخطي الراحة"
+    },
+    "complete": {
+      "title": "اكتمل التمرين",
+      "description": "تم تسجيل جميع التمارين أو وضعها في قائمة المزامنة."
+    },
+    "errors": {
+      "loadWorkout": "تعذر تحميل تمرين اليوم.",
+      "missingTemplateIds": "استجابة التمرين لا تحتوي على معرّفات قوالب التمارين. يرجى إضافة معرّف كل قالب من جهة الخادم قبل البدء."
+    }
   }
 }

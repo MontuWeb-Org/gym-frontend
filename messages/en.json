@@ -4,11 +4,31 @@
     "description": "Comprehensive gym management platform"
   },
   "Home": {
+    "badge": "Next-Gen Fitness Management",
     "title": "Welcome to Gym Platform",
-    "description": "Manage your gym workouts, classes, and memberships easily."
+    "description": "Manage your gym workouts, classes, and memberships easily.",
+    "welcomeBack": "Welcome back, {name}",
+    "exploreAccount": "Explore Your Account",
+    "joinAsTrainer": "Join as Trainer",
+    "stats": {
+      "customWorkouts": "Custom Workouts",
+      "progressTracking": "Progress Tracking",
+      "fullLocalization": "Full Localization"
+    },
+    "widget": {
+      "title": "Live Activity",
+      "subtitle": "Gym Performance Dashboard",
+      "statusActive": "Active",
+      "todaysWorkout": "Today's Workout",
+      "workoutDesc": "Hypertrophy Chest & Triceps",
+      "workoutTime": "45 MIN",
+      "personalTrainer": "Personal Trainer",
+      "trainerDesc": "Assigned & Ready",
+      "statusConnected": "Connected"
+    }
   },
   "Login": {
-    "title": "Sign In",
+    "title": "Login",
     "description": "Enter your credentials to access your account.",
     "nameLabel": "Name",
     "emailLabel": "Email Address",
@@ -19,7 +39,7 @@
       "trainee": "Trainee"
     },
     "submitButton": "Sign In",
-    "backToHome": "Back to Welcome Page"
+    "backToHome": "Back to Home Page"
   },
   "Nav": {
     "brandName": "Gym Platform",
@@ -45,7 +65,11 @@
     "adminHub": "Admin Hub",
     "workouts": "Workouts",
     "members": "Members",
-    "classes": "Classes"
+    "classes": "Classes",
+    "current-plans": "Current Plans",
+    "todays-workout": "Today's Workout",
+    "progress": "Progress",
+    "notifications": "Notifications"
   },
   "Trainer": {
     "panelTitle": "Trainer Panel",
@@ -60,7 +84,32 @@
       "fallingBehindTitle": "Falling behind — needs attention",
       "weeklyActivityTitle": "This week's activity",
       "workoutsLogged": "Workouts Logged",
-      "errorTitle": "Dashboard Error"
+      "errorTitle": "Dashboard Error",
+      "cards": {
+        "trainees": "Trainees",
+        "activePlans": "Active Plans",
+        "averageAdherence": "Average Adherence",
+        "completedPlans": "Completed Plans"
+      },
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      },
+      "atRisk": {
+        "title": "Trainees Requiring Attention",
+        "description": "Trainees currently marked as at risk",
+        "viewAll": "View all",
+        "emptyTitle": "No trainees require attention",
+        "emptyDescription": "All trainees are currently outside the at-risk status.",
+        "noPlan": "No plan",
+        "adherence": "Adherence",
+        "status": "At Risk"
+      }
     },
     "trainees": {
       "title": "Total Trainees",
@@ -84,8 +133,47 @@
       "createButton": "Create & Open Builder"
     },
     "billing": {
-      "title": "Billing",
-      "description": "View your subscription status, invoices, and payment history."
+      "title": "Billing & Subscriptions",
+      "description": "Manage your subscription plans and view payment history.",
+      "loading": "Loading billing details...",
+      "planFallback": "Subscription Plan",
+      "notAvailable": "N/A",
+      "current": {
+        "label": "Current Subscription",
+        "price": "Price",
+        "traineeLimit": "Trainee Limit",
+        "started": "Started On",
+        "lastUpdated": "Last Updated",
+        "emptyTitle": "No Active Subscription",
+        "emptyDescription": "You do not currently have an active subscription plan."
+      },
+      "history": {
+        "title": "Billing History",
+        "description": "A record of all your past subscription payments and plan changes.",
+        "loading": "Loading billing history...",
+        "empty": "No billing history found.",
+        "page": "Page {page} of {totalPages}",
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "filters": {
+        "payment": "Filter by payment status",
+        "lifecycle": "Filter by lifecycle status",
+        "all": "All Statuses"
+      },
+      "payment": {
+        "PAID": "Paid",
+        "NOT_PAID": "Unpaid"
+      },
+      "lifecycle": {
+        "ACTIVE": "Active",
+        "COMPLETED": "Completed",
+        "CANCELED": "Canceled"
+      },
+      "errors": {
+        "loadCurrent": "Failed to load current subscription.",
+        "loadHistory": "Failed to load subscription history."
+      }
     },
     "settings": {
       "title": "Settings",
@@ -167,6 +255,7 @@
       "pendingInvite": "Not Started"
     },
     "columns": {
+      "avatar": "Avatar",
       "name": "Name",
       "program": "Program",
       "adherence": "Adherence",
@@ -194,7 +283,9 @@
     },
     "toasts": {
       "deleteSuccess": "Trainee removed successfully.",
-      "deleteError": "Failed to remove trainee."
+      "deleteError": "Failed to remove trainee.",
+      "inviteSuccess": "Invitation sent successfully.",
+      "inviteError": "Failed to send invitation."
     },
     "states": {
       "loading": "Loading trainees...",
@@ -213,6 +304,7 @@
     "sendInvite": "Send Invite"
   },
   "TraineeDetails": {
+    "title": "Trainee Details",
     "backToTrainees": "Back to Trainees",
     "joinedPrefix": "Joined",
     "message": "Message",
@@ -246,6 +338,7 @@
     "loading": "Loading trainee details..."
   },
   "Profile": {
+    "title": "My Profile",
     "nameLabel": "Full Name",
     "namePlaceholder": "Enter your full name",
     "phoneNumberLabel": "Phone Number",
@@ -264,6 +357,8 @@
     "experiencePlaceholder": "Enter your experience (e.g. 5 years in Web Dev)",
     "bioLabel": "Bio",
     "bioPlaceholder": "Write a short bio about yourself...",
+    "traineesFallingBehindThresholdLabel": "Trainees Falling Behind Threshold",
+    "traineesAtRiskThresholdLabel": "Trainees At Risk Threshold",
     "submitButton": "Save Changes",
     "saving": "Saving..."
   },
@@ -275,5 +370,87 @@
     "planAssigned": "You were assigned the plan \"{planName}\"",
     "personalRecord": "New personal record on {exerciseName}!",
     "adherenceLow": "Your adherence to \"{planName}\" dropped to {percentage}%"
+  },
+  "PlanTimeline": {
+    "loading": "Loading plan timeline...",
+    "back": "Back",
+    "backToTrainee": "Back to Trainee",
+    "noActivePlans": "No Active Plans",
+    "noActivePlansDesc": "You do not have any active training plans assigned at the moment.",
+    "week": "Week {number}",
+    "legend": {
+      "title": "Legend"
+    },
+    "statuses": {
+      "completed": "Completed",
+      "in_progress": "In Progress",
+      "skipped": "Skipped",
+      "not_started": "Not Started",
+      "current": "Current"
+    },
+    "statusLabels": {
+      "active": "Active",
+      "completed": "Completed",
+      "paused": "Paused",
+      "cancelled": "Cancelled"
+    },
+    "info": {
+      "startedAt": "Started",
+      "weeks": "Weeks",
+      "completed": "Done",
+      "currentPosition": "Position",
+      "weekWorkout": "W{week} · #W{workout}"
+    },
+    "log": {
+      "minutes": "min",
+      "viewLog": "View Log"
+    },
+    "actions": {
+      "start": "Start",
+      "resume": "Resume",
+      "startAgain": "Start Again",
+      "skip": "Skip"
+    },
+    "toasts": {
+      "startSuccess": "Workout started!",
+      "startError": "Failed to start workout.",
+      "skipSuccess": "Workout skipped.",
+      "skipError": "Failed to skip workout."
+    }
+  },
+  "WorkoutLog": {
+    "loading": "Loading today's workout...",
+    "empty": "No workout is scheduled for today.",
+    "selectedWorkout": "Selected workout",
+    "ready": "{count} exercises are ready to log.",
+    "offline": "Offline mode",
+    "set": "Set {current} of {total}",
+    "prescription": "Target: {reps} reps · Suggested weight: {weight}",
+    "fields": {
+      "reps": "Repetitions",
+      "weight": "Weight"
+    },
+    "actions": {
+      "start": "Start workout",
+      "next": "Save set and continue",
+      "finish": "Finish workout"
+    },
+    "rest": {
+      "title": "Rest timer",
+      "recommended": "Recommended rest: {seconds} seconds",
+      "pause": "Pause",
+      "resume": "Resume",
+      "reset": "Reset",
+      "nextSet": "Next set",
+      "skip": "Skip rest"
+    },
+    "complete": {
+      "title": "Workout complete",
+      "description": "All exercises were recorded successfully or queued for sync."
+    },
+    "errors": {
+      "loadWorkout": "Unable to load today's workout.",
+      "missingTemplateIds": "The workout response is missing exercise template IDs. Please ask the backend team to include each template ID before starting."
+    }
   }
 }
